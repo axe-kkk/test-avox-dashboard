@@ -1,0 +1,61 @@
+import type { User } from '../../types';
+
+export const mockUsers: User[] = [
+  {
+    id: 'user_001',
+    name: 'Sophie Blanchard',
+    email: 'sophie.blanchard@grandmeridian.com',
+    role: 'admin',
+    department: 'Management',
+    joinedAt: '2022-03-15',
+    lastActiveAt: '2026-04-21T09:42:00Z',
+    notificationsEnabled: true,
+    workingHours: { start: '08:00', end: '20:00', days: [1,2,3,4,5] },
+  },
+  {
+    id: 'user_002',
+    name: 'Marc Dupont',
+    email: 'marc.dupont@grandmeridian.com',
+    role: 'manager',
+    department: 'Revenue',
+    joinedAt: '2022-08-01',
+    lastActiveAt: '2026-04-21T08:55:00Z',
+    notificationsEnabled: true,
+    workingHours: { start: '09:00', end: '18:00', days: [1,2,3,4,5] },
+  },
+  {
+    id: 'user_003',
+    name: 'Elena Kowalski',
+    email: 'elena.kowalski@grandmeridian.com',
+    role: 'agent',
+    department: 'Guest Relations',
+    joinedAt: '2023-01-20',
+    lastActiveAt: '2026-04-21T09:30:00Z',
+    notificationsEnabled: true,
+    workingHours: { start: '07:00', end: '15:00', days: [1,2,3,4,5,6] },
+  },
+  {
+    id: 'user_004',
+    name: 'Julien Moreau',
+    email: 'julien.moreau@grandmeridian.com',
+    role: 'agent',
+    department: 'Reception',
+    joinedAt: '2023-06-10',
+    lastActiveAt: '2026-04-20T23:15:00Z',
+    notificationsEnabled: false,
+    workingHours: { start: '15:00', end: '23:00', days: [1,2,3,4,5,6,0] },
+  },
+  {
+    id: 'user_005',
+    name: 'Isabelle Fontaine',
+    email: 'isabelle.fontaine@grandmeridian.com',
+    role: 'viewer',
+    department: 'Marketing',
+    joinedAt: '2024-02-14',
+    lastActiveAt: '2026-04-18T14:20:00Z',
+    notificationsEnabled: true,
+    workingHours: { start: '09:00', end: '17:00', days: [1,2,3,4,5] },
+  },
+];
+
+export const currentUser = mockUsers[0];
