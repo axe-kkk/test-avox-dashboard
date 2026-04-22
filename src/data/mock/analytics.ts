@@ -31,14 +31,14 @@ export const revenueTrend: ChartDataPoint[] = [
 ];
 
 export const channelVolume: { channel: string; volume: number; color: string }[] = [
-  { channel: 'WhatsApp', volume: 1842, color: '#25D366' },
-  { channel: 'Email', volume: 986, color: '#6366f1' },
-  { channel: 'Messenger', volume: 412, color: '#0084FF' },
-  { channel: 'Web Widget', volume: 534, color: '#0ea5e9' },
-  { channel: 'SMS', volume: 643, color: '#8b5cf6' },
-  { channel: 'Instagram', volume: 289, color: '#E1306C' },
-  { channel: 'Telegram', volume: 178, color: '#2AABEE' },
-  { channel: 'OTA Email', volume: 321, color: '#f59e0b' },
+  { channel: 'WhatsApp', volume: 1842, color: '#2355A7' },
+  { channel: 'Email', volume: 986, color: '#BED4F6' },
+  { channel: 'Messenger', volume: 412, color: '#0E1013' },
+  { channel: 'Web Widget', volume: 534, color: '#D1CFCF' },
+  { channel: 'SMS', volume: 643, color: '#2355A7' },
+  { channel: 'Instagram', volume: 289, color: '#BED4F6' },
+  { channel: 'Telegram', volume: 178, color: '#0E1013' },
+  { channel: 'OTA Email', volume: 321, color: '#D1CFCF' },
 ];
 
 export const enginePerformance: {

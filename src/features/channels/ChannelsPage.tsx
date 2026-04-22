@@ -22,9 +22,9 @@ const channelDescriptions: Record<string, string> = {
 };
 
 const statusVariants: Record<string, 'success' | 'danger' | 'warning' | 'default'> = {
-  connected: 'success',
-  disconnected: 'danger',
-  warning: 'warning',
+  connected: 'blue',
+  disconnected: 'dark',
+  warning: 'default',
   pending: 'default',
 };
 
@@ -38,16 +38,16 @@ function ChannelCard({ channel }: { channel: Channel }) {
         <div className="flex items-start gap-4">
           <div className={cn(
             'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-            channelColors[channel.type].split(' ')[0],
+            'bg-[#F6F7F9]',
           )}>
             <ChannelIcon channel={channel.type} size="md" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="text-sm font-semibold text-slate-900">{channel.name}</h3>
+              <h3 className="text-sm font-semibold text-[#0E1013]">{channel.name}</h3>
               <StatusDot status={channel.status as Parameters<typeof StatusDot>[0]['status']} />
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#5C6370]">
               {channel.accountName ?? channel.phoneNumber ?? channel.email ?? '—'}
             </p>
           </div>
@@ -60,21 +60,21 @@ function ChannelCard({ channel }: { channel: Channel }) {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mt-4">
-          <div className="bg-slate-50 rounded-lg px-3 py-2">
-            <p className="text-[10px] text-slate-400">Messages (30d)</p>
-            <p className="text-sm font-bold text-slate-900 tabular-nums">{channel.messagesLast30d.toLocaleString()}</p>
+          <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
+            <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Messages (30d)</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{channel.messagesLast30d.toLocaleString()}</p>
           </div>
-          <div className="bg-slate-50 rounded-lg px-3 py-2">
-            <p className="text-[10px] text-slate-400">Avg Response</p>
-            <p className="text-sm font-bold text-slate-900">{channel.avgResponseTime}</p>
+          <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
+            <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Avg Response</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{channel.avgResponseTime}</p>
           </div>
-          <div className="bg-slate-50 rounded-lg px-3 py-2">
-            <p className="text-[10px] text-slate-400">Conversion</p>
-            <p className="text-sm font-bold text-slate-900">{(channel.conversionRate * 100).toFixed(0)}%</p>
+          <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
+            <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Conversion</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{(channel.conversionRate * 100).toFixed(0)}%</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50">
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#EDEEF1]">
           {channel.status === 'connected' ? (
             <Button
               size="xs"
@@ -102,15 +102,15 @@ function ChannelCard({ channel }: { channel: Channel }) {
       </div>
 
       {expanded && (
-        <div className="border-t border-slate-100 bg-slate-50 px-5 py-4 space-y-4">
-          <p className="text-xs text-slate-600 leading-relaxed">{channelDescriptions[channel.type]}</p>
+        <div className="border-t border-[#EDEEF1] bg-[#F9F9F9] px-5 py-4 space-y-4">
+          <p className="text-xs text-[#5C6370] leading-relaxed">{channelDescriptions[channel.type]}</p>
 
           {channel.status === 'warning' && (
-            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 bg-white border border-[#EDEEF1] rounded-lg px-3 py-2.5">
+              <AlertTriangle className="w-4 h-4 text-[#0E1013] flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-semibold text-amber-800">Attention Required</p>
-                <p className="text-[10px] text-amber-700 mt-0.5">
+                <p className="text-xs font-semibold text-[#0E1013]">Attention Required</p>
+                <p className="text-[10px] text-[#5C6370] mt-0.5">
                   {channel.type === 'instagram'
                     ? 'Instagram API token expired. Re-authenticate to restore messaging.'
                     : 'Channel configuration issue detected. Please review settings.'}
@@ -121,16 +121,16 @@ function ChannelCard({ channel }: { channel: Channel }) {
 
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500">Account / Identifier</span>
-              <span className="font-medium text-slate-800">{channel.accountName ?? channel.phoneNumber ?? channel.email}</span>
+              <span className="text-[#5C6370]">Account / Identifier</span>
+              <span className="font-medium text-[#0E1013]">{channel.accountName ?? channel.phoneNumber ?? channel.email}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500">Engines assigned</span>
-              <span className="font-medium text-slate-800">Concierge, Arrival, Upsell</span>
+              <span className="text-[#5C6370]">Engines assigned</span>
+              <span className="font-medium text-[#0E1013]">Concierge, Arrival, Upsell</span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500">Webhook status</span>
-              <span className="text-emerald-600 font-medium">Active</span>
+              <span className="text-[#5C6370]">Webhook status</span>
+              <span className="text-[#2355A7] font-medium">Active</span>
             </div>
           </div>
 
@@ -154,35 +154,41 @@ export function ChannelsPage() {
   const warning = mockChannels.filter(c => c.status === 'warning').length;
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Channels</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {connected} connected · {warning > 0 ? `${warning} warning${warning > 1 ? 's' : ''}` : 'All channels healthy'}
-          </p>
+    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
+      {/* Hero */}
+      <Card className="px-8 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-medium text-[#8B9299] uppercase tracking-[0.22em] mb-3">
+              {connected} connected · {warning > 0 ? `${warning} attention` : 'All nominal'}
+            </p>
+            <h1
+              className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
+              style={{ fontFamily: "'Azeret Mono', monospace" }}
+            >Channels</h1>
+          </div>
+          <Button
+            size="md"
+            variant="primary"
+            onClick={() => addToast({ type: 'info', title: 'Connect new channel', message: 'Channel wizard opened' })}
+          >
+            <Plus className="w-4 h-4" /> Add Channel
+          </Button>
         </div>
-        <Button
-          size="md"
-          variant="primary"
-          onClick={() => addToast({ type: 'info', title: 'Connect new channel', message: 'Channel wizard opened' })}
-        >
-          <Plus className="w-4 h-4" /> Add Channel
-        </Button>
-      </div>
+      </Card>
 
       {/* Summary Row */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Connected', value: connected, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Warnings', value: warning, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Total Messages (30d)', value: mockChannels.reduce((s, c) => s + c.messagesLast30d, 0).toLocaleString(), color: 'text-slate-900', bg: 'bg-slate-50' },
-          { label: 'Avg Conversion', value: `${(mockChannels.reduce((s, c) => s + c.conversionRate, 0) / mockChannels.length * 100).toFixed(0)}%`, color: 'text-slate-900', bg: 'bg-slate-50' },
+          { label: 'Connected', value: connected },
+          { label: 'Attention', value: warning },
+          { label: 'Total Messages (30d)', value: mockChannels.reduce((s, c) => s + c.messagesLast30d, 0).toLocaleString() },
+          { label: 'Avg Conversion', value: `${(mockChannels.reduce((s, c) => s + c.conversionRate, 0) / mockChannels.length * 100).toFixed(0)}%` },
         ].map(s => (
-          <div key={s.label} className={cn('rounded-xl p-4', s.bg)}>
-            <p className="text-xs text-slate-500 mb-1">{s.label}</p>
-            <p className={cn('text-2xl font-bold', s.color)}>{s.value}</p>
-          </div>
+          <Card key={s.label} className="p-4">
+            <p className="text-xs text-[#8B9299] mb-1">{s.label}</p>
+            <p className="text-2xl font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{s.value}</p>
+          </Card>
         ))}
       </div>
 

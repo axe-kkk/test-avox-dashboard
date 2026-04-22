@@ -3,36 +3,25 @@ import { cn } from '../../utils';
 type Status = 'active' | 'paused' | 'error' | 'warning' | 'connected' | 'disconnected' | 'pending' | 'training';
 
 const colors: Record<Status, string> = {
-  active: 'bg-emerald-500',
-  connected: 'bg-emerald-500',
-  paused: 'bg-amber-400',
-  warning: 'bg-amber-400',
-  pending: 'bg-amber-400',
-  error: 'bg-rose-500',
-  disconnected: 'bg-slate-300',
-  training: 'bg-blue-400',
+  active:       'bg-[#2355A7]',
+  connected:    'bg-[#2355A7]',
+  training:     'bg-[#2355A7]',
+  pending:      'bg-[#D1CFCF]',
+  paused:       'bg-[#D1CFCF]',
+  warning:      'bg-[#5C6370]',
+  error:        'bg-[#0E1013]',
+  disconnected: 'bg-[#D1CFCF]',
 };
 
-const pulse: Record<Status, boolean> = {
-  active: true,
-  connected: true,
-  paused: false,
-  warning: false,
-  pending: true,
-  error: false,
-  disconnected: false,
-  training: true,
+const shouldPulse: Record<Status, boolean> = {
+  active: true, connected: true, training: true, pending: false,
+  paused: false, warning: false, error: false, disconnected: false,
 };
 
 const labels: Record<Status, string> = {
-  active: 'Active',
-  connected: 'Connected',
-  paused: 'Paused',
-  warning: 'Warning',
-  pending: 'Pending',
-  error: 'Error',
-  disconnected: 'Disconnected',
-  training: 'Training',
+  active: 'Active', connected: 'Connected', paused: 'Paused',
+  warning: 'Warning', pending: 'Pending', error: 'Error',
+  disconnected: 'Disconnected', training: 'Training',
 };
 
 interface StatusDotProps {
@@ -49,10 +38,10 @@ export function StatusDot({ status, showLabel = false, size = 'sm', className }:
         'rounded-full flex-shrink-0',
         size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2',
         colors[status],
-        pulse[status] && 'animate-pulse',
+        shouldPulse[status] && 'animate-pulse',
       )} />
       {showLabel && (
-        <span className="text-xs font-medium text-slate-600">{labels[status]}</span>
+        <span className="text-[12px] font-medium text-[#5C6370]">{labels[status]}</span>
       )}
     </span>
   );

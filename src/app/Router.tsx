@@ -14,13 +14,14 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<InboxPage />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/guests" element={<GuestsPage />} />
           <Route path="/engines" element={<EnginesPage />} />
           <Route path="/sequences" element={<SequencesPage />} />
           <Route path="/channels" element={<ChannelsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/analytics/overview" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

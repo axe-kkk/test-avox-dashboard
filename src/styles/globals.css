@@ -1,58 +1,74 @@
 @import "tailwindcss";
 
 @theme {
-  --color-avox-50: #f8f7f5;
-  --color-avox-100: #f0ede8;
-  --color-avox-200: #e1dbd2;
-  --color-avox-300: #c8bfb0;
-  --color-avox-400: #a99b87;
-  --color-avox-500: #8c7d68;
-  --color-avox-600: #7a6a58;
-  --color-avox-700: #65584a;
-  --color-avox-800: #544a3f;
-  --color-avox-900: #463e36;
-  --color-avox-950: #252118;
+  /* ── AVOX Brand Colors ─────────────────────────────────── */
+  --color-brand-black:      #0E1013;
+  --color-brand-blue:       #2355A7;
+  --color-brand-blue-hover: #1f4b93;
+  --color-brand-blue-light: #BED4F6;
+  --color-brand-gray:       #D1CFCF;
+  --color-brand-bg:         #F9F9F9;
+  --color-brand-border:     #EDEEF1;
 
-  --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-card: 0 1px 4px 0 rgb(0 0 0 / 0.06), 0 2px 8px -2px rgb(0 0 0 / 0.04);
+  /* ── Surfaces & Text ───────────────────────────────────── */
+  --color-surface:          #FFFFFF;
+  --color-surface-2:        #F9F9F9;
+  --color-surface-3:        #F6F7F9;
+  --color-text-muted:       #5C6370;
+  --color-text-subtle:      #8B9299;
+  --color-ring:             #BED4F6;
+
+  /* ── Typography ────────────────────────────────────────── */
+  --font-family-sans:  'Roboto', system-ui, -apple-system, sans-serif;
+  --font-family-mono:  'Azeret Mono', 'Courier New', monospace;
+
+  /* ── Radii ─────────────────────────────────────────────── */
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --shadow-soft:  0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.03);
   --shadow-panel: 0 4px 24px -4px rgb(0 0 0 / 0.08);
-
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ── Base ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-html {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-body {
-  background-color: #f8fafc;
-  color: #0f172a;
+html, body {
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-black);
   margin: 0;
   padding: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
 }
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 4px; height: 4px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: #D1CFD2; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b8b5b8; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ── Utilities ─────────────────────────────────────────────── */
+.font-mono    { font-family: 'Azeret Mono', monospace; }
+.font-display { font-family: 'Azeret Mono', monospace; letter-spacing: -0.02em; }
+.text-muted   { color: var(--color-text-muted); }
+.text-subtle  { color: var(--color-text-subtle); }
+.surface      { background: var(--color-surface); }
+.surface-2    { background: var(--color-surface-2); }
+.surface-3    { background: var(--color-surface-3); }
+.border-subtle { border-color: var(--color-brand-border); }
 
-::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+/* Subtle premium accent (use sparingly) */
+.accent-hairline {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-brand-blue-light) 55%, transparent);
 }
 
 .line-clamp-2 {

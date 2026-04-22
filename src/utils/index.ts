@@ -42,34 +42,37 @@ export const channelLabels: Record<ChannelType, string> = {
   viber: 'Viber',
 };
 
+// All channels share a single neutral style — no rainbow
 export const channelColors: Record<ChannelType, string> = {
-  whatsapp: 'bg-green-100 text-green-700',
-  messenger: 'bg-blue-100 text-blue-700',
-  instagram: 'bg-pink-100 text-pink-700',
-  email: 'bg-indigo-100 text-indigo-700',
-  sms: 'bg-purple-100 text-purple-700',
-  telegram: 'bg-sky-100 text-sky-700',
-  web_widget: 'bg-cyan-100 text-cyan-700',
-  ota_email: 'bg-amber-100 text-amber-700',
-  viber: 'bg-violet-100 text-violet-700',
+  whatsapp:   'bg-[#F6F7F9] text-[#5C6370]',
+  messenger:  'bg-[#F6F7F9] text-[#5C6370]',
+  instagram:  'bg-[#F6F7F9] text-[#5C6370]',
+  email:      'bg-[#F6F7F9] text-[#5C6370]',
+  sms:        'bg-[#F6F7F9] text-[#5C6370]',
+  telegram:   'bg-[#F6F7F9] text-[#5C6370]',
+  web_widget: 'bg-[#F6F7F9] text-[#5C6370]',
+  ota_email:  'bg-[#F6F7F9] text-[#5C6370]',
+  viber:      'bg-[#F6F7F9] text-[#5C6370]',
 };
 
+// Engine tags — one subtle palette, differentiated only by text
 export const engineColors: Record<EngineName, string> = {
-  Conversion: 'bg-emerald-100 text-emerald-700',
-  Reservation: 'bg-blue-100 text-blue-700',
-  Upsell: 'bg-amber-100 text-amber-700',
-  Arrival: 'bg-sky-100 text-sky-700',
-  Concierge: 'bg-violet-100 text-violet-700',
-  Recovery: 'bg-rose-100 text-rose-700',
-  Reputation: 'bg-indigo-100 text-indigo-700',
+  Conversion:  'bg-[#F6F7F9] text-[#0E1013]',
+  Reservation: 'bg-[#F6F7F9] text-[#0E1013]',
+  Upsell:      'bg-[#F6F7F9] text-[#0E1013]',
+  Arrival:     'bg-[#F6F7F9] text-[#0E1013]',
+  Concierge:   'bg-[#F6F7F9] text-[#0E1013]',
+  Recovery:    'bg-[#F6F7F9] text-[#0E1013]',
+  Reputation:  'bg-[#F6F7F9] text-[#0E1013]',
 };
 
+// Conversation status — brand colors only
 export const statusColors: Record<ConversationStatus, string> = {
-  open: 'bg-blue-100 text-blue-700',
-  pending: 'bg-amber-100 text-amber-700',
-  resolved: 'bg-emerald-100 text-emerald-700',
-  escalated: 'bg-rose-100 text-rose-700',
-  ai_handled: 'bg-violet-100 text-violet-700',
+  open:       'bg-[#EEF2FC] text-[#2355A7]',
+  pending:    'bg-[#F6F7F9] text-[#5C6370]',
+  resolved:   'bg-[#F6F7F9] text-[#8B9299]',
+  escalated:  'bg-[#0E1013] text-white',
+  ai_handled: 'bg-[#F6F7F9] text-[#8B9299]',
 };
 
 export function getInitials(name: string): string {

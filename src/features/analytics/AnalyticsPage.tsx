@@ -28,12 +28,12 @@ const analyticsTabs = [
 
 const periods = ['Today', 'Last 7 days', 'Last 30 days', 'Last 90 days', 'Custom'];
 
-const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#0ea5e9', '#ec4899', '#8b5cf6', '#10b981'];
+const COLORS = ['#2355A7', '#BED4F6', '#0E1013', '#D1CFCF'];
 
 const chartTooltipStyle = {
   contentStyle: {
     background: '#fff',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #EDEEF1',
     borderRadius: '12px',
     fontSize: '12px',
     boxShadow: '0 4px 24px -4px rgba(0,0,0,0.08)',
@@ -49,11 +49,14 @@ function MetricCard({ label, value, change, formatter = (v: number) => v.toLocal
   const positive = change >= 0;
   return (
     <Card>
-      <p className="text-xs text-slate-500 mb-2">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 tabular-nums">{formatter(value)}</p>
+      <p className="text-[11px] text-[#8B9299] uppercase tracking-wider font-medium">{label}</p>
+      <p
+        className="text-[26px] font-semibold text-[#0E1013] tabular-nums leading-none mt-1 mb-2"
+        style={{ fontFamily: "'Azeret Mono', monospace" }}
+      >{formatter(value)}</p>
       <div className="flex items-center gap-1 mt-1.5">
-        {positive ? <TrendingUp className="w-3 h-3 text-emerald-500" /> : <TrendingDown className="w-3 h-3 text-rose-500" />}
-        <span className={cn('text-xs font-medium', positive ? 'text-emerald-600' : 'text-rose-600')}>
+        {positive ? <TrendingUp className="w-3 h-3 text-[#2355A7]" /> : <TrendingDown className="w-3 h-3 text-[#5C6370]" />}
+        <span className={cn('text-xs font-medium', positive ? 'text-[#2355A7]' : 'text-[#5C6370]')}>
           {positive ? '+' : ''}{change}% vs prev period
         </span>
       </div>
@@ -67,36 +70,46 @@ export function AnalyticsPage() {
   const [period, setPeriod] = useState('Last 30 days');
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Analytics</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Performance insights across all engines, channels, and guests</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-            {periods.map(p => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
-                  p === period ? 'bg-white text-slate-900 shadow-soft' : 'text-slate-500 hover:text-slate-700',
-                )}
-              >
-                {p}
-              </button>
-            ))}
+    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
+      {/* Hero banner */}
+      <Card className="px-8 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-medium text-[#8B9299] uppercase tracking-[0.22em] mb-3">
+              Performance insights · All engines
+            </p>
+            <h1
+              className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
+              style={{ fontFamily: "'Azeret Mono', monospace" }}
+            >
+              Analytics
+            </h1>
           </div>
-          <Button size="sm" variant="outline" onClick={() => addToast({ type: 'info', title: 'Export started', message: 'PDF report will be ready in a moment' })}>
-            <Download className="w-3.5 h-3.5" /> Export
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => addToast({ type: 'success', title: 'Report scheduled', message: 'Weekly PDF will be emailed every Monday' })}>
-            <Calendar className="w-3.5 h-3.5" /> Schedule Report
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-[#F6F7F9] rounded-xl p-1 border border-[#EDEEF1]">
+              {periods.map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={cn(
+                    'px-3 py-1.5 text-[12px] font-medium rounded-lg transition-colors',
+                    p === period ? 'bg-white text-[#2355A7] shadow-soft' : 'text-[#5C6370] hover:text-[#0E1013]',
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => addToast({ type: 'info', title: 'Export started', message: 'PDF report will be ready in a moment' })}
+            >
+              <Download className="w-3.5 h-3.5" /> Export
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <Tabs tabs={analyticsTabs} activeTab={activeTab} onChange={setActiveTab} />
 
@@ -119,19 +132,19 @@ export function AnalyticsPage() {
                 <AreaChart data={conversationsTrend} {...chartTooltipStyle}>
                   <defs>
                     <linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#2355A7" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#2355A7" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#0E1013" stopOpacity={0.10} />
+                      <stop offset="95%" stopColor="#0E1013" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
                   <Tooltip {...chartTooltipStyle} />
-                  <Area type="monotone" dataKey="value" name="Total" stroke="#6366f1" fill="url(#cg1)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="secondary" name="Escalated" stroke="#f43f5e" fill="url(#cg2)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="value" name="Total" stroke="#2355A7" fill="url(#cg1)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="secondary" name="Escalated" stroke="#0E1013" fill="url(#cg2)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
@@ -140,11 +153,11 @@ export function AnalyticsPage() {
               <CardHeader title="Revenue Impact" subtitle="Upsell and booking revenue driven by AI" />
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={revenueTrend} barSize={16}>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `€${(v/1000).toFixed(0)}k`} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} tickFormatter={v => `€${(v/1000).toFixed(0)}k`} />
                   <Tooltip {...chartTooltipStyle} formatter={(v) => formatCurrency(Number(v))} />
-                  <Bar dataKey="value" name="Total Revenue" fill="#6366f1" radius={[4,4,0,0]} />
-                  <Bar dataKey="secondary" name="Upsell Revenue" fill="#22c55e" radius={[4,4,0,0]} />
+                  <Bar dataKey="value" name="Total Revenue" fill="#2355A7" radius={[4,4,0,0]} />
+                  <Bar dataKey="secondary" name="Upsell Revenue" fill="#BED4F6" radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -157,23 +170,23 @@ export function AnalyticsPage() {
               <div className="space-y-2">
                 {satisfactionDistribution.map((item, i) => (
                   <div key={item.score} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-500 w-14">{item.score}</span>
-                    <div className="flex-1 bg-slate-100 rounded-full h-2">
+                    <span className="text-xs text-[#5C6370] w-14">{item.score}</span>
+                    <div className="flex-1 bg-[#F6F7F9] rounded-full h-2">
                       <div
                         className="h-2 rounded-full"
                         style={{
                           width: `${(item.count / 500) * 100}%`,
-                          background: ['#22c55e', '#86efac', '#fbbf24', '#f97316', '#f43f5e'][i],
+                          background: ['#2355A7', '#BED4F6', '#D1CFCF', '#5C6370', '#0E1013'][i],
                         }}
                       />
                     </div>
-                    <span className="text-xs font-semibold text-slate-700 w-8 text-right">{item.count}</span>
+                    <span className="text-xs font-semibold text-[#0E1013] w-8 text-right">{item.count}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-xs">
-                <span className="text-slate-500">Average Score</span>
-                <span className="font-bold text-slate-900">4.51 / 5</span>
+              <div className="mt-4 pt-4 border-t border-[#EDEEF1] flex justify-between text-xs">
+                <span className="text-[#5C6370]">Average Score</span>
+                <span className="font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>4.51 / 5</span>
               </div>
             </Card>
 
@@ -183,21 +196,21 @@ export function AnalyticsPage() {
                 <ResponsiveContainer width={160} height={160}>
                   <PieChart>
                     <Pie data={[{ value: 89 }, { value: 11 }]} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value" startAngle={90} endAngle={-270}>
-                      <Cell fill="#6366f1" />
-                      <Cell fill="#e2e8f0" />
+                      <Cell fill="#2355A7" />
+                      <Cell fill="#D1CFCF" />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-3xl font-bold text-slate-900">89%</p>
-                    <p className="text-xs text-slate-500">Resolved by AI</p>
+                    <p className="text-[28px] font-semibold text-[#0E1013] tabular-nums leading-none" style={{ fontFamily: "'Azeret Mono', monospace" }}>89%</p>
+                    <p className="text-[12px] text-[#8B9299] mt-0.5">Resolved by AI</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-slate-500">11%</p>
-                    <p className="text-xs text-slate-400">Human handoff</p>
+                    <p className="text-[18px] font-semibold text-[#8B9299] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>11%</p>
+                    <p className="text-xs text-[#8B9299]">Human handoff</p>
                   </div>
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-xs text-[#5C6370] space-y-1">
                     <p>• 1,376 AI-only resolutions</p>
                     <p>• 171 escalated to agents</p>
                     <p>• Avg human response: 4m 12s</p>
@@ -217,37 +230,37 @@ export function AnalyticsPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-100">
+                  <tr className="border-b border-[#EDEEF1]">
                     {['Engine', 'Total Actions', 'Resolved', 'Rate', 'Revenue Impact'].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider first:pl-0">
+                      <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider first:pl-0">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-[#EDEEF1]">
                   {enginePerformance.map(ep => (
-                    <tr key={ep.engine} className="hover:bg-slate-50 transition-colors">
+                    <tr key={ep.engine} className="hover:bg-[#F9F9F9] transition-colors">
                       <td className="py-3 pl-0 pr-4">
-                        <span className="text-sm font-semibold text-slate-900">{ep.engine}</span>
+                        <span className="text-sm font-semibold text-[#0E1013]">{ep.engine}</span>
                       </td>
-                      <td className="px-4 py-3 text-sm tabular-nums font-medium text-slate-800">{ep.actions.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm tabular-nums text-slate-600">{ep.resolved.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm tabular-nums font-medium text-[#0E1013]">{ep.actions.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm tabular-nums text-[#5C6370]">{ep.resolved.toLocaleString()}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-slate-100 rounded-full h-1.5">
-                            <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${ep.rate}%` }} />
+                          <div className="w-16 bg-[#F6F7F9] rounded-full h-1.5">
+                            <div className="bg-[#2355A7] h-1.5 rounded-full" style={{ width: `${ep.rate}%` }} />
                           </div>
-                          <span className="text-xs font-semibold text-slate-700">{ep.rate}%</span>
+                          <span className="text-xs font-semibold text-[#0E1013]">{ep.rate}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         {ep.revenue > 0 ? (
-                          <span className="text-sm font-semibold text-emerald-700">{formatCurrency(ep.revenue)}</span>
+                          <span className="text-sm font-semibold text-[#2355A7]">{formatCurrency(ep.revenue)}</span>
                         ) : ep.revenue < 0 ? (
-                          <span className="text-sm font-semibold text-rose-600">{formatCurrency(ep.revenue)}</span>
+                          <span className="text-sm font-semibold text-[#0E1013]">{formatCurrency(ep.revenue)}</span>
                         ) : (
-                          <span className="text-sm text-slate-300">—</span>
+                          <span className="text-sm text-[#D1CFCF]">—</span>
                         )}
                       </td>
                     </tr>
@@ -261,11 +274,11 @@ export function AnalyticsPage() {
             <CardHeader title="Actions by Engine" />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={enginePerformance} layout="vertical" barSize={20}>
-                <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="engine" type="category" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={80} />
+                <XAxis type="number" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                <YAxis dataKey="engine" type="category" tick={{ fontSize: 11, fill: '#5C6370' }} axisLine={false} tickLine={false} width={80} />
                 <Tooltip {...chartTooltipStyle} />
-                <Bar dataKey="actions" name="Total Actions" fill="#6366f1" radius={[0,4,4,0]} />
-                <Bar dataKey="resolved" name="Resolved" fill="#22c55e" radius={[0,4,4,0]} />
+                <Bar dataKey="actions" name="Total Actions" fill="#2355A7" radius={[0,4,4,0]} />
+                <Bar dataKey="resolved" name="Resolved" fill="#BED4F6" radius={[0,4,4,0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -280,8 +293,8 @@ export function AnalyticsPage() {
               <CardHeader title="Message Volume by Channel" />
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={channelVolume} layout="vertical" barSize={18}>
-                  <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis dataKey="channel" type="category" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={72} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                  <YAxis dataKey="channel" type="category" tick={{ fontSize: 11, fill: '#5C6370' }} axisLine={false} tickLine={false} width={72} />
                   <Tooltip {...chartTooltipStyle} />
                   <Bar dataKey="volume" name="Messages" radius={[0,4,4,0]}>
                     {channelVolume.map((entry, i) => (
@@ -309,8 +322,8 @@ export function AnalyticsPage() {
                   {channelVolume.map(c => (
                     <div key={c.channel} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
-                      <span className="text-xs text-slate-600">{c.channel}</span>
-                      <span className="text-xs font-semibold text-slate-800 ml-auto pl-4">{c.volume.toLocaleString()}</span>
+                      <span className="text-xs text-[#5C6370]">{c.channel}</span>
+                      <span className="text-xs font-semibold text-[#0E1013] ml-auto pl-4">{c.volume.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
@@ -336,15 +349,15 @@ export function AnalyticsPage() {
                 {guestSources.map((source, i) => (
                   <div key={source.source} className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: COLORS[i] }} />
-                    <span className="text-xs text-slate-600 flex-1">{source.source}</span>
-                    <div className="w-24 bg-slate-100 rounded-full h-1.5">
+                    <span className="text-xs text-[#5C6370] flex-1">{source.source}</span>
+                    <div className="w-24 bg-[#F6F7F9] rounded-full h-1.5">
                       <div
                         className="h-1.5 rounded-full"
                         style={{ width: `${(source.count / 500) * 100}%`, background: COLORS[i] }}
                       />
                     </div>
-                    <span className="text-xs font-semibold text-slate-700 w-8 text-right">{source.count}</span>
-                    <span className="text-xs text-slate-400 w-20 text-right">LTV {formatCurrency(source.ltv)}</span>
+                    <span className="text-xs font-semibold text-[#0E1013] w-8 text-right">{source.count}</span>
+                    <span className="text-xs text-[#8B9299] w-20 text-right">LTV {formatCurrency(source.ltv)}</span>
                   </div>
                 ))}
               </div>
@@ -358,14 +371,14 @@ export function AnalyticsPage() {
                 ]}>
                   <defs>
                     <linearGradient id="satGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#2355A7" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#2355A7" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[3.5, 5]} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[3.5, 5]} tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
                   <Tooltip {...chartTooltipStyle} />
-                  <Area type="monotone" dataKey="value" name="Avg Score" stroke="#22c55e" fill="url(#satGrad)" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 4 }} />
+                  <Area type="monotone" dataKey="value" name="Avg Score" stroke="#2355A7" fill="url(#satGrad)" strokeWidth={2.5} dot={{ fill: '#2355A7', r: 4 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>

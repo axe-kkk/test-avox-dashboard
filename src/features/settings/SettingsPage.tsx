@@ -27,10 +27,10 @@ const roleLabels: Record<Role, string> = {
   viewer: 'View-only',
 };
 
-const roleBadge: Record<Role, 'purple' | 'info' | 'success' | 'default'> = {
-  admin: 'purple',
-  manager: 'info',
-  agent: 'success',
+const roleBadge: Record<Role, 'dark' | 'blue' | 'default'> = {
+  admin: 'dark',
+  manager: 'blue',
+  agent: 'default',
   viewer: 'default',
 };
 
@@ -64,8 +64,13 @@ export function SettingsPage() {
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar nav */}
-      <div className="w-52 flex-shrink-0 border-r border-slate-100 bg-white py-5">
-        <p className="px-5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Settings</p>
+      <div className="w-52 flex-shrink-0 flex flex-col" style={{ borderRight: '1px solid #EDEEF1', background: 'white' }}>
+        {/* Sidebar header */}
+        <div className="px-5 py-4 bg-white" style={{ borderBottom: '1px solid #EDEEF1' }}>
+          <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-[0.22em] mb-1">System</p>
+          <p className="text-[17px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Settings</p>
+        </div>
+        <div className="flex-1 py-3">
         {[
           { id: 'property', icon: Building2, label: 'Property' },
           { id: 'pms', icon: Database, label: 'PMS Integration' },
@@ -80,26 +85,29 @@ export function SettingsPage() {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-5 py-2.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50',
+                'w-full flex items-center gap-3 px-4 py-2.5 text-[13px] transition-colors mx-0',
+                isActive
+                  ? 'bg-[#EEF2FC] text-[#2355A7] font-semibold border-r-2 border-[#2355A7]'
+                  : 'text-[#5C6370] font-normal hover:text-[#0E1013] hover:bg-[#F6F7F9]',
               )}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className={cn('w-4 h-4 flex-shrink-0', isActive ? 'text-[#2355A7]' : 'text-[#8B9299]')} />
               {item.label}
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-8 bg-[#F9F9F9]">
 
         {/* PROPERTY */}
         {activeTab === 'property' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Property Settings</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Configure your property details and operational defaults.</p>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Property Settings</h2>
+              <p className="text-[13px] text-[#8B9299] mt-0.5">Configure your property details and operational defaults.</p>
             </div>
             <Card>
               <CardHeader title="Property Details" />
@@ -156,7 +164,7 @@ export function SettingsPage() {
                 </div>
               </div>
               {canManage && (
-                <div className="flex gap-2 mt-5 pt-4 border-t border-slate-100">
+                <div className="flex gap-2 mt-5 pt-4 border-t border-[#EDEEF1]">
                   <Button size="sm" variant="primary" onClick={() => addToast({ type: 'success', title: 'Settings saved' })}>
                     Save Changes
                   </Button>
@@ -170,8 +178,8 @@ export function SettingsPage() {
         {activeTab === 'pms' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">PMS Integration</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Connect AVOX to your Property Management System for real-time data sync.</p>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>PMS Integration</h2>
+              <p className="text-[13px] text-[#8B9299] mt-0.5">Connect AVOX to your Property Management System for real-time data sync.</p>
             </div>
             <Card>
               <CardHeader
@@ -195,7 +203,7 @@ export function SettingsPage() {
                 <Input label="Property Code" defaultValue="GMPA-001" disabled={!canManage} />
               </div>
               {canManage && (
-                <div className="flex gap-2 mt-5 pt-4 border-t border-slate-100">
+                <div className="flex gap-2 mt-5 pt-4 border-t border-[#EDEEF1]">
                   <Button
                     size="sm"
                     variant="primary"
@@ -227,11 +235,11 @@ export function SettingsPage() {
                     { time: '07:30:00', event: 'Scheduled sync triggered', count: '0 changes' },
                     { time: '06:45:18', event: 'Rate update received', count: '186 room rates refreshed' },
                   ].map(log => (
-                    <div key={log.time} className="flex items-center gap-3 text-xs py-2 border-b border-slate-50 last:border-0">
-                      <span className="text-slate-400 font-mono w-16 flex-shrink-0">{log.time}</span>
-                      <span className="text-slate-700 flex-1">{log.event}</span>
-                      <span className="text-slate-400">{log.count}</span>
-                      <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <div key={log.time} className="flex items-center gap-3 text-xs py-2 border-b border-[#EDEEF1] last:border-0">
+                      <span className="text-[#8B9299] font-mono w-16 flex-shrink-0">{log.time}</span>
+                      <span className="text-[#0E1013] flex-1">{log.event}</span>
+                      <span className="text-[#8B9299]">{log.count}</span>
+                      <Check className="w-3.5 h-3.5 text-[#2355A7] flex-shrink-0" />
                     </div>
                   ))}
                 </div>
@@ -245,8 +253,8 @@ export function SettingsPage() {
           <div className="max-w-3xl space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Team Members</h2>
-                <p className="text-sm text-slate-500 mt-0.5">{mockUsers.length} members · 2 roles</p>
+                <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Team Members</h2>
+                <p className="text-[13px] text-[#8B9299] mt-0.5">{mockUsers.length} members · 2 roles</p>
               </div>
               {canTeam && (
                 <Button size="sm" variant="primary" onClick={() => addToast({ type: 'info', title: 'Invite sent', message: 'An invitation email has been dispatched' })}>
@@ -255,24 +263,24 @@ export function SettingsPage() {
               )}
             </div>
             <Card padding="none">
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-[#EDEEF1]">
                 {mockUsers.map(user => (
-                  <div key={user.id} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors">
+                  <div key={user.id} className="flex items-center gap-4 px-5 py-4 hover:bg-[#F9F9F9] transition-colors">
                     <Avatar name={user.name} size="md" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-                      <p className="text-xs text-slate-500">{user.email}</p>
+                      <p className="text-sm font-semibold text-[#0E1013]">{user.name}</p>
+                      <p className="text-xs text-[#5C6370]">{user.email}</p>
                     </div>
-                    <div className="text-xs text-slate-500">{user.department}</div>
+                    <div className="text-xs text-[#5C6370]">{user.department}</div>
                     <Badge variant={roleBadge[user.role]}>{roleLabels[user.role]}</Badge>
-                    <div className="text-xs text-slate-400">Joined {formatDate(user.joinedAt)}</div>
+                    <div className="text-xs text-[#8B9299]">Joined {formatDate(user.joinedAt)}</div>
                     {canTeam && (
                       <div className="flex gap-1.5">
                         <Button size="xs" variant="ghost" onClick={() => addToast({ type: 'info', title: 'Edit member', message: `Editing ${user.name}` })}>
                           Edit
                         </Button>
                         <Button size="xs" variant="ghost" onClick={() => addToast({ type: 'warning', title: 'Removed', message: `${user.name} removed from property` })}>
-                          <Trash2 className="w-3 h-3 text-slate-400" />
+                          <Trash2 className="w-3 h-3 text-[#8B9299]" />
                         </Button>
                       </div>
                     )}
@@ -286,14 +294,14 @@ export function SettingsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left py-2 text-slate-400 font-medium pr-4">Permission</th>
+                    <tr className="border-b border-[#EDEEF1]">
+                      <th className="text-left py-2 text-[#8B9299] font-medium pr-4">Permission</th>
                       {(['admin', 'manager', 'agent', 'viewer'] as Role[]).map(r => (
-                        <th key={r} className="text-center py-2 px-3 text-slate-600 font-semibold">{roleLabels[r]}</th>
+                        <th key={r} className="text-center py-2 px-3 text-[#5C6370] font-semibold">{roleLabels[r]}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-[#EDEEF1]">
                     {[
                       { label: 'View all conversations', access: [true, true, true, true] },
                       { label: 'Reply to guests', access: [true, true, true, false] },
@@ -304,13 +312,13 @@ export function SettingsPage() {
                       { label: 'Billing Access', access: [true, false, false, false] },
                       { label: 'Settings', access: [true, false, false, false] },
                     ].map(row => (
-                      <tr key={row.label} className="hover:bg-slate-50">
-                        <td className="py-2.5 pr-4 text-slate-600">{row.label}</td>
+                      <tr key={row.label} className="hover:bg-[#F9F9F9]">
+                        <td className="py-2.5 pr-4 text-[#5C6370]">{row.label}</td>
                         {row.access.map((has, i) => (
                           <td key={i} className="text-center py-2.5 px-3">
                             {has
-                              ? <Check className="w-3.5 h-3.5 text-emerald-500 mx-auto" />
-                              : <span className="text-slate-200">—</span>
+                              ? <Check className="w-3.5 h-3.5 text-[#2355A7] mx-auto" />
+                              : <span className="text-[#D1CFCF]">—</span>
                             }
                           </td>
                         ))}
@@ -327,8 +335,8 @@ export function SettingsPage() {
         {activeTab === 'notifications' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Notifications</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Configure alert rules, delivery channels, and escalation chains.</p>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Notifications</h2>
+              <p className="text-[13px] text-[#8B9299] mt-0.5">Configure alert rules, delivery channels, and escalation chains.</p>
             </div>
             <Card>
               <CardHeader title="Alert Rules" />
@@ -340,16 +348,16 @@ export function SettingsPage() {
                   { label: 'Revenue milestone reached', desc: 'Daily summary at 18:00', channel: 'Email', enabled: false },
                   { label: 'Unassigned conversation > 15min', desc: 'Alert duty manager', channel: 'SMS', enabled: true },
                 ].map(rule => (
-                  <div key={rule.label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                  <div key={rule.label} className="flex items-center gap-3 p-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl">
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">{rule.label}</p>
-                      <p className="text-xs text-slate-500">{rule.desc}</p>
+                      <p className="text-sm font-medium text-[#0E1013]">{rule.label}</p>
+                      <p className="text-xs text-[#5C6370]">{rule.desc}</p>
                     </div>
                     <Badge variant="default">{rule.channel}</Badge>
                     <div
                       className={cn(
                         'w-9 h-5 rounded-full relative cursor-pointer transition-colors flex-shrink-0',
-                        rule.enabled ? 'bg-emerald-500' : 'bg-slate-200',
+                        rule.enabled ? 'bg-[#2355A7]' : 'bg-[#D1CFCF]',
                       )}
                       onClick={() => addToast({ type: 'info', title: rule.enabled ? 'Alert disabled' : 'Alert enabled' })}
                     >
@@ -371,13 +379,13 @@ export function SettingsPage() {
                   { step: 2, name: 'Marc Dupont', role: 'Revenue Manager', method: 'SMS' },
                   { step: 3, name: 'Elena Kowalski', role: 'Duty Agent', method: 'SMS' },
                 ].map(item => (
-                  <div key={item.step} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
+                  <div key={item.step} className="flex items-center gap-3 p-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl">
+                    <div className="w-6 h-6 rounded-full bg-[#F6F7F9] border border-[#EDEEF1] flex items-center justify-center text-xs font-bold text-[#5C6370] flex-shrink-0">
                       {item.step}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">{item.name}</p>
-                      <p className="text-xs text-slate-500">{item.role}</p>
+                      <p className="text-sm font-medium text-[#0E1013]">{item.name}</p>
+                      <p className="text-xs text-[#5C6370]">{item.role}</p>
                     </div>
                     <Badge variant="default">{item.method}</Badge>
                   </div>
@@ -391,32 +399,32 @@ export function SettingsPage() {
         {activeTab === 'billing' && canBilling && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Billing & Subscription</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Manage your plan, usage, and payment details.</p>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Billing & Subscription</h2>
+              <p className="text-[13px] text-[#8B9299] mt-0.5">Manage your plan, usage, and payment details.</p>
             </div>
 
             <Card>
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Current Plan</p>
-                  <p className="text-xl font-bold text-slate-900">Professional</p>
-                  <p className="text-sm text-slate-500 mt-0.5">7 AI Engines · Up to 500 conversations/day · 3 properties</p>
+                  <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-1">Current Plan</p>
+                  <p className="text-[18px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Professional</p>
+                  <p className="text-[13px] text-[#8B9299] mt-0.5">7 AI Engines · Up to 500 conversations/day · 3 properties</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-slate-900">€1,290</p>
-                  <p className="text-xs text-slate-500">per month</p>
-                  <Badge variant="success" className="mt-1">Active</Badge>
+                  <p className="text-[24px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>€1,290</p>
+                  <p className="text-xs text-[#5C6370]">per month</p>
+                  <Badge variant="blue" className="mt-1">Active</Badge>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-100">
+              <div className="mt-4 pt-4 border-t border-[#EDEEF1]">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-500">Monthly Conversations</span>
-                  <span className="font-semibold text-slate-800">1,547 / 15,000</span>
+                  <span className="text-[#5C6370]">Monthly Conversations</span>
+                  <span className="font-semibold text-[#0E1013]">1,547 / 15,000</span>
                 </div>
-                <div className="bg-slate-100 rounded-full h-2">
-                  <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '10.3%' }} />
+                <div className="bg-[#F6F7F9] rounded-full h-2">
+                  <div className="bg-[#2355A7] h-2 rounded-full" style={{ width: '10.3%' }} />
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">10.3% of monthly limit used</p>
+                <p className="text-[10px] text-[#8B9299] mt-1">10.3% of monthly limit used</p>
               </div>
               <div className="flex gap-2 mt-4">
                 <Button size="sm" variant="outline" onClick={() => addToast({ type: 'info', title: 'Plan comparison opened' })}>
@@ -434,25 +442,25 @@ export function SettingsPage() {
                   { item: 'WhatsApp Business API', amount: 120 },
                   { item: 'Premium Support SLA', amount: 190 },
                 ].map(row => (
-                  <div key={row.item} className="flex justify-between text-xs py-2 border-b border-slate-50 last:border-0">
-                    <span className="text-slate-600">{row.item}</span>
-                    <span className="font-semibold text-slate-800">€{row.amount}</span>
+                  <div key={row.item} className="flex justify-between text-xs py-2 border-b border-[#EDEEF1] last:border-0">
+                    <span className="text-[#5C6370]">{row.item}</span>
+                    <span className="font-semibold text-[#0E1013]">€{row.amount}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-sm font-bold pt-2">
-                  <span className="text-slate-900">Total Monthly</span>
-                  <span className="text-slate-900">€1,290</span>
+                  <span className="text-[#0E1013]">Total Monthly</span>
+                  <span className="text-[#0E1013]">€1,290</span>
                 </div>
               </div>
             </Card>
 
             <Card>
               <CardHeader title="Payment Method" />
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                <div className="w-10 h-7 bg-slate-200 rounded flex items-center justify-center text-xs font-bold text-slate-600">VISA</div>
+              <div className="flex items-center gap-3 p-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl">
+                <div className="w-10 h-7 bg-[#F6F7F9] border border-[#EDEEF1] rounded flex items-center justify-center text-xs font-bold text-[#5C6370]">VISA</div>
                 <div>
-                  <p className="text-sm font-medium text-slate-800">•••• •••• •••• 4291</p>
-                  <p className="text-xs text-slate-500">Expires 09/2028</p>
+                  <p className="text-sm font-medium text-[#0E1013]">•••• •••• •••• 4291</p>
+                  <p className="text-xs text-[#5C6370]">Expires 09/2028</p>
                 </div>
                 <Button size="xs" variant="ghost" className="ml-auto" onClick={() => addToast({ type: 'info', title: 'Payment method update' })}>
                   Update
@@ -464,13 +472,13 @@ export function SettingsPage() {
               <CardHeader title="Invoice History" />
               <div className="space-y-2">
                 {invoices.map(inv => (
-                  <div key={inv.ref} className="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
+                  <div key={inv.ref} className="flex items-center gap-3 py-2 border-b border-[#EDEEF1] last:border-0">
                     <div className="flex-1">
-                      <p className="text-xs font-medium text-slate-800">{inv.ref}</p>
-                      <p className="text-[10px] text-slate-400">{formatDate(inv.date)}</p>
+                      <p className="text-xs font-medium text-[#0E1013]">{inv.ref}</p>
+                      <p className="text-[10px] text-[#8B9299]">{formatDate(inv.date)}</p>
                     </div>
-                    <span className="text-sm font-semibold text-slate-800">€{inv.amount}</span>
-                    <Badge variant="success">{inv.status}</Badge>
+                    <span className="text-sm font-semibold text-[#0E1013]">€{inv.amount}</span>
+                    <Badge variant="blue">{inv.status}</Badge>
                     <Button size="xs" variant="ghost" onClick={() => addToast({ type: 'info', title: 'Invoice downloaded' })}>
                       PDF
                     </Button>
@@ -483,10 +491,10 @@ export function SettingsPage() {
 
         {activeTab === 'billing' && !canBilling && (
           <div className="max-w-md">
-            <div className="bg-slate-100 rounded-xl p-8 text-center">
-              <Shield className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-sm font-semibold text-slate-700 mb-1">Access Restricted</h3>
-              <p className="text-xs text-slate-500">Billing is only accessible to Admin users. Contact Sophie Blanchard for billing changes.</p>
+            <div className="bg-white border border-[#EDEEF1] rounded-xl p-8 text-center">
+              <Shield className="w-10 h-10 text-[#8B9299] mx-auto mb-3" />
+              <h3 className="text-sm font-semibold text-[#0E1013] mb-1">Access Restricted</h3>
+              <p className="text-xs text-[#5C6370]">Billing is only accessible to Admin users. Contact Sophie Blanchard for billing changes.</p>
             </div>
           </div>
         )}

@@ -179,40 +179,40 @@ function EngineCard({ engine, isActive, onClick }: { engine: AIEngine; isActive:
   return (
     <Card
       hover
-      className={cn('cursor-pointer transition-all', isActive && 'ring-2 ring-slate-900 shadow-panel')}
+      className={cn('cursor-pointer transition-all', isActive && 'ring-2 ring-[#0E1013] shadow-panel')}
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <StatusDot status={engine.status} />
-            <h3 className="text-sm font-semibold text-slate-900">{engine.name}</h3>
+            <h3 className="text-sm font-semibold text-[#0E1013]">{engine.name}</h3>
           </div>
-          <p className="text-xs text-slate-500 line-clamp-2">{engine.description}</p>
+          <p className="text-xs text-[#5C6370] line-clamp-2">{engine.description}</p>
         </div>
       </div>
       {engine.lastError && (
-        <div className="flex items-start gap-1.5 bg-rose-50 rounded-lg px-2.5 py-2 mb-3">
-          <AlertTriangle className="w-3 h-3 text-rose-600 flex-shrink-0 mt-0.5" />
-          <p className="text-[10px] text-rose-700 leading-relaxed">{engine.lastError}</p>
+        <div className="flex items-start gap-1.5 bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-2.5 py-2 mb-3">
+          <AlertTriangle className="w-3 h-3 text-[#0E1013] flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] text-[#0E1013] leading-relaxed">{engine.lastError}</p>
         </div>
       )}
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div>
-          <p className="text-[10px] text-slate-400">Today</p>
-          <p className="text-base font-bold text-slate-900 tabular-nums">{engine.actionsToday}</p>
+          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Today</p>
+          <p className="text-[16px] font-semibold text-[#0E1013] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.actionsToday}</p>
         </div>
         <div>
-          <p className="text-[10px] text-slate-400">{engine.mainKpi.label}</p>
-          <p className="text-base font-bold text-slate-900">{engine.mainKpi.value}</p>
+          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">{engine.mainKpi.label}</p>
+          <p className="text-[16px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.mainKpi.value}</p>
         </div>
         <div>
-          <p className="text-[10px] text-slate-400">Resolution</p>
-          <p className="text-base font-bold text-slate-900">{(engine.resolutionRate * 100).toFixed(0)}%</p>
+          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Resolution</p>
+          <p className="text-[16px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{(engine.resolutionRate * 100).toFixed(0)}%</p>
         </div>
       </div>
       {canManage && (
-        <div className="flex gap-2 pt-3 border-t border-slate-50">
+        <div className="flex gap-2 pt-3 border-t border-[#EDEEF1]">
           <Button
             size="xs"
             variant={engine.status === 'active' ? 'secondary' : 'primary'}
@@ -239,9 +239,9 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
   const engineActions = mockActivity.filter(a => a.engineName === engine.name);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-card overflow-hidden">
+    <div className="bg-white rounded-xl border border-[#EDEEF1] shadow-card overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-slate-100">
+      <div className="px-6 py-5 border-b border-[#EDEEF1]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={cn('px-3 py-1 rounded-full text-sm font-semibold', engineColors[engine.name])}>
@@ -251,20 +251,20 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
           </div>
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <p className="text-[10px] text-slate-400">Total Handled</p>
-              <p className="text-sm font-bold text-slate-900 tabular-nums">{engine.handledConversations.toLocaleString()}</p>
+              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Total Handled</p>
+              <p className="text-[15px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.handledConversations.toLocaleString()}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-slate-400">Avg Response</p>
-              <p className="text-sm font-bold text-slate-900">{engine.avgResponseTime}</p>
+              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Avg Response</p>
+              <p className="text-[15px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.avgResponseTime}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-slate-400">Errors (30d)</p>
-              <p className={cn('text-sm font-bold', engine.errorCount > 3 ? 'text-rose-600' : 'text-slate-900')}>{engine.errorCount}</p>
+              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Errors (30d)</p>
+              <p className={cn('text-[15px] font-semibold', engine.errorCount > 3 ? 'text-[#0E1013]' : 'text-[#0E1013]')} style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.errorCount}</p>
             </div>
           </div>
         </div>
-        <p className="text-xs text-slate-500 mt-3">{engine.description}</p>
+        <p className="text-xs text-[#5C6370] mt-3">{engine.description}</p>
       </div>
 
       <Tabs tabs={engineDetailTabs} activeTab={activeTab} onChange={setActiveTab} className="px-6" />
@@ -274,12 +274,12 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
           <div className="space-y-6">
             {config.sections.map(section => (
               <div key={section.title}>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{section.title}</h4>
+                <h4 className="text-xs font-semibold text-[#8B9299] uppercase tracking-wider mb-3">{section.title}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {section.fields.map(field => (
-                    <div key={field.label} className="bg-slate-50 rounded-xl px-4 py-3">
-                      <p className="text-[10px] text-slate-400 mb-0.5">{field.label}</p>
-                      <p className="text-sm font-medium text-slate-800">{field.value}</p>
+                    <div key={field.label} className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8B9299] mb-0.5">{field.label}</p>
+                      <p className="text-sm font-medium text-[#0E1013]">{field.value}</p>
                     </div>
                   ))}
                 </div>
@@ -292,38 +292,41 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
           <div className="space-y-5">
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: 'Conversations', value: engine.handledConversations.toLocaleString(), icon: TrendingUp, color: 'text-blue-600 bg-blue-50' },
-                { label: 'Resolution Rate', value: `${(engine.resolutionRate * 100).toFixed(1)}%`, icon: CheckCircle, color: 'text-emerald-600 bg-emerald-50' },
-                { label: 'Avg Response', value: engine.avgResponseTime, icon: Clock, color: 'text-violet-600 bg-violet-50' },
-                { label: 'Error Count', value: engine.errorCount.toString(), icon: XCircle, color: 'text-rose-600 bg-rose-50' },
+                { label: 'Conversations', value: engine.handledConversations.toLocaleString(), icon: TrendingUp, color: 'text-[#2355A7] bg-[#EEF2FC]' },
+                { label: 'Resolution Rate', value: `${(engine.resolutionRate * 100).toFixed(1)}%`, icon: CheckCircle, color: 'text-[#2355A7] bg-[#EEF2FC]' },
+                { label: 'Avg Response', value: engine.avgResponseTime, icon: Clock, color: 'text-[#0E1013] bg-[#F6F7F9]' },
+                { label: 'Error Count', value: engine.errorCount.toString(), icon: XCircle, color: 'text-[#0E1013] bg-[#F6F7F9]' },
               ].map(m => {
                 const Icon = m.icon;
                 return (
-                  <div key={m.label} className="bg-slate-50 rounded-xl p-4">
+                  <div key={m.label} className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-4">
                     <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center mb-2', m.color)}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <p className="text-xs text-slate-500">{m.label}</p>
-                    <p className="text-xl font-bold text-slate-900">{m.value}</p>
+                    <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">{m.label}</p>
+                    <p
+                      className="text-[20px] font-semibold text-[#0E1013] tabular-nums leading-tight mt-0.5"
+                      style={{ fontFamily: "'Azeret Mono', monospace" }}
+                    >{m.value}</p>
                   </div>
                 );
               })}
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Conversation Volume (12 days)</h4>
-              <div className="bg-slate-50 rounded-xl p-4">
+              <h4 className="text-xs font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Conversation Volume (12 days)</h4>
+              <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-4">
                 <ResponsiveContainer width="100%" height={160}>
                   <AreaChart data={conversationsTrend}>
                     <defs>
                       <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#2355A7" stopOpacity={0.12} />
+                        <stop offset="95%" stopColor="#2355A7" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }} />
-                    <Area type="monotone" dataKey="value" stroke="#6366f1" fill="url(#grad)" strokeWidth={2} dot={false} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ background: '#fff', border: '1px solid #EDEEF1', borderRadius: '12px', fontSize: '12px' }} />
+                    <Area type="monotone" dataKey="value" stroke="#2355A7" fill="url(#grad)" strokeWidth={2} dot={false} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -334,19 +337,19 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
         {activeTab === 'log' && (
           <div className="space-y-2">
             {engineActions.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-8">No recent actions for this engine.</p>
+              <p className="text-sm text-[#8B9299] text-center py-8">No recent actions for this engine.</p>
             ) : engineActions.map(item => (
-              <div key={item.id} className="flex items-start gap-3 bg-slate-50 rounded-xl px-4 py-3">
+              <div key={item.id} className="flex items-start gap-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-slate-800">{item.guestName}</span>
-                    <span className="text-[10px] text-slate-400">{formatRelativeTime(item.timestamp)}</span>
+                    <span className="text-xs font-semibold text-[#0E1013]">{item.guestName}</span>
+                    <span className="text-[10px] text-[#8B9299]">{formatRelativeTime(item.timestamp)}</span>
                     {item.urgency === 'high' && (
-                      <Badge variant="danger" size="sm">Urgent</Badge>
+                      <Badge variant="dark" size="sm">Urgent</Badge>
                     )}
                   </div>
-                  <p className="text-xs text-slate-600">{item.action}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{item.result}</p>
+                  <p className="text-xs text-[#5C6370]">{item.action}</p>
+                  <p className="text-[10px] text-[#8B9299] mt-0.5">{item.result}</p>
                 </div>
               </div>
             ))}
@@ -361,11 +364,19 @@ export function EnginesPage() {
   const [selectedEngine, setSelectedEngine] = useState<AIEngine | null>(null);
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">AI Engines</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Configure and monitor all 7 operational AI engines</p>
-      </div>
+    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
+      {/* Hero */}
+      <Card className="px-8 py-6">
+        <div>
+          <p className="text-[11px] font-medium text-[#8B9299] uppercase tracking-[0.22em] mb-3">7 operational engines</p>
+          <h1
+            className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
+            style={{ fontFamily: "'Azeret Mono', monospace" }}
+          >
+            AI Engines
+          </h1>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-4 gap-4">
         {mockEngines.map(engine => (

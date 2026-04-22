@@ -24,7 +24,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [role, setRoleState] = useState<Role>('admin');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const currentUser = mockUsers.find(u => u.role === role) ?? mockUsers[0];

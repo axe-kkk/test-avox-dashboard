@@ -7,26 +7,27 @@ interface AvatarProps {
 }
 
 const sizes = {
-  xs: 'w-6 h-6 text-xs',
-  sm: 'w-7 h-7 text-xs',
-  md: 'w-8 h-8 text-sm',
-  lg: 'w-10 h-10 text-sm',
+  xs: 'w-6 h-6 text-[9px]',
+  sm: 'w-7 h-7 text-[10px]',
+  md: 'w-8 h-8 text-[11px]',
+  lg: 'w-10 h-10 text-[12px]',
 };
 
+// Brand-aligned palette — strict neutrals + single blue accent
 const palettes = [
-  'bg-blue-100 text-blue-700',
-  'bg-emerald-100 text-emerald-700',
-  'bg-violet-100 text-violet-700',
-  'bg-amber-100 text-amber-700',
-  'bg-rose-100 text-rose-700',
-  'bg-sky-100 text-sky-700',
-  'bg-indigo-100 text-indigo-700',
+  'bg-[#BED4F6] text-[#2355A7]',
+  'bg-[#F6F7F9] text-[#5C6370]',
+  'bg-[#2355A7] text-white',
+  'bg-[#D1CFCF] text-[#0E1013]',
+  'bg-[#FFFFFF] text-[#0E1013] border border-[#EDEEF1]',
+  'bg-[#F6F7F9] text-[#5C6370]',
+  'bg-[#0E1013] text-white',
 ];
 
 function hashName(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash + name.charCodeAt(i)) % palettes.length;
-  return hash;
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i)) % palettes.length;
+  return h;
 }
 
 export function Avatar({ name, size = 'md', className }: AvatarProps) {

@@ -7,25 +7,33 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary: 'bg-slate-900 text-white hover:bg-slate-800 shadow-soft',
-  secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100',
-  danger: 'bg-rose-600 text-white hover:bg-rose-700 shadow-soft',
-  outline: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-soft',
+  primary:   'bg-[#2355A7] text-white hover:bg-[#1f4b93]',
+  secondary: 'bg-[#EEF2FC] text-[#2355A7] hover:bg-[#E3EBFA]',
+  ghost:     'bg-transparent text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#0E1013]',
+  danger:    'bg-[#0E1013] text-white hover:bg-[#1a1f26]',
+  outline:   'border border-[#EDEEF1] bg-white text-[#0E1013] hover:bg-[#F6F7F9]',
 };
 
 const sizes = {
-  xs: 'px-2.5 py-1 text-xs rounded-md gap-1',
-  sm: 'px-3 py-1.5 text-xs rounded-lg gap-1.5',
-  md: 'px-4 py-2 text-sm rounded-lg gap-2',
-  lg: 'px-5 py-2.5 text-sm rounded-xl gap-2',
+  xs: 'px-2.5 py-1   text-[11px] rounded-lg  gap-1',
+  sm: 'px-3   py-1.5 text-[12px] rounded-xl  gap-1.5',
+  md: 'px-4   py-2   text-[13px] rounded-xl  gap-2',
+  lg: 'px-5   py-2.5 text-[13px] rounded-xl  gap-2',
 };
 
-export function Button({ variant = 'secondary', size = 'md', className, children, ...props }: ButtonProps) {
+export function Button({
+  variant = 'secondary',
+  size = 'md',
+  className,
+  children,
+  ...props
+}: ButtonProps) {
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center font-medium transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#BED4F6]',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         className,
