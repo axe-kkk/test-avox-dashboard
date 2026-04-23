@@ -21,7 +21,7 @@ const channelDescriptions: Record<string, string> = {
   ota_email: 'Monitor and respond to OTA messages (Booking.com, Expedia) from a single inbox.',
 };
 
-const statusVariants: Record<string, 'success' | 'danger' | 'warning' | 'default'> = {
+const statusVariants: Record<string, 'blue' | 'dark' | 'default'> = {
   connected: 'blue',
   disconnected: 'dark',
   warning: 'default',

@@ -1,16 +1,19 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { SubSidebar } from './SubSidebar';
 import { Topbar } from './Topbar';
 import { ToastContainer } from '../components/ui/Toast';
 
 export function AppLayout() {
+  const location = useLocation();
+  const isInbox = location.pathname === '/' || location.pathname.startsWith('/inbox');
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-brand-bg)' }}>
       <Sidebar />
-      <SubSidebar />
+      {!isInbox && <SubSidebar />}
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Topbar />
+        {!isInbox && <Topbar />}
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

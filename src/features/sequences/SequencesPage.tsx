@@ -4,7 +4,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { mockSequences } from '../../data/mock/sequences';
-import { engineColors, channelLabels, formatRelativeTime, cn } from '../../utils';
+import { engineColors, channelLabels, formatDateTime, cn } from '../../utils';
 import type { Sequence, SequenceStep } from '../../types';
 import { useApp } from '../../app/AppContext';
 
@@ -98,7 +98,7 @@ function SequenceRow({ seq, isSelected, onClick }: { seq: Sequence; isSelected: 
         </div>
       </td>
       <td className="px-4 py-4 text-xs text-[#5C6370] whitespace-nowrap">
-        {formatRelativeTime(seq.lastLaunch)}
+        {formatDateTime(seq.lastLaunch)}
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>

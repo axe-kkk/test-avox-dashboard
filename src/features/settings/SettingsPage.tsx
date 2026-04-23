@@ -185,7 +185,7 @@ export function SettingsPage() {
               <CardHeader
                 title="Connection Status"
                 action={
-                  <Badge variant={pmsConnected ? 'success' : 'danger'}>
+                  <Badge variant={pmsConnected ? 'blue' : 'dark'}>
                     {pmsConnected ? 'Connected' : 'Disconnected'}
                   </Badge>
                 }

@@ -7,7 +7,7 @@ import { StatusDot } from '../../components/ui/StatusDot';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
 import { summaryMetrics } from '../../data/mock/analytics';
-import { formatRelativeTime, formatCurrency, cn } from '../../utils';
+import { formatDateTime, formatCurrency, cn } from '../../utils';
 import type { EngineName } from '../../types';
 import { Card } from '../../components/ui/Card';
 
@@ -267,7 +267,7 @@ export function HomePage() {
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <span className="text-[12px] font-semibold text-[#0E1013] truncate">{item.guestName}</span>
                       <span className="text-[10px] text-[#8B9299] whitespace-nowrap flex-shrink-0">
-                        {formatRelativeTime(item.timestamp)}
+                        {formatDateTime(item.timestamp)}
                       </span>
                     </div>
                     <span className="inline-block text-[10px] font-medium text-[#2355A7] bg-[#EEF2FC] px-1.5 py-0.5 rounded mb-1.5">

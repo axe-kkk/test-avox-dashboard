@@ -8,7 +8,7 @@ import { ChannelIcon } from '../../components/ui/ChannelIcon';
 import { mockGuests } from '../../data/mock/guests';
 import { mockReservations } from '../../data/mock/reservations';
 import { mockConversations } from '../../data/mock/conversations';
-import { formatDate, formatCurrency, formatRelativeTime, cn } from '../../utils';
+import { formatDate, formatCurrency, formatDateTime, cn } from '../../utils';
 import type { Guest } from '../../types';
 import { useApp } from '../../app/AppContext';
 
@@ -163,10 +163,10 @@ function GuestDetailPanel({ guest, onClose }: { guest: Guest; onClose: () => voi
             ) : conversations.map(conv => (
               <div key={conv.id} className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-3">
                 <div className="flex items-start gap-2">
-                  <ChannelIcon channel={conv.channel} size="sm" />
+                  <ChannelIcon channel={conv.channel} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-[#0E1013] truncate">{conv.lastMessage}</p>
-                    <p className="text-[10px] text-[#8B9299] mt-0.5">{formatRelativeTime(conv.lastMessageAt)}</p>
+                    <p className="text-[10px] text-[#8B9299] mt-0.5">{formatDateTime(conv.lastMessageAt)}</p>
                   </div>
                   {conv.engineName && (
                     <span className="text-[10px] font-medium text-[#2355A7] bg-[#EEF2FC] px-1.5 py-0.5 rounded-full whitespace-nowrap">
@@ -375,7 +375,7 @@ export function GuestsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-[#5C6370] whitespace-nowrap">
-                    {formatRelativeTime(guest.lastInquiryAt)}
+                    {formatDateTime(guest.lastInquiryAt)}
                   </td>
                   <td className="px-4 py-3 text-xs text-[#5C6370] whitespace-nowrap">
                     {guest.lastStayAt ? formatDate(guest.lastStayAt) : <span className="text-[#D1CFCF]">—</span>}

@@ -7,7 +7,7 @@ import { StatusDot } from '../../components/ui/StatusDot';
 import { Tabs } from '../../components/ui/Tabs';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
-import { engineColors, formatRelativeTime, cn } from '../../utils';
+import { engineColors, formatDateTime, cn } from '../../utils';
 import type { AIEngine, EngineName } from '../../types';
 import { useApp, usePermission } from '../../app/AppContext';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -343,7 +343,7 @@ function EngineDetail({ engine }: { engine: AIEngine }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xs font-semibold text-[#0E1013]">{item.guestName}</span>
-                    <span className="text-[10px] text-[#8B9299]">{formatRelativeTime(item.timestamp)}</span>
+                    <span className="text-[10px] text-[#8B9299]">{formatDateTime(item.timestamp)}</span>
                     {item.urgency === 'high' && (
                       <Badge variant="dark" size="sm">Urgent</Badge>
                     )}

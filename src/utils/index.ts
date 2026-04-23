@@ -18,6 +18,14 @@ export function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+export function formatDateTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  // Example: "22 Apr 2026, 14:32"
+  const d = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const t = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  return `${d}, ${t}`;
+}
+
 export function formatCurrency(amount: number, currency = 'EUR'): string {
   return new Intl.NumberFormat('en-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount);
 }
@@ -32,7 +40,7 @@ export function formatTime(dateStr: string): string {
 
 export const channelLabels: Record<ChannelType, string> = {
   whatsapp: 'WhatsApp',
-  messenger: 'Messenger',
+  messenger: 'Facebook',
   instagram: 'Instagram',
   email: 'Email',
   sms: 'SMS',
