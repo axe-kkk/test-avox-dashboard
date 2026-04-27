@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import {
   Search, ChevronDown, ChevronUp, Star, X, SlidersHorizontal,
   Settings2, Download, MessageSquare, ChevronLeft,
@@ -131,8 +131,184 @@ const ALL_COLS: { id: ColId; label: string; sortKey?: keyof Guest }[] = [
 ];
 
 /* ═══════════════════════════════════════════════
-   FILTER PANEL
+   FILTER PANEL — sub-components (outside to prevent remount on re-render)
 ═══════════════════════════════════════════════ */
+
+/** Pill chip — multi-select */
+function FChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center h-6 px-2.5 rounded-full text-[11px] font-medium border transition-all select-none',
+        active
+          ? 'bg-[#2355A7] text-white border-[#2355A7]'
+          : 'bg-white text-[#5C6370] border-[#E4E6EA] hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#F0F5FF]',
+      )}
+    >{children}</button>
+  );
+}
+
+/** Checkbox row — boolean toggle */
+function FCheck({ checked, onClick, children }: { checked: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-2.5 py-1.5 group"
+    >
+      <span className={cn(
+        'w-[15px] h-[15px] rounded-[4px] border flex items-center justify-center flex-shrink-0 transition-all',
+        checked ? 'bg-[#2355A7] border-[#2355A7]' : 'bg-white border-[#D5D8DE] group-hover:border-[#2355A7]',
+      )}>
+        {checked && (
+          <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+            <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </span>
+      <span className={cn('text-[12px] transition-colors', checked ? 'text-[#2355A7] font-medium' : 'text-[#5C6370] group-hover:text-[#3D4550]')}>{children}</span>
+    </button>
+  );
+}
+
+/** Collapsible section — defined outside FilterPanel to prevent remount */
+function FSection({
+  id, label, active, open, onToggle, children,
+}: {
+  id: string; label: string; active: boolean;
+  open: boolean; onToggle: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-b border-[#F2F3F5] last:border-0">
+      <button
+        onClick={() => onToggle(id)}
+        className="w-full flex items-center justify-between py-3 text-left group"
+      >
+        <div className="flex items-center gap-2">
+          {active && <span className="w-1.5 h-1.5 rounded-full bg-[#2355A7] flex-shrink-0" />}
+          <span className={cn(
+            'text-[12px] font-semibold transition-colors',
+            active ? 'text-[#2355A7]' : 'text-[#3D4550] group-hover:text-[#2355A7]',
+          )}>{label}</span>
+        </div>
+        {open
+          ? <ChevronUp className="w-3.5 h-3.5 text-[#A0A6B0] group-hover:text-[#2355A7] transition-colors flex-shrink-0" />
+          : <ChevronDown className="w-3.5 h-3.5 text-[#A0A6B0] group-hover:text-[#2355A7] transition-colors flex-shrink-0" />}
+      </button>
+      {open && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
+  );
+}
+
+/** Inline dropdown — expands in place, avoids overflow-clip issues */
+function FDropdown({
+  placeholder, selectedCount, onClear, children,
+}: {
+  placeholder: string;
+  selectedCount: number;
+  onClear?: () => void;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const has = selectedCount > 0;
+  return (
+    <div>
+      {/* Trigger */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={cn(
+          'w-full h-9 px-3 rounded-xl border flex items-center justify-between gap-2 transition-all',
+          open
+            ? 'bg-white border-[#2355A7] ring-2 ring-[#BED4F6]/30'
+            : has
+              ? 'bg-[#EEF2FC] border-[#BED4F6] hover:border-[#2355A7]'
+              : 'bg-[#F6F7F9] border-[#E4E6EA] hover:bg-white hover:border-[#C8CBD0]',
+        )}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          {has ? (
+            <>
+              <span className="w-[18px] h-[18px] rounded-full bg-[#2355A7] text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0 leading-none">
+                {selectedCount}
+              </span>
+              <span className="text-[12px] font-medium text-[#2355A7] truncate">{selectedCount} selected</span>
+            </>
+          ) : (
+            <span className="text-[12px] text-[#8B9299]">{placeholder}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {has && onClear && (
+            <span
+              role="button"
+              onClick={e => { e.stopPropagation(); onClear(); }}
+              className="w-4 h-4 rounded-full bg-[#BED4F6]/60 text-[#2355A7] flex items-center justify-center text-[11px] leading-none hover:bg-[#2355A7] hover:text-white transition-colors cursor-pointer select-none"
+            >×</span>
+          )}
+          <ChevronDown className={cn('w-3.5 h-3.5 flex-shrink-0 transition-transform duration-150',
+            open ? 'rotate-180 text-[#2355A7]' : 'text-[#A0A6B0]',
+          )} />
+        </div>
+      </button>
+
+      {/* Expanded list */}
+      {open && (
+        <div className="mt-1.5 rounded-xl border border-[#EDEEF1] bg-white overflow-hidden shadow-[0_4px_20px_rgba(35,85,167,0.10)]">
+          <div className="max-h-[196px] overflow-y-auto p-1.5">
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Option row inside FDropdown */
+function FDropdownOption({
+  checked, onClick, avatar, sublabel, children,
+}: {
+  checked: boolean;
+  onClick: () => void;
+  avatar?: string;
+  sublabel?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors',
+        checked ? 'bg-[#EEF2FC]' : 'hover:bg-[#F6F7F9]',
+      )}
+    >
+      {/* Checkbox */}
+      <span className={cn(
+        'w-[14px] h-[14px] rounded-[3px] border flex items-center justify-center flex-shrink-0 transition-all',
+        checked ? 'bg-[#2355A7] border-[#2355A7]' : 'bg-white border-[#D5D8DE]',
+      )}>
+        {checked && (
+          <svg width="8" height="6" viewBox="0 0 9 7" fill="none">
+            <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </span>
+      {/* Avatar (optional) */}
+      {avatar && (
+        <span className="w-5 h-5 rounded-full bg-[#2355A7] text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0 leading-none">
+          {avatar}
+        </span>
+      )}
+      {/* Label */}
+      <div className="min-w-0">
+        <p className={cn('text-[12px] leading-tight', checked ? 'text-[#2355A7] font-medium' : 'text-[#3D4550]')}>{children}</p>
+        {sublabel && <p className="text-[10px] text-[#A0A6B0] mt-0.5">{sublabel}</p>}
+      </div>
+    </button>
+  );
+}
+
+/* ─── Main FilterPanel ─── */
 function FilterPanel({ filters, onChange, count, onReset, onClose }: {
   filters: Filters;
   onChange: (f: Filters) => void;
@@ -144,215 +320,240 @@ function FilterPanel({ filters, onChange, count, onReset, onClose }: {
     new Set(['assignment', 'contact', 'activity', 'language', 'travel', 'status', 'visits', 'finance', 'rating', 'tags'])
   );
 
+  /* ── Preserve scroll position across re-renders ── */
+  const scrollRef  = useRef<HTMLDivElement>(null);
+  const savedScroll = useRef(0);
+
+  useLayoutEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = savedScroll.current;
+  });
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    savedScroll.current = (e.currentTarget).scrollTop;
+  };
+
   const toggleGroup = (id: string) =>
     setOpenGroups(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const toggleMulti = (field: 'languages' | 'travelWith' | 'clientStatus' | 'tags', val: string) => {
+  const multi = (field: 'languages' | 'travelWith' | 'clientStatus' | 'tags', val: string) => {
     const arr = filters[field] as string[];
     onChange({ ...filters, [field]: arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val] });
   };
 
-  const toggleBool = (field: keyof Filters, val: boolean) => {
+  const bool = (field: keyof Filters, val: boolean) => {
     onChange({ ...filters, [field]: (filters[field] as boolean | null) === val ? null : val });
   };
 
   const activeCount = countFilters(filters);
-  const depts = Array.from(new Set(mockUsers.map(u => u.department)));
 
-  /* ── Filter chip ── */
-  const Chip = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
-    <button
-      onClick={onClick}
-      className={cn(
-        'inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium border transition-all',
-        active
-          ? 'bg-[#EEF2FC] text-[#2355A7] border-[#BED4F6] shadow-[inset_0_0_0_1px_#BED4F6]'
-          : 'bg-white text-[#5C6370] border-[#EDEEF1] hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#F5F8FF]',
-      )}
-    >{children}</button>
-  );
-
-  /* ── Collapsible section ── */
-  const Section = ({ id, label, children }: { id: string; label: string; children: React.ReactNode }) => {
-    const isOpen = openGroups.has(id);
-    return (
-      <div>
-        <button
-          onClick={() => toggleGroup(id)}
-          className="w-full flex items-center justify-between py-3 text-left group"
-        >
-          <span className="text-[11px] font-semibold text-[#3D4550] group-hover:text-[#2355A7] transition-colors">{label}</span>
-          {isOpen
-            ? <ChevronUp className="w-3.5 h-3.5 text-[#8B9299] group-hover:text-[#2355A7] transition-colors" />
-            : <ChevronDown className="w-3.5 h-3.5 text-[#8B9299] group-hover:text-[#2355A7] transition-colors" />}
-        </button>
-        {isOpen && <div className="pb-3.5 space-y-2.5">{children}</div>}
-        <div className="h-px bg-[#F0F1F3]" />
-      </div>
-    );
+  /* helpers for per-section active state */
+  const sActive = {
+    assignment: !!filters.assignedUserId,
+    contact:    filters.hasPhone !== null || filters.hasEmail !== null,
+    activity:   filters.hasSequence !== null || filters.hasReservation !== null || filters.hasCalls !== null || filters.hasComplaints !== null,
+    language:   filters.languages.length > 0,
+    travel:     filters.travelWith.length > 0,
+    status:     filters.clientStatus.length > 0,
+    visits:     !!(filters.visitFrom || filters.visitTo),
+    finance:    !!(filters.spendMin || filters.spendMax),
+    rating:     filters.ratingMin > 0,
+    tags:       filters.tags.length > 0,
   };
 
+  const S = (id: keyof typeof sActive, label: string, children: React.ReactNode) => (
+    <FSection
+      id={id} label={label}
+      active={sActive[id]}
+      open={openGroups.has(id)}
+      onToggle={toggleGroup}
+    >{children}</FSection>
+  );
+
+
   return (
-    <div className="w-[248px] flex-shrink-0 border-r border-[#EDEEF1] flex flex-col overflow-hidden bg-white">
+    <div className="w-[252px] flex-shrink-0 border-r border-[#EDEEF1] flex flex-col overflow-hidden bg-white">
 
       {/* ── Header ── */}
-      <div className="px-5 pt-5 pb-4 border-b border-[#EDEEF1] flex-shrink-0 bg-[#F9F9F9]">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-[0.14em] mb-1.5">Total guests</p>
-            <p
-              className="text-[36px] font-semibold text-[#3D4550] leading-none tabular-nums"
+      <div className="px-5 pt-5 pb-4 border-b border-[#EDEEF1] flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-baseline gap-2">
+            <span
+              className="text-[32px] font-bold text-[#3D4550] leading-none tabular-nums"
               style={{ fontFamily: "'Azeret Mono', monospace" }}
-            >{count}</p>
+            >{count}</span>
+            <span className="text-[13px] text-[#8B9299] font-medium">guests</span>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 mt-1 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#EDEEF1] hover:text-[#5C6370] transition-colors"
             title="Hide filters"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F0F1F3] hover:text-[#5C6370] transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
         </div>
 
         {activeCount > 0 ? (
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#EDEEF1]">
+          <div className="flex items-center justify-between bg-[#EEF2FC] rounded-lg px-3 py-2">
             <div className="flex items-center gap-1.5">
-              <span className="w-4 h-4 rounded-full bg-[#2355A7] text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0">{activeCount}</span>
-              <span className="text-[11px] text-[#5C6370]">filter{activeCount !== 1 ? 's' : ''} applied</span>
+              <span className="w-4 h-4 rounded-full bg-[#2355A7] text-white text-[9px] font-bold flex items-center justify-center leading-none flex-shrink-0">{activeCount}</span>
+              <span className="text-[11px] text-[#2355A7] font-medium">{activeCount === 1 ? '1 filter' : `${activeCount} filters`} applied</span>
             </div>
-            <button onClick={onReset} className="text-[11px] font-medium text-[#2355A7] hover:underline">Reset</button>
+            <button onClick={onReset} className="text-[11px] font-semibold text-[#2355A7] hover:underline">Reset</button>
           </div>
         ) : (
-          <p className="text-[11px] text-[#C4C8CF] mt-2">No filters applied</p>
+          <p className="text-[11px] text-[#C4C8CF]">No filters applied</p>
         )}
       </div>
 
-      {/* ── Filter list ── */}
-      <div className="flex-1 overflow-y-auto px-4">
+      {/* ── Scrollable filters ── */}
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-1">
 
-        <Section id="assignment" label="Assigned to">
-          <select
-            value={filters.assignedUserId}
-            onChange={e => onChange({ ...filters, assignedUserId: e.target.value })}
-            className="w-full h-8 px-2.5 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[12px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors appearance-none"
+        {S('assignment', 'Assigned to',
+          <FDropdown
+            placeholder="Any manager"
+            selectedCount={filters.assignedUserId ? 1 : 0}
+            onClear={() => onChange({ ...filters, assignedUserId: '' })}
           >
-            <option value="">All managers</option>
-            {depts.map(dept => (
-              <optgroup key={dept} label={dept}>
-                {mockUsers.filter(u => u.department === dept).map(u => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </optgroup>
+            {mockUsers.map(u => {
+              const initials = u.name.split(' ').map((p: string) => p[0]).join('').slice(0, 2).toUpperCase();
+              return (
+                <FDropdownOption
+                  key={u.id}
+                  checked={filters.assignedUserId === u.id}
+                  onClick={() => onChange({ ...filters, assignedUserId: filters.assignedUserId === u.id ? '' : u.id })}
+                  avatar={initials}
+                  sublabel={u.department}
+                >
+                  {u.name}
+                </FDropdownOption>
+              );
+            })}
+          </FDropdown>
+        )}
+
+        {S('contact', 'Contact info',
+          <div className="space-y-0.5">
+            <FCheck checked={filters.hasPhone === true}  onClick={() => bool('hasPhone', true)}>Has phone number</FCheck>
+            <FCheck checked={filters.hasEmail === true}  onClick={() => bool('hasEmail', true)}>Has email address</FCheck>
+          </div>
+        )}
+
+        {S('activity', 'Activity',
+          <div className="space-y-0.5">
+            <FCheck checked={filters.hasSequence   === true} onClick={() => bool('hasSequence', true)}>Active sequence</FCheck>
+            <FCheck checked={filters.hasReservation === true} onClick={() => bool('hasReservation', true)}>Active reservation</FCheck>
+            <FCheck checked={filters.hasCalls      === true} onClick={() => bool('hasCalls', true)}>Has calls</FCheck>
+            <FCheck checked={filters.hasComplaints === true} onClick={() => bool('hasComplaints', true)}>Has complaints</FCheck>
+            <div className="pt-1.5">
+              <p className="text-[10px] text-[#A0A6B0] mb-1.5">Website activity after</p>
+              <input type="date"
+                className="w-full h-8 px-2.5 rounded-lg border border-[#E4E6EA] bg-[#F9F9F9] text-[11px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
+              />
+            </div>
+          </div>
+        )}
+
+        {S('language', 'Language',
+          <FDropdown
+            placeholder="Any language"
+            selectedCount={filters.languages.length}
+            onClear={() => onChange({ ...filters, languages: [] })}
+          >
+            {Object.entries(LANG_LABELS).map(([code, lbl]) => (
+              <FDropdownOption
+                key={code}
+                checked={filters.languages.includes(code)}
+                onClick={() => multi('languages', code)}
+              >
+                {lbl}
+              </FDropdownOption>
             ))}
-          </select>
-        </Section>
+          </FDropdown>
+        )}
 
-        <Section id="contact" label="Contact info">
+        {S('travel', 'Travels with',
           <div className="flex flex-wrap gap-1.5">
-            <Chip active={filters.hasPhone === true} onClick={() => toggleBool('hasPhone', true)}>Has phone</Chip>
-            <Chip active={filters.hasEmail === true} onClick={() => toggleBool('hasEmail', true)}>Has email</Chip>
-          </div>
-        </Section>
-
-        <Section id="activity" label="Activity">
-          <div className="flex flex-wrap gap-1.5">
-            <Chip active={filters.hasSequence === true}   onClick={() => toggleBool('hasSequence', true)}>Active sequence</Chip>
-            <Chip active={filters.hasReservation === true} onClick={() => toggleBool('hasReservation', true)}>Reservation</Chip>
-            <Chip active={filters.hasCalls === true}      onClick={() => toggleBool('hasCalls', true)}>Has calls</Chip>
-            <Chip active={filters.hasComplaints === true} onClick={() => toggleBool('hasComplaints', true)}>Complaints</Chip>
-          </div>
-          <div>
-            <p className="text-[10px] text-[#8B9299] mb-1.5">Website activity after</p>
-            <input
-              type="date"
-              className="w-full h-8 px-2.5 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[11px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
-            />
-          </div>
-        </Section>
-
-        <Section id="language" label="Language / nationality">
-          <div className="flex flex-wrap gap-1.5">
-            {Object.entries(LANG_LABELS).map(([code, label]) => (
-              <Chip key={code} active={filters.languages.includes(code)} onClick={() => toggleMulti('languages', code)}>{label}</Chip>
+            {[['solo','Solo'],['couple','Couple'],['kids','With kids'],['group','Large group']].map(([v, l]) => (
+              <FChip key={v} active={filters.travelWith.includes(v)} onClick={() => multi('travelWith', v)}>{l}</FChip>
             ))}
           </div>
-        </Section>
+        )}
 
-        <Section id="travel" label="Travels with">
+        {S('status', 'Client status',
           <div className="flex flex-wrap gap-1.5">
-            {[['solo', 'Solo'], ['couple', 'Couple'], ['kids', 'With kids'], ['group', 'Large group']].map(([v, l]) => (
-              <Chip key={v} active={filters.travelWith.includes(v)} onClick={() => toggleMulti('travelWith', v)}>{l}</Chip>
+            {[['new','New'],['returning','Returning'],['vip','VIP'],['lost','Lost']].map(([v, l]) => (
+              <FChip key={v} active={filters.clientStatus.includes(v)} onClick={() => multi('clientStatus', v)}>{l}</FChip>
             ))}
           </div>
-        </Section>
+        )}
 
-        <Section id="status" label="Client status">
-          <div className="flex flex-wrap gap-1.5">
-            {[['new', 'New'], ['returning', 'Returning'], ['vip', 'VIP'], ['lost', 'Lost']].map(([v, l]) => (
-              <Chip key={v} active={filters.clientStatus.includes(v)} onClick={() => toggleMulti('clientStatus', v)}>{l}</Chip>
-            ))}
-          </div>
-        </Section>
-
-        <Section id="visits" label="Past visits">
+        {S('visits', 'Past visits',
           <div className="grid grid-cols-2 gap-2">
-            {[['From', 'visitFrom'], ['To', 'visitTo']].map(([label, field]) => (
+            {[['From','visitFrom'],['To','visitTo']].map(([lbl, field]) => (
               <div key={field}>
-                <p className="text-[10px] text-[#8B9299] mb-1">{label}</p>
-                <input
-                  type="date"
-                  value={filters[field as 'visitFrom' | 'visitTo']}
+                <p className="text-[10px] text-[#A0A6B0] mb-1.5">{lbl}</p>
+                <input type="date"
+                  value={filters[field as 'visitFrom'|'visitTo']}
                   onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-8 px-2 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[10px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
+                  className="w-full h-8 px-2 rounded-lg border border-[#E4E6EA] bg-[#F9F9F9] text-[10px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
                 />
               </div>
             ))}
           </div>
-        </Section>
+        )}
 
-        <Section id="finance" label="Total spend">
+        {S('finance', 'Total spend (€)',
           <div className="grid grid-cols-2 gap-2">
-            {[['Min €', 'spendMin', '0'], ['Max €', 'spendMax', '∞']].map(([label, field, ph]) => (
+            {[['Min','spendMin','0'],['Max','spendMax','∞']].map(([lbl, field, ph]) => (
               <div key={field}>
-                <p className="text-[10px] text-[#8B9299] mb-1">{label}</p>
-                <input
-                  type="number"
-                  placeholder={ph}
-                  value={filters[field as 'spendMin' | 'spendMax']}
+                <p className="text-[10px] text-[#A0A6B0] mb-1.5">{lbl}</p>
+                <input type="number" placeholder={ph}
+                  value={filters[field as 'spendMin'|'spendMax']}
                   onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-8 px-2.5 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[12px] text-[#3D4550] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
+                  className="w-full h-8 px-2.5 rounded-lg border border-[#E4E6EA] bg-[#F9F9F9] text-[12px] text-[#3D4550] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
                 />
               </div>
             ))}
           </div>
-        </Section>
+        )}
 
-        <Section id="rating" label="Guest rating">
+        {S('rating', 'Guest rating',
           <div>
-            <p className="text-[10px] text-[#8B9299] mb-2">Minimum score</p>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(s => (
-                <button key={s} onClick={() => onChange({ ...filters, ratingMin: filters.ratingMin === s ? 0 : s })}>
-                  <Star className={cn('w-5 h-5 transition-colors', s <= filters.ratingMin ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF] hover:text-[#BED4F6]')} />
+            <p className="text-[10px] text-[#A0A6B0] mb-2">Minimum score</p>
+            <div className="flex items-center gap-0.5">
+              {[1,2,3,4,5].map(s => (
+                <button key={s} onClick={() => onChange({ ...filters, ratingMin: filters.ratingMin === s ? 0 : s })} className="p-0.5">
+                  <Star className={cn('w-[22px] h-[22px] transition-all',
+                    s <= filters.ratingMin ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D5D8DE] hover:text-[#BED4F6]',
+                  )} />
                 </button>
               ))}
               {filters.ratingMin > 0 && (
-                <span className="text-[11px] text-[#2355A7] ml-1 font-medium">≥ {filters.ratingMin}</span>
+                <span className="text-[11px] text-[#2355A7] font-semibold ml-1.5">≥ {filters.ratingMin}</span>
               )}
             </div>
           </div>
-        </Section>
+        )}
 
-        <Section id="tags" label="Tags">
-          <div className="flex flex-wrap gap-1.5">
+        {S('tags', 'Tags',
+          <FDropdown
+            placeholder="Any tag"
+            selectedCount={filters.tags.length}
+            onClear={() => onChange({ ...filters, tags: [] })}
+          >
             {SUGGESTED_TAGS.map(t => (
-              <Chip key={t} active={filters.tags.includes(t)} onClick={() => toggleMulti('tags', t)}>{t}</Chip>
+              <FDropdownOption
+                key={t}
+                checked={filters.tags.includes(t)}
+                onClick={() => multi('tags', t)}
+              >
+                {t}
+              </FDropdownOption>
             ))}
-          </div>
-        </Section>
+          </FDropdown>
+        )}
 
-        {/* bottom padding */}
-        <div className="h-4" />
+        <div className="h-5" />
       </div>
     </div>
   );
