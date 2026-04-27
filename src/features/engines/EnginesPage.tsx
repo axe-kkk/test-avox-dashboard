@@ -1,397 +1,266 @@
-import { useState } from 'react';
-import { AlertTriangle, Play, Pause, Settings2, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { Card } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { StatusDot } from '../../components/ui/StatusDot';
-import { Tabs } from '../../components/ui/Tabs';
+import { useNavigate } from 'react-router-dom';
+import { RefreshCw, ArrowRight, Zap, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
-import { engineColors, formatDateTime, cn } from '../../utils';
-import type { AIEngine, EngineName } from '../../types';
-import { useApp, usePermission } from '../../app/AppContext';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { conversationsTrend } from '../../data/mock/analytics';
+import { formatDateTime, cn } from '../../utils';
+import { ChannelIcon } from '../../components/ui/ChannelIcon';
 
-const engineDetailTabs = [
-  { id: 'config', label: 'Configuration' },
-  { id: 'performance', label: 'Performance' },
-  { id: 'log', label: 'Action Log' },
+/* ── Journey stages ── */
+const STAGES: { label: string; short: string; engines: string[] }[] = [
+  { label: 'Pre-Booking',       short: 'Pre-Booking',   engines: ['Conversion'] },
+  { label: 'Booking Confirmed', short: 'Confirmed',     engines: ['Reservation'] },
+  { label: 'Pre-Arrival',       short: 'Pre-Arrival',   engines: ['Arrival', 'Upsell'] },
+  { label: 'Check-In',          short: 'Check-In',      engines: ['Arrival'] },
+  { label: 'In-Stay',           short: 'In-Stay',       engines: ['Concierge', 'Recovery', 'Upsell'] },
+  { label: 'Check-Out',         short: 'Check-Out',     engines: ['Recovery'] },
+  { label: 'Post-Stay',         short: 'Post-Stay',     engines: ['Reputation'] },
 ];
 
-const engineConfigs: Record<EngineName, { sections: { title: string; fields: { label: string; value: string; type?: string }[] }[] }> = {
-  Conversion: {
-    sections: [
-      {
-        title: 'Response Behavior',
-        fields: [
-          { label: 'Response Language', value: 'Match guest language' },
-          { label: 'Tone', value: 'Warm & professional' },
-          { label: 'Max Response Time', value: '2 minutes' },
-          { label: 'Escalation Threshold', value: '3 unanswered turns' },
-        ],
-      },
-      {
-        title: 'Booking Rules',
-        fields: [
-          { label: 'Min Lead Time', value: '0 days' },
-          { label: 'Auto-confirm Bookings', value: 'Yes — under 3 nights' },
-          { label: 'Rate Display', value: 'Show best available rate' },
-          { label: 'Availability Sync', value: 'Real-time via PMS' },
-        ],
-      },
-      {
-        title: 'Follow-up',
-        fields: [
-          { label: 'Follow-up After No Reply', value: '24 hours' },
-          { label: 'Follow-up Limit', value: '2 messages' },
-          { label: 'Routing on Escalation', value: 'Assign to Elena Kowalski' },
-        ],
-      },
-    ],
-  },
-  Upsell: {
-    sections: [
-      {
-        title: 'Offer Timing',
-        fields: [
-          { label: 'First Upsell Trigger', value: 'T+2h after booking' },
-          { label: 'In-Stay Trigger', value: 'T+4h after check-in' },
-          { label: 'Offer Expiry', value: '48 hours' },
-        ],
-      },
-      {
-        title: 'Revenue Thresholds',
-        fields: [
-          { label: 'Upgrade Min Differential', value: '€80 room difference' },
-          { label: 'Commission Model', value: '15% of upsell value' },
-          { label: 'Daily Revenue Target', value: '€3,500' },
-        ],
-      },
-    ],
-  },
-  Arrival: {
-    sections: [
-      {
-        title: 'Pre-Arrival Timing',
-        fields: [
-          { label: 'First Message At', value: 'T-72h before arrival' },
-          { label: 'Reminder At', value: 'T-24h before arrival' },
-          { label: 'Day-of Message', value: 'T-4h before arrival' },
-        ],
-      },
-      {
-        title: 'Data Collection',
-        fields: [
-          { label: 'Collect Preferences', value: 'Yes — pillow, floor, extras' },
-          { label: 'Sync to PMS', value: 'Automatic on response' },
-          { label: 'Early Check-in Offer', value: 'Yes — from 10:00 AM' },
-        ],
-      },
-    ],
-  },
-  Concierge: {
-    sections: [
-      {
-        title: 'Service Coverage',
-        fields: [
-          { label: 'Active Hours', value: '24/7' },
-          { label: 'Languages Supported', value: '8 languages' },
-          { label: 'Escalation Channel', value: 'SMS to duty manager' },
-          { label: 'Restaurant Booking', value: 'Integrated — Le Jardin' },
-        ],
-      },
-      {
-        title: 'Response Rules',
-        fields: [
-          { label: 'Emergency Escalation', value: 'Immediate — Human override' },
-          { label: 'Unknown Request Handling', value: 'Acknowledge & escalate' },
-          { label: 'Maintenance Requests', value: 'Auto-ticket to Engineering' },
-        ],
-      },
-    ],
-  },
-  Recovery: {
-    sections: [
-      {
-        title: 'Detection',
-        fields: [
-          { label: 'Sentiment Threshold', value: 'Score < 3 triggers alert' },
-          { label: 'Negative Keywords', value: 'Noise, cold, dirty, slow, unacceptable' },
-          { label: 'Detection Lag', value: '< 30 seconds' },
-        ],
-      },
-      {
-        title: 'Compensation Logic',
-        fields: [
-          { label: 'Max Auto-Compensation', value: '€150 F&B credit' },
-          { label: 'Above Threshold', value: 'Escalate to GM' },
-          { label: 'VIP Auto-Compensation', value: '€300 + Room upgrade offer' },
-        ],
-      },
-    ],
-  },
-  Reservation: {
-    sections: [
-      {
-        title: 'Modification Rules',
-        fields: [
-          { label: 'Auto-approve Date Changes', value: 'Yes — same rate plan' },
-          { label: 'Cancellation Policy', value: 'Enforce per booking terms' },
-          { label: 'PMS Sync Delay', value: 'Real-time (< 5s)' },
-        ],
-      },
-      {
-        title: 'Channel Handling',
-        fields: [
-          { label: 'OTA Modifications', value: 'Accept — sync to PMS' },
-          { label: 'Direct Modifications', value: 'Auto-confirm + email' },
-          { label: 'Overbooking Alert', value: 'Yes — notify Revenue Manager' },
-        ],
-      },
-    ],
-  },
-  Reputation: {
-    sections: [
-      {
-        title: 'Review Requests',
-        fields: [
-          { label: 'Post-stay Delay', value: 'T+18h after checkout' },
-          { label: 'Eligible Score', value: '≥ 4/5 satisfaction' },
-          { label: 'Target Platforms', value: 'Google, Booking.com, TripAdvisor' },
-        ],
-      },
-      {
-        title: 'Public Response',
-        fields: [
-          { label: 'Respond to All Reviews', value: 'Yes — AI draft + human approve' },
-          { label: 'Negative Review Alert', value: '< 3 stars — GM notified' },
-          { label: 'Response Tone', value: 'Warm, owning, solution-focused' },
-        ],
-      },
-    ],
-  },
+const ENGINE_COLORS: Record<string, string> = {
+  Conversion:  '#2355A7',
+  Reservation: '#0EA5E9',
+  Upsell:      '#8B5CF6',
+  Arrival:     '#10B981',
+  Concierge:   '#F59E0B',
+  Recovery:    '#EF4444',
+  Reputation:  '#EC4899',
 };
 
-function EngineCard({ engine, isActive, onClick }: { engine: AIEngine; isActive: boolean; onClick: () => void }) {
-  const canManage = usePermission('manage_engines');
-  const { addToast } = useApp();
-  return (
-    <Card
-      hover
-      className={cn('cursor-pointer transition-all', isActive && 'ring-2 ring-[#0E1013] shadow-panel')}
-      onClick={onClick}
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <StatusDot status={engine.status} />
-            <h3 className="text-sm font-semibold text-[#0E1013]">{engine.name}</h3>
-          </div>
-          <p className="text-xs text-[#5C6370] line-clamp-2">{engine.description}</p>
-        </div>
-      </div>
-      {engine.lastError && (
-        <div className="flex items-start gap-1.5 bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-2.5 py-2 mb-3">
-          <AlertTriangle className="w-3 h-3 text-[#0E1013] flex-shrink-0 mt-0.5" />
-          <p className="text-[10px] text-[#0E1013] leading-relaxed">{engine.lastError}</p>
-        </div>
-      )}
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <div>
-          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Today</p>
-          <p className="text-[16px] font-semibold text-[#0E1013] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.actionsToday}</p>
-        </div>
-        <div>
-          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">{engine.mainKpi.label}</p>
-          <p className="text-[16px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.mainKpi.value}</p>
-        </div>
-        <div>
-          <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Resolution</p>
-          <p className="text-[16px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{(engine.resolutionRate * 100).toFixed(0)}%</p>
-        </div>
-      </div>
-      {canManage && (
-        <div className="flex gap-2 pt-3 border-t border-[#EDEEF1]">
-          <Button
-            size="xs"
-            variant={engine.status === 'active' ? 'secondary' : 'primary'}
-            onClick={e => {
-              e.stopPropagation();
-              addToast({ type: 'success', title: engine.status === 'active' ? `${engine.name} paused` : `${engine.name} activated` });
-            }}
-          >
-            {engine.status === 'active' ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-            {engine.status === 'active' ? 'Pause' : 'Activate'}
-          </Button>
-          <Button size="xs" variant="ghost">
-            <Settings2 className="w-3 h-3" /> Config
-          </Button>
-        </div>
-      )}
-    </Card>
-  );
-}
+const STATUS_COLORS: Record<string, { dot: string; bg: string; text: string; label: string }> = {
+  active:   { dot: 'bg-[#16A34A]', bg: 'bg-[#DCFCE7]', text: 'text-[#16A34A]', label: 'Active'   },
+  paused:   { dot: 'bg-[#F59E0B]', bg: 'bg-[#FEF9C3]', text: 'text-[#D97706]', label: 'Paused'   },
+  error:    { dot: 'bg-[#EF4444]', bg: 'bg-[#FEE2E2]', text: 'text-[#DC2626]', label: 'Error'    },
+  inactive: { dot: 'bg-[#C4C8CF]', bg: 'bg-[#F1F5F9]', text: 'text-[#64748B]', label: 'Inactive' },
+};
 
-function EngineDetail({ engine }: { engine: AIEngine }) {
-  const [activeTab, setActiveTab] = useState('config');
-  const config = engineConfigs[engine.name];
-  const engineActions = mockActivity.filter(a => a.engineName === engine.name);
+export function EnginesPage() {
+  const navigate = useNavigate();
+  const activeCount = mockEngines.filter(e => e.status === 'active').length;
+  const totalToday  = mockEngines.reduce((s, e) => s + e.actionsToday, 0);
+
+  /* Stage action counts */
+  const stageActions = STAGES.map(stage => {
+    const total = stage.engines.reduce((sum, name) => {
+      const eng = mockEngines.find(e => e.name === name);
+      return sum + (eng?.actionsToday ?? 0);
+    }, 0);
+    return { ...stage, total };
+  });
+  const maxActions = Math.max(...stageActions.map(s => s.total));
 
   return (
-    <div className="bg-white rounded-xl border border-[#EDEEF1] shadow-card overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-5 border-b border-[#EDEEF1]">
+    <div className="h-full overflow-auto" style={{ background: 'var(--color-brand-bg, #F7F8FA)' }}>
+      <div className="max-w-[1280px] mx-auto px-6 py-6 space-y-5">
+
+        {/* ── Header ── */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={cn('px-3 py-1 rounded-full text-sm font-semibold', engineColors[engine.name])}>
-              {engine.name}
-            </div>
-            <StatusDot status={engine.status} showLabel />
+          <div>
+            <h1 className="text-[22px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+              AI Engines
+            </h1>
+            <p className="text-[13px] text-[#8B9299] mt-0.5">
+              {activeCount} active · {totalToday} actions today
+            </p>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="text-center">
-              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Total Handled</p>
-              <p className="text-[15px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.handledConversations.toLocaleString()}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Avg Response</p>
-              <p className="text-[15px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.avgResponseTime}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Errors (30d)</p>
-              <p className={cn('text-[15px] font-semibold', engine.errorCount > 3 ? 'text-[#0E1013]' : 'text-[#0E1013]')} style={{ fontFamily: "'Azeret Mono', monospace" }}>{engine.errorCount}</p>
-            </div>
-          </div>
+          <button className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium text-[#5C6370] bg-white border border-[#EDEEF1] hover:bg-[#F6F7F9] transition-colors">
+            <RefreshCw className="w-3.5 h-3.5" />
+            Sync PMS
+          </button>
         </div>
-        <p className="text-xs text-[#5C6370] mt-3">{engine.description}</p>
-      </div>
 
-      <Tabs tabs={engineDetailTabs} activeTab={activeTab} onChange={setActiveTab} className="px-6" />
-
-      <div className="p-6">
-        {activeTab === 'config' && (
-          <div className="space-y-6">
-            {config.sections.map(section => (
-              <div key={section.title}>
-                <h4 className="text-xs font-semibold text-[#8B9299] uppercase tracking-wider mb-3">{section.title}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {section.fields.map(field => (
-                    <div key={field.label} className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl px-4 py-3">
-                      <p className="text-[10px] text-[#8B9299] mb-0.5">{field.label}</p>
-                      <p className="text-sm font-medium text-[#0E1013]">{field.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+        {/* ── Guest Journey Timeline ── */}
+        <div className="bg-white rounded-2xl border border-[#EDEEF1] p-6">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider">Guest Journey Timeline</p>
+            <span className="text-[11px] text-[#8B9299]">Actions today per stage</span>
           </div>
-        )}
 
-        {activeTab === 'performance' && (
-          <div className="space-y-5">
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: 'Conversations', value: engine.handledConversations.toLocaleString(), icon: TrendingUp, color: 'text-[#2355A7] bg-[#EEF2FC]' },
-                { label: 'Resolution Rate', value: `${(engine.resolutionRate * 100).toFixed(1)}%`, icon: CheckCircle, color: 'text-[#2355A7] bg-[#EEF2FC]' },
-                { label: 'Avg Response', value: engine.avgResponseTime, icon: Clock, color: 'text-[#0E1013] bg-[#F6F7F9]' },
-                { label: 'Error Count', value: engine.errorCount.toString(), icon: XCircle, color: 'text-[#0E1013] bg-[#F6F7F9]' },
-              ].map(m => {
-                const Icon = m.icon;
+          {/* Timeline rail */}
+          <div className="relative">
+            {/* Connector line */}
+            <div className="absolute top-[22px] left-0 right-0 h-px bg-[#EDEEF1] z-0" />
+
+            <div className="relative z-10 grid grid-cols-7 gap-1">
+              {stageActions.map((stage, idx) => {
+                const heightPct = maxActions > 0 ? (stage.total / maxActions) : 0;
+                const barH = Math.max(4, Math.round(heightPct * 48));
                 return (
-                  <div key={m.label} className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-4">
-                    <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center mb-2', m.color)}>
-                      <Icon className="w-4 h-4" />
+                  <div key={stage.label} className="flex flex-col items-center gap-2">
+                    {/* Stage dot */}
+                    <div className={cn(
+                      'w-11 h-11 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all',
+                      stage.total > 0
+                        ? 'bg-[#EEF2FC] border-[#2355A7]'
+                        : 'bg-white border-[#E4E6EA]',
+                    )}>
+                      <span
+                        className={cn(
+                          'text-[13px] font-bold tabular-nums',
+                          stage.total > 0 ? 'text-[#2355A7]' : 'text-[#C4C8CF]',
+                        )}
+                        style={{ fontFamily: "'Azeret Mono', monospace" }}
+                      >
+                        {stage.total}
+                      </span>
                     </div>
-                    <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">{m.label}</p>
-                    <p
-                      className="text-[20px] font-semibold text-[#0E1013] tabular-nums leading-tight mt-0.5"
-                      style={{ fontFamily: "'Azeret Mono', monospace" }}
-                    >{m.value}</p>
+
+                    {/* Arrow connector (not last) */}
+                    {idx < STAGES.length - 1 && (
+                      <div className="absolute top-[14px] translate-x-[calc(50%+22px)] z-20 pointer-events-none" style={{ left: `${(100 / 7) * (idx + 1)}%`, transform: 'translateX(-50%)' }}>
+                        <ArrowRight className="w-3.5 h-3.5 text-[#D1CFCF]" />
+                      </div>
+                    )}
+
+                    {/* Bar */}
+                    <div className="w-full flex justify-center">
+                      <div
+                        className="w-6 rounded-t-sm transition-all"
+                        style={{
+                          height: `${barH}px`,
+                          background: stage.total > 0 ? `${ENGINE_COLORS[stage.engines[0]]}22` : '#F3F4F6',
+                          borderBottom: `2px solid ${stage.total > 0 ? ENGINE_COLORS[stage.engines[0]] : '#E4E6EA'}`,
+                        }}
+                      />
+                    </div>
+
+                    {/* Stage label */}
+                    <p className="text-[10px] font-medium text-[#8B9299] text-center leading-tight">{stage.short}</p>
+
+                    {/* Engine tags */}
+                    <div className="flex flex-col items-center gap-0.5">
+                      {stage.engines.map(name => (
+                        <span
+                          key={name}
+                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                          style={{
+                            background: `${ENGINE_COLORS[name]}18`,
+                            color: ENGINE_COLORS[name],
+                          }}
+                        >
+                          {name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 );
               })}
             </div>
-            <div>
-              <h4 className="text-xs font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Conversation Volume (12 days)</h4>
-              <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-4">
-                <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={conversationsTrend}>
-                    <defs>
-                      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2355A7" stopOpacity={0.12} />
-                        <stop offset="95%" stopColor="#2355A7" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#8B9299' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ background: '#fff', border: '1px solid #EDEEF1', borderRadius: '12px', fontSize: '12px' }} />
-                    <Area type="monotone" dataKey="value" stroke="#2355A7" fill="url(#grad)" strokeWidth={2} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+          </div>
+        </div>
+
+        {/* ── Engine status cards (compact) ── */}
+        <div className="grid grid-cols-7 gap-3">
+          {mockEngines.map(engine => {
+            const sc = STATUS_COLORS[engine.status] ?? STATUS_COLORS.inactive;
+            return (
+              <button
+                key={engine.id}
+                onClick={() => navigate(`/engines/${engine.name.toLowerCase()}`)}
+                className="bg-white rounded-xl border border-[#EDEEF1] p-3.5 text-left hover:border-[#2355A7] hover:shadow-[0_0_0_2px_#BED4F6/30] transition-all group"
+              >
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', sc.dot)} />
+                  <span className="text-[11px] font-semibold text-[#3D4550] truncate group-hover:text-[#2355A7] transition-colors">{engine.name}</span>
+                </div>
+                <p
+                  className="text-[20px] font-bold tabular-nums leading-none"
+                  style={{ fontFamily: "'Azeret Mono', monospace", color: ENGINE_COLORS[engine.name] }}
+                >
+                  {engine.actionsToday}
+                </p>
+                <p className="text-[9px] text-[#A0A6B0] mt-1 leading-tight">actions today</p>
+                {engine.lastError && (
+                  <div className="mt-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
+                    <span className="text-[9px] text-[#EF4444] truncate">Error</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Bottom row: PMS Sync + Action Log ── */}
+        <div className="grid grid-cols-[320px_1fr] gap-5">
+
+          {/* PMS Sync Status */}
+          <div className="bg-white rounded-2xl border border-[#EDEEF1] p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
+              <p className="text-[13px] font-semibold text-[#3D4550]">PMS Sync Status</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'Last sync',           value: '2 minutes ago',    icon: Clock,         ok: true  },
+                { label: 'Active reservations', value: '142',              icon: CheckCircle2,  ok: true  },
+                { label: 'Check-ins today',     value: '38 guests',        icon: CheckCircle2,  ok: true  },
+              ].map(item => (
+                <div key={item.label} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <item.icon className={cn('w-3.5 h-3.5 flex-shrink-0', item.ok ? 'text-[#16A34A]' : 'text-[#EF4444]')} />
+                    <span className="text-[12px] text-[#5C6370]">{item.label}</span>
+                  </div>
+                  <span className="text-[12px] font-semibold text-[#3D4550] tabular-nums">{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="pt-2 border-t border-[#F2F3F5]">
+              <p className="text-[10px] text-[#8B9299]">Connected to Cloudbeds PMS · Property: Grand Palace Hotel</p>
+            </div>
+          </div>
+
+          {/* Action Log */}
+          <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#EDEEF1] flex items-center justify-between">
+              <p className="text-[13px] font-semibold text-[#3D4550]">Action Log</p>
+              <span className="text-[11px] text-[#8B9299]">All engines · today</span>
+            </div>
+            <div className="divide-y divide-[#F2F3F5] max-h-[360px] overflow-y-auto">
+              {mockActivity.map(item => (
+                <div key={item.id} className="flex items-start gap-3.5 px-5 py-3.5 hover:bg-[#FAFAFA] transition-colors">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <ChannelIcon channel={item.channel} size="sm" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                        style={{
+                          background: `${ENGINE_COLORS[item.engineName] ?? '#8B9299'}18`,
+                          color: ENGINE_COLORS[item.engineName] ?? '#8B9299',
+                        }}
+                      >
+                        {item.engineName}
+                      </span>
+                      <span className="text-[12px] font-medium text-[#3D4550] truncate">{item.guestName}</span>
+                      {item.urgency === 'high' && (
+                        <span className="text-[9px] font-bold text-[#EF4444] bg-[#FEE2E2] px-1.5 py-0.5 rounded-full">URGENT</span>
+                      )}
+                      <span className="text-[10px] text-[#A0A6B0] ml-auto flex-shrink-0">{formatDateTime(item.timestamp)}</span>
+                    </div>
+                    <p className="text-[12px] text-[#5C6370]">{item.action}</p>
+                    <p className="text-[11px] text-[#A0A6B0] mt-0.5">{item.result}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Empty state (shown when no engines configured) ── */}
+        {mockEngines.length === 0 && (
+          <div className="bg-white rounded-2xl border border-dashed border-[#D1D5DB] flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#EEF2FC] flex items-center justify-center">
+              <Zap className="w-7 h-7 text-[#2355A7]" />
+            </div>
+            <div className="text-center">
+              <p className="text-[16px] font-semibold text-[#3D4550] mb-1">Налаштуйте свій перший AI Engine</p>
+              <p className="text-[13px] text-[#8B9299]">Виберіть Engine із панелі зліва, щоб почати налаштування</p>
             </div>
           </div>
         )}
 
-        {activeTab === 'log' && (
-          <div className="space-y-2">
-            {engineActions.length === 0 ? (
-              <p className="text-sm text-[#8B9299] text-center py-8">No recent actions for this engine.</p>
-            ) : engineActions.map(item => (
-              <div key={item.id} className="flex items-start gap-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-[#0E1013]">{item.guestName}</span>
-                    <span className="text-[10px] text-[#8B9299]">{formatDateTime(item.timestamp)}</span>
-                    {item.urgency === 'high' && (
-                      <Badge variant="dark" size="sm">Urgent</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-[#5C6370]">{item.action}</p>
-                  <p className="text-[10px] text-[#8B9299] mt-0.5">{item.result}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-    </div>
-  );
-}
-
-export function EnginesPage() {
-  const [selectedEngine, setSelectedEngine] = useState<AIEngine | null>(null);
-
-  return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
-      {/* Hero */}
-      <Card className="px-8 py-6">
-        <div>
-          <p className="text-[11px] font-medium text-[#8B9299] uppercase tracking-[0.22em] mb-3">7 operational engines</p>
-          <h1
-            className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
-            style={{ fontFamily: "'Azeret Mono', monospace" }}
-          >
-            AI Engines
-          </h1>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-4 gap-4">
-        {mockEngines.map(engine => (
-          <EngineCard
-            key={engine.id}
-            engine={engine}
-            isActive={selectedEngine?.id === engine.id}
-            onClick={() => setSelectedEngine(engine === selectedEngine ? null : engine)}
-          />
-        ))}
-      </div>
-
-      {selectedEngine && (
-        <EngineDetail engine={selectedEngine} />
-      )}
     </div>
   );
 }
