@@ -6,7 +6,7 @@ import { ToastContainer } from '../components/ui/Toast';
 
 export function AppLayout() {
   const location = useLocation();
-  const isInbox = location.pathname === '/' || location.pathname.startsWith('/inbox');
+  const isInbox = location.pathname === '/' || location.pathname.startsWith('/inbox') || location.pathname.startsWith('/guests');
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-brand-bg)' }}>

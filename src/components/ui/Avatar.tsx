@@ -21,7 +21,8 @@ const palettes = [
   'bg-[#D1CFCF] text-[#0E1013]',
   'bg-[#FFFFFF] text-[#0E1013] border border-[#EDEEF1]',
   'bg-[#F6F7F9] text-[#5C6370]',
-  'bg-[#0E1013] text-white',
+  // Avoid near-black avatars; keep the UI light.
+  'bg-[#F6F7F9] text-[#5C6370]',
 ];
 
 function hashName(name: string) {

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Search, Send, FileText, ArrowUpRight, CheckCircle, Phone, Mail, Plus, Star, Tag, ChevronDown, Filter,
   AlertTriangle, Settings2, Smile, Paperclip, Mic, Languages, MoreHorizontal, ArrowLeftRight,
+  User, BedDouble, Database, Zap, Activity, TrendingUp, PhoneCall,
 } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { ChannelIcon } from '../../components/ui/ChannelIcon';
@@ -48,7 +49,7 @@ const viewLabels: Record<InboxView, string> = {
 };
 
 const priorityBorder: Record<string, string> = {
-  urgent: 'border-l-[#0E1013]',
+  urgent: 'border-l-[#2355A7]',
   high:   'border-l-[#D1CFCF]',
   normal: 'border-l-transparent',
   low:    'border-l-transparent',
@@ -115,7 +116,7 @@ function ConvRow({ conv, isActive, onClick }: {
       onClick={onClick}
       className={cn(
         'w-full text-left px-4 pt-3.5 pb-3 border-b border-[#EDEEF1] hover:bg-[#F9F9F9] transition-colors border-l-4',
-        isActive ? 'bg-[#EEF2FC] border-l-[#2355A7]' : priorityBorder[conv.priority],
+        isActive ? 'bg-[#EEF2FC] border-l-[#2355A7]' : 'border-l-transparent',
       )}
     >
       <div className="flex items-start gap-2.5">
@@ -130,7 +131,7 @@ function ConvRow({ conv, isActive, onClick }: {
               </span>
               <span className={cn(
                 'text-[13px] truncate',
-                conv.unreadCount > 0 ? 'font-semibold text-[#0E1013]' : 'font-medium text-[#0E1013]',
+                conv.unreadCount > 0 ? 'font-semibold text-[#5C6370]' : 'font-medium text-[#5C6370]',
               )}>
                 {conv.guestName}
               </span>
@@ -148,7 +149,7 @@ function ConvRow({ conv, isActive, onClick }: {
 
             <div className="flex items-center gap-2 flex-shrink-0">
               {conv.status === 'escalated' && (
-                <span className="text-[10px] font-medium text-[#0E1013] bg-[#F6F7F9] px-2 py-0.5 rounded-full border border-[#EDEEF1]">
+                <span className="text-[10px] font-medium text-[#5C6370] bg-[#F6F7F9] px-2 py-0.5 rounded-full border border-[#EDEEF1]">
                   Escalated
                 </span>
               )}
@@ -422,6 +423,8 @@ export function InboxPage() {
   const [editableTags, setEditableTags] = useState<string[]>([]);
   const [editableNotes, setEditableNotes] = useState('');
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [guestProfileOpen, setGuestProfileOpen] = useState(false);
+  const [guestProfileTab, setGuestProfileTab] = useState('reservation');
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeQuery, setMergeQuery] = useState('');
 
@@ -654,7 +657,7 @@ export function InboxPage() {
             <div className="relative">
               <button
                 onClick={() => setViewsOpen(v => !v)}
-                className="h-8 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-medium text-[#0E1013] flex items-center gap-2 hover:bg-white transition-colors"
+                className="h-8 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-medium text-[#5C6370] flex items-center gap-2 hover:bg-white transition-colors"
               >
                 <span className="font-semibold uppercase tracking-[0.08em]">ALL</span>
                 <span className="text-[#8B9299] font-semibold tabular-nums">{counts.unread}</span>
@@ -672,7 +675,7 @@ export function InboxPage() {
                       onClick={() => { setViewsOpen(false); setParams(prev => { prev.set('view', v); return prev; }); }}
                       className={cn(
                         'w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12px] transition-colors',
-                        activeView === v ? 'bg-[#EEF2FC] text-[#0E1013]' : 'text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#0E1013]',
+                        activeView === v ? 'bg-[#EEF2FC] text-[#5C6370]' : 'text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#5C6370]',
                       )}
                     >
                       <span className="font-medium">{viewLabels[v]}</span>
@@ -689,7 +692,7 @@ export function InboxPage() {
                       onClick={() => { setViewsOpen(false); setParams(prev => { prev.set('view', v); return prev; }); }}
                       className={cn(
                         'w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12px] transition-colors',
-                        activeView === v ? 'bg-[#EEF2FC] text-[#0E1013]' : 'text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#0E1013]',
+                        activeView === v ? 'bg-[#EEF2FC] text-[#5C6370]' : 'text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#5C6370]',
                       )}
                     >
                       <span className="font-medium">{viewLabels[v]}</span>
@@ -830,7 +833,7 @@ export function InboxPage() {
                   <div className="relative">
                     <AlertTriangle className="w-4 h-4 text-[#0E1013]" />
                     {urgentCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#0E1013] text-white text-[9px] font-bold flex items-center justify-center tabular-nums">
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#2355A7] text-white text-[9px] font-bold flex items-center justify-center tabular-nums">
                         {urgentCount}
                       </span>
                     )}
@@ -933,10 +936,10 @@ export function InboxPage() {
               <div className="px-6 pt-5 pb-4 border-b border-[#EDEEF1] flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em] mb-1">Compose</p>
-                  <h3 className="text-[16px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>New conversation</h3>
+                  <h3 className="text-[16px] font-semibold text-[#5C6370]" style={{ fontFamily: "'Azeret Mono', monospace" }}>New conversation</h3>
                 </div>
                 <button
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors text-[18px] leading-none mt-0.5"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#5C6370] transition-colors text-[18px] leading-none mt-0.5"
                   onClick={() => { setNewConvOpen(false); setNewConvRecipient(''); setNewConvSubject(''); setNewConvGuestSearch(''); setNewConvGuestId(null); setNewConvMessage(''); }}
                 >×</button>
               </div>
@@ -975,12 +978,12 @@ export function InboxPage() {
                     <div className="flex items-center gap-3 p-3 bg-[#EEF2FC] border border-[#BED4F6] rounded-xl">
                       <Avatar name={selectedGuest.name} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-[#0E1013] truncate">{selectedGuest.name}</p>
+                        <p className="text-[13px] font-semibold text-[#5C6370] truncate">{selectedGuest.name}</p>
                         <p className="text-[11px] text-[#5C6370] truncate">{selectedGuest.email}</p>
                       </div>
                       <button
                         onClick={() => { setNewConvGuestId(null); setNewConvGuestSearch(''); }}
-                        className="text-[#8B9299] hover:text-[#0E1013] text-[16px] leading-none"
+                        className="text-[#8B9299] hover:text-[#5C6370] text-[16px] leading-none"
                       >×</button>
                     </div>
                   ) : (
@@ -990,7 +993,7 @@ export function InboxPage() {
                         value={newConvGuestSearch}
                         onChange={e => setNewConvGuestSearch(e.target.value)}
                         placeholder="Search guest by name or email…"
-                        className="w-full h-9 pl-9 pr-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
+                        className="w-full h-9 pl-9 pr-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#5C6370] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
                       />
                       {filteredGuests.length > 0 && (
                         <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-10 p-1.5 max-h-[160px] overflow-y-auto">
@@ -1002,7 +1005,7 @@ export function InboxPage() {
                             >
                               <Avatar name={g.name} size="sm" />
                               <div className="min-w-0">
-                                <p className="text-[12px] font-medium text-[#0E1013] truncate">{g.name}</p>
+                                <p className="text-[12px] font-medium text-[#5C6370] truncate">{g.name}</p>
                                 <p className="text-[11px] text-[#8B9299] truncate">{g.email}</p>
                               </div>
                             </button>
@@ -1023,7 +1026,7 @@ export function InboxPage() {
                         onChange={e => setNewConvRecipient(e.target.value)}
                         placeholder={recipientPh}
                         type={isEmail ? 'email' : 'text'}
-                        className="w-full h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#5C6370] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
                       />
                     </div>
 
@@ -1034,7 +1037,7 @@ export function InboxPage() {
                           value={newConvSubject}
                           onChange={e => setNewConvSubject(e.target.value)}
                           placeholder="E.g. Your upcoming stay at Grand Suites"
-                          className="w-full h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
+                          className="w-full h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#5C6370] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
                         />
                       </div>
                     )}
@@ -1091,6 +1094,409 @@ export function InboxPage() {
         );
       })()}
 
+      {/* ── Guest full profile modal ── */}
+      {guestProfileOpen && guest && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <button className="absolute inset-0 bg-[#0E1013]/40 backdrop-blur-[2px]" onClick={() => setGuestProfileOpen(false)} aria-label="Close" />
+          <div className="relative w-[880px] h-[640px] flex bg-white border border-[#EDEEF1] rounded-2xl shadow-panel overflow-hidden">
+
+            {/* ── LEFT SIDEBAR ── */}
+            <div className="w-[220px] flex-shrink-0 bg-[#F9F9F9] border-r border-[#EDEEF1] flex flex-col">
+
+              {/* Identity block */}
+              <div className="px-5 pt-6 pb-5 border-b border-[#EDEEF1]">
+                <div className="flex flex-col items-center text-center gap-2">
+                  <Avatar name={guest.name} size="lg" />
+                  <div>
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      <h2 className="text-[14px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.name}</h2>
+                      {guest.tags.includes('VIP') && (
+                        <span className="text-[9px] font-bold tracking-wider text-[#2355A7] bg-[#EEF2FC] px-1.5 py-0.5 rounded">VIP</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-[#8B9299] mt-0.5">{guest.nationality} · {guest.language.toUpperCase()}</p>
+                    <p className="text-[11px] text-[#8B9299]">{guest.source}</p>
+                  </div>
+                </div>
+
+                {/* Key stats */}
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5">
+                    <p className="text-[10px] text-[#8B9299] mb-0.5">Stays</p>
+                    <p className="text-[18px] font-semibold text-[#2355A7] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
+                  </div>
+                  <div className="bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5">
+                    <p className="text-[10px] text-[#8B9299] mb-0.5">LTV</p>
+                    <p className="text-[13px] font-semibold text-[#2355A7] tabular-nums leading-tight mt-0.5" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
+                  </div>
+                </div>
+                {guest.satisfactionScore && (
+                  <div className="mt-2 bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5 flex items-center justify-between">
+                    <p className="text-[10px] text-[#8B9299]">Rating</p>
+                    <div className="flex items-center gap-0.5">
+                      {[1,2,3,4,5].map(i => (
+                        <Star key={i} className={cn('w-3 h-3', i <= (guest.satisfactionScore ?? 0) ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Nav items */}
+              <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+                {[
+                  { id: 'reservation', label: 'Reservation', icon: BedDouble },
+                  { id: 'pms',         label: 'PMS',         icon: Database  },
+                  { id: 'log',         label: 'Engine log',  icon: Zap       },
+                  { id: 'signals',     label: 'Signals',     icon: TrendingUp},
+                  { id: 'calls',       label: 'Calls',       icon: PhoneCall },
+                  { id: 'tags',        label: 'Tags & notes',icon: Tag       },
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setGuestProfileTab(id)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-colors text-[13px] font-medium',
+                      guestProfileTab === id
+                        ? 'bg-[#EEF2FC] text-[#2355A7]'
+                        : 'text-[#5C6370] hover:bg-white hover:text-[#3D4550]',
+                    )}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    {label}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Contact footer */}
+              <div className="px-4 py-4 border-t border-[#EDEEF1] space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-[#8B9299] flex-shrink-0" />
+                  <span className="text-[11px] text-[#5C6370] truncate">{guest.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-[#8B9299] flex-shrink-0" />
+                  <span className="text-[11px] text-[#5C6370]">{guest.phone}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── RIGHT CONTENT ── */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+
+              {/* Content header */}
+              <div className="px-6 py-4 border-b border-[#EDEEF1] flex items-center justify-between flex-shrink-0">
+                <p className="text-[13px] font-semibold text-[#2355A7]">
+                  {guestProfileTab === 'reservation' && 'Reservation'}
+                  {guestProfileTab === 'pms' && 'PMS History'}
+                  {guestProfileTab === 'log' && 'Engine Log'}
+                  {guestProfileTab === 'signals' && 'Signals'}
+                  {guestProfileTab === 'calls' && 'Calls'}
+                  {guestProfileTab === 'tags' && 'Tags & Notes'}
+                </p>
+                <button
+                  onClick={() => setGuestProfileOpen(false)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#3D4550] transition-colors text-[16px] leading-none"
+                >×</button>
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto p-6">
+
+                {/* RESERVATION */}
+                {guestProfileTab === 'reservation' && (
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Current reservation</p>
+                      {reservation ? (
+                        <div className="space-y-0">
+                          {[
+                            ['Booking ref',  reservation.bookingRef],
+                            ['Room',         `${reservation.roomType} · #${reservation.roomNumber}`],
+                            ['Check-in',     formatDate(reservation.checkIn)],
+                            ['Check-out',    formatDate(reservation.checkOut)],
+                            ['Rate code',    reservation.rateCode],
+                            ['Rate / night', formatCurrency(reservation.ratePerNight)],
+                            ['Total',        formatCurrency(reservation.totalAmount)],
+                            ['Adults',       String(reservation.adults)],
+                            ['Channel',      reservation.channel],
+                            ['Status',       reservation.status],
+                          ].map(([label, val]) => (
+                            <div key={label} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
+                              <span className="text-[12px] text-[#8B9299]">{label}</span>
+                              <span className="text-[12px] font-medium text-[#3D4550]">{val}</span>
+                            </div>
+                          ))}
+                          {reservation.specialRequests.length > 0 && (
+                            <div className="pt-3">
+                              <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Special requests</p>
+                              {reservation.specialRequests.map(r => (
+                                <p key={r} className="text-[12px] text-[#5C6370] py-0.5 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#BED4F6] flex-shrink-0" />{r}</p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[13px] text-[#8B9299]">No active reservation.</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Guest details</p>
+                      {[
+                        ['Preferred channel', channelLabels[guest.preferredChannel]],
+                        ['Source', guest.source],
+                        ['Status', guest.status],
+                        ['Last stay', guest.lastStayAt ? formatDate(guest.lastStayAt) : '—'],
+                        ['Upcoming stay', guest.upcomingStayAt ? formatDate(guest.upcomingStayAt) : '—'],
+                      ].map(([label, val]) => (
+                        <div key={label} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
+                          <span className="text-[12px] text-[#8B9299]">{label}</span>
+                          <span className="text-[12px] font-medium text-[#3D4550] capitalize">{val}</span>
+                        </div>
+                      ))}
+                      {guest.companions.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Companions</p>
+                          {guest.companions.map(c => (
+                            <p key={c} className="text-[12px] text-[#5C6370] py-0.5 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#BED4F6] flex-shrink-0" />{c}</p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* PMS */}
+                {guestProfileTab === 'pms' && (
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Past visits</p>
+                      {[
+                        { date: '12 Mar 2025', room: 'Junior Suite', nights: 3, spend: 1840 },
+                        { date: '5 Aug 2024',  room: 'Deluxe Room',  nights: 2, spend: 920  },
+                        { date: '20 Dec 2023', room: 'Grand Suite',  nights: 5, spend: 4200 },
+                        { date: '3 Jun 2023',  room: 'Classic Room', nights: 1, spend: 310  },
+                        { date: '18 Jan 2023', room: 'Deluxe Room',  nights: 4, spend: 1280 },
+                      ].map((v, i) => (
+                        <div key={i} className="flex justify-between items-center py-2.5 border-b border-[#F4F5F7] last:border-0">
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#3D4550]">{v.room}</p>
+                            <p className="text-[11px] text-[#8B9299] mt-0.5">{v.date} · {v.nights} nights</p>
+                          </div>
+                          <p className="text-[12px] font-semibold text-[#2355A7]">{formatCurrency(v.spend)}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Preferences</p>
+                      {['High floor room', 'Hypoallergenic bedding', 'Late check-out', 'Extra pillows', 'Quiet room', 'Twin beds', 'Non-smoking floor'].map(p => (
+                        <div key={p} className="flex items-center gap-2 py-2 border-b border-[#F4F5F7] last:border-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#BED4F6] flex-shrink-0" />
+                          <p className="text-[12px] text-[#5C6370]">{p}</p>
+                        </div>
+                      ))}
+                      <div className="mt-5 p-4 bg-[#EEF2FC] rounded-xl">
+                        <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-1">Total spend</p>
+                        <p className="text-[22px] font-semibold text-[#2355A7]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
+                        <p className="text-[11px] text-[#5C6370] mt-0.5">across {guest.totalVisits} visits</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* LOG */}
+                {guestProfileTab === 'log' && (
+                  <div className="space-y-0">
+                    {[
+                      { engine: 'Upsell',      action: 'Dinner package offered',           result: 'Accepted',  time: '21 Apr 2026, 11:15', detail: 'Le Jardin, table for 2, 20:00' },
+                      { engine: 'Arrival',     action: 'Pre-arrival message sent',         result: 'Delivered', time: '20 Apr 2026, 09:00', detail: 'WhatsApp · Read at 09:14' },
+                      { engine: 'Conversion',  action: 'Rate plan comparison sent',        result: 'Opened',    time: '18 Apr 2026, 14:32', detail: 'Email click · 3 min dwell' },
+                      { engine: 'Reputation',  action: 'Review request triggered',         result: 'Pending',   time: '15 Apr 2026, 18:00', detail: 'Scheduled post-checkout' },
+                      { engine: 'Concierge',   action: 'Restaurant recommendation sent',   result: 'Clicked',   time: '14 Apr 2026, 12:44', detail: 'Le Jardin link clicked' },
+                      { engine: 'Upsell',      action: 'Spa package offered',              result: 'Ignored',   time: '13 Apr 2026, 10:30', detail: 'No response after 48h' },
+                      { engine: 'Reservation', action: 'Booking confirmation sent',        result: 'Delivered', time: '10 Apr 2026, 08:00', detail: 'Email + WhatsApp' },
+                    ].map((entry, i) => (
+                      <div key={i} className="flex gap-4 py-3 border-b border-[#F4F5F7] last:border-0">
+                        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div className="w-2 h-2 rounded-full bg-[#2355A7] mt-1" />
+                          {i < 6 && <div className="w-px flex-1 bg-[#EDEEF1]" />}
+                        </div>
+                        <div className="flex-1 min-w-0 pb-1">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[12px] font-semibold text-[#3D4550]">{entry.engine}</span>
+                              <span className={cn(
+                                'text-[10px] font-medium px-1.5 py-0.5 rounded-md',
+                                entry.result === 'Accepted' || entry.result === 'Clicked' ? 'bg-[#EEF2FC] text-[#2355A7]' :
+                                entry.result === 'Delivered' || entry.result === 'Opened' ? 'bg-[#F6F7F9] text-[#5C6370]' :
+                                'bg-[#F6F7F9] text-[#C4C8CF]'
+                              )}>{entry.result}</span>
+                            </div>
+                            <span className="text-[11px] text-[#C4C8CF] flex-shrink-0">{entry.time}</span>
+                          </div>
+                          <p className="text-[12px] text-[#5C6370]">{entry.action}</p>
+                          <p className="text-[11px] text-[#8B9299] mt-0.5">{entry.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* SIGNALS */}
+                {guestProfileTab === 'signals' && (
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Satisfaction history</p>
+                      {[
+                        { date: '21 Apr 2026', score: 5, note: 'Loved the champagne welcome and room setup' },
+                        { date: '12 Mar 2025', score: 4, note: 'Slight delay at check-in, otherwise excellent' },
+                        { date: '5 Aug 2024',  score: 3, note: 'Noise from adjacent room disrupted sleep' },
+                        { date: '3 Jun 2023',  score: 5, note: 'Perfect anniversary stay' },
+                      ].map((s, i) => (
+                        <div key={i} className="py-3 border-b border-[#F4F5F7] last:border-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex gap-0.5">
+                              {[1,2,3,4,5].map(j => (
+                                <Star key={j} className={cn('w-3.5 h-3.5', j <= s.score ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
+                              ))}
+                            </div>
+                            <span className="text-[11px] text-[#8B9299]">{s.date}</span>
+                          </div>
+                          <p className="text-[12px] text-[#5C6370]">{s.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Sentiment tags</p>
+                      <div className="flex flex-wrap gap-1.5 mb-5">
+                        {['Loyal', 'Anniversary stay', 'High spender', 'Promo-sensitive', 'Quiet preference', 'Romance traveller'].map(tag => (
+                          <span key={tag} className="text-[11px] text-[#2355A7] bg-[#EEF2FC] px-2.5 py-1 rounded-full">{tag}</span>
+                        ))}
+                      </div>
+                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Complaints</p>
+                      <div className="space-y-2">
+                        {[
+                          { date: '5 Aug 2024', text: 'Noise from adjacent room', resolved: true },
+                          { date: '12 Mar 2025', text: 'Check-in wait time exceeded 15 min', resolved: true },
+                        ].map((c, i) => (
+                          <div key={i} className="p-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-[11px] text-[#8B9299]">{c.date}</span>
+                              <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-md', c.resolved ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#8B9299]')}>
+                                {c.resolved ? 'Resolved' : 'Open'}
+                              </span>
+                            </div>
+                            <p className="text-[12px] text-[#5C6370]">{c.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CALLS */}
+                {guestProfileTab === 'calls' && (
+                  <div className="space-y-0">
+                    {[
+                      { dir: 'in',  duration: '3m 42s', date: '21 Apr 2026, 10:30', agent: 'Elena K.',  status: 'answered', topic: 'Rose petals & dinner reservation' },
+                      { dir: 'out', duration: '1m 15s', date: '20 Apr 2026, 14:00', agent: 'Sophie M.', status: 'answered', topic: 'Check-in time confirmation' },
+                      { dir: 'in',  duration: '—',      date: '18 Apr 2026, 09:22', agent: '—',          status: 'missed',   topic: '' },
+                      { dir: 'out', duration: '5m 08s', date: '15 Apr 2026, 16:45', agent: 'Elena K.',  status: 'answered', topic: 'Booking modification' },
+                      { dir: 'in',  duration: '2m 30s', date: '10 Apr 2026, 11:00', agent: 'Sophie M.', status: 'answered', topic: 'Welcome call' },
+                    ].map((call, i) => (
+                      <div key={i} className="flex gap-4 py-3.5 border-b border-[#F4F5F7] last:border-0">
+                        <div className={cn(
+                          'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold',
+                          call.dir === 'in' ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#5C6370]',
+                        )}>
+                          {call.dir === 'in' ? '↙' : '↗'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[12px] font-semibold text-[#3D4550]">{call.dir === 'in' ? 'Inbound' : 'Outbound'} · {call.duration}</p>
+                            <span className="text-[11px] text-[#8B9299] flex-shrink-0">{call.date}</span>
+                          </div>
+                          {call.topic && <p className="text-[12px] text-[#5C6370] mt-0.5">{call.topic}</p>}
+                          <div className="flex items-center gap-3 mt-1.5">
+                            {call.agent !== '—' && <span className="text-[11px] text-[#8B9299]">Agent: {call.agent}</span>}
+                            {call.status === 'answered' && (
+                              <>
+                                <button className="text-[11px] font-medium text-[#2355A7] hover:underline">▶ Listen</button>
+                                <button className="text-[11px] font-medium text-[#2355A7] hover:underline">Transcript</button>
+                              </>
+                            )}
+                            {call.status === 'missed' && <span className="text-[11px] text-[#8B9299] bg-[#F6F7F9] px-2 py-0.5 rounded-md">Missed</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* TAGS */}
+                {guestProfileTab === 'tags' && (() => {
+                  const suggested = ['VIP', 'Returning', 'Loyal', 'Anniversary', 'High spender', 'Corporate', 'Group booking', 'Long stay', 'Early bird', 'Promo-sensitive', 'Quiet preference', 'Late checkout'];
+                  const addTag = (t: string) => {
+                    const tag = t.trim();
+                    if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
+                    setNewTagInput('');
+                  };
+                  return (
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Active tags</p>
+                          <div className="flex flex-wrap gap-1.5 min-h-[40px]">
+                            {editableTags.length > 0 ? editableTags.map(tag => (
+                              <span key={tag} className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#2355A7] bg-[#EEF2FC] pl-3 pr-1.5 py-1 rounded-full">
+                                {tag}
+                                <button onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
+                                  className="w-4 h-4 flex items-center justify-center text-[#2355A7]/50 hover:text-[#2355A7] transition-colors rounded-full hover:bg-[#BED4F6]/40">×</button>
+                              </span>
+                            )) : <p className="text-[13px] text-[#C4C8CF] italic">No tags yet.</p>}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Add tag</p>
+                          <div className="flex gap-2">
+                            <input value={newTagInput} onChange={e => setNewTagInput(e.target.value)}
+                              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ',') && newTagInput.trim()) { e.preventDefault(); addTag(newTagInput.replace(/,$/, '')); } }}
+                              placeholder="Type and press Enter…"
+                              className="flex-1 h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#3D4550] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white" />
+                            <button onClick={() => addTag(newTagInput)} disabled={!newTagInput.trim()}
+                              className="h-9 px-4 rounded-xl bg-[#2355A7] text-white text-[12px] font-semibold disabled:opacity-30 hover:bg-[#1c4490] transition-colors">Add</button>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Suggestions</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {suggested.filter(t => !editableTags.includes(t)).map(tag => (
+                              <button key={tag} onClick={() => addTag(tag)}
+                                className="text-[12px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-dashed border-[#EDEEF1] px-3 py-1 rounded-full hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#EEF2FC] transition-colors">
+                                + {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider">Notes</p>
+                        <textarea value={editableNotes} onChange={e => setEditableNotes(e.target.value)}
+                          rows={10} placeholder="Add a note about this guest…"
+                          className="w-full resize-none text-[13px] text-[#3D4550] rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] px-4 py-3 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed" />
+                        <button onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
+                          className="w-full h-9 rounded-xl bg-[#2355A7] text-white text-[12px] font-semibold hover:bg-[#1c4490] transition-colors">Save notes</button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Center: thread ── */}
       <div className="flex-1 flex flex-col overflow-hidden bg-[#F9F9F9]">
         {/* Thread header */}
@@ -1102,11 +1508,11 @@ export function InboxPage() {
           <div className="relative">
             <button
               onClick={() => setAssigneeOpen(v => !v)}
-              className="h-8 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-medium text-[#0E1013] flex items-center gap-2 hover:bg-white transition-colors"
+              className="h-8 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-medium text-[#5C6370] flex items-center gap-2 hover:bg-white transition-colors"
               title="Department / employee"
             >
               <span className="text-[#8B9299]">{assignee?.department ?? 'Unassigned'}</span>
-              <span className="text-[#0E1013] font-semibold">{assignee?.name?.split(' ')[0] ?? '—'}</span>
+              <span className="text-[#5C6370] font-semibold">{assignee?.name?.split(' ')[0] ?? '—'}</span>
               <ChevronDown className="w-3.5 h-3.5 text-[#8B9299]" />
             </button>
             {assigneeOpen && (
@@ -1127,7 +1533,7 @@ export function InboxPage() {
                         }}
                         className="w-full px-2.5 py-2 rounded-lg hover:bg-[#F6F7F9] transition-colors flex items-center justify-between text-[12px]"
                       >
-                        <span className="font-medium text-[#0E1013]">{u.name}</span>
+                        <span className="font-medium text-[#5C6370]">{u.name}</span>
                         <span className="text-[#8B9299]">{u.role}</span>
                       </button>
                     ))}
@@ -1136,7 +1542,7 @@ export function InboxPage() {
                 <div className="my-1 h-px bg-[#EDEEF1]" />
                 <button
                   onClick={() => { setAssigneeOpen(false); setActiveConv(prev => ({ ...prev, assignedTo: null })); }}
-                  className="w-full px-2.5 py-2 rounded-lg hover:bg-[#F6F7F9] transition-colors text-left text-[12px] font-medium text-[#0E1013]"
+                  className="w-full px-2.5 py-2 rounded-lg hover:bg-[#F6F7F9] transition-colors text-left text-[12px] font-medium text-[#5C6370]"
                 >
                   Unassign
                 </button>
@@ -1181,32 +1587,51 @@ export function InboxPage() {
           {/* Separator */}
           <div className="w-px h-5 bg-[#EDEEF1] mx-1" />
 
-          {/* Inline action buttons — previously in ··· menu */}
+          {/* ── Group 1: Guest actions ── */}
           <button
-            className="h-8 px-3 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'info', title: 'Draft booking created' })}
-            title="New Booking"
+            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+            onClick={() => addToast({ type: 'info', title: 'Booking flow opened' })}
+            title="Create / edit booking"
           >
             <Plus className="w-3.5 h-3.5" /> Booking
           </button>
           <button
-            className="h-8 px-3 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
             onClick={() => addToast({ type: 'success', title: 'Upsell sent' })}
-            title="Send Upsell"
+            title="Send upsell offer"
           >
             <Star className="w-3.5 h-3.5" /> Upsell
           </button>
           <button
-            className="h-8 px-3 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'warning', title: 'Escalated' })}
-            title="Escalate"
+            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+            onClick={() => addToast({ type: 'info', title: 'Online check-in initiated' })}
+            title="Online check-in"
+          >
+            <CheckCircle className="w-3.5 h-3.5" /> Check-in
+          </button>
+          <button
+            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+            onClick={() => addToast({ type: 'info', title: 'Feedback request sent' })}
+            title="Request guest feedback"
+          >
+            <FileText className="w-3.5 h-3.5" /> Feedback
+          </button>
+
+          {/* ── Separator ── */}
+          <div className="w-px h-5 bg-[#EDEEF1] mx-1" />
+
+          {/* ── Group 2: Conversation actions ── */}
+          <button
+            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+            onClick={() => addToast({ type: 'warning', title: 'Conversation escalated' })}
+            title="Escalate conversation"
           >
             <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
           </button>
           <button
-            className="h-8 px-3 rounded-lg text-[12px] font-medium text-[#2355A7] flex items-center gap-1.5 hover:bg-[#EEF2FC] transition-colors"
-            onClick={() => addToast({ type: 'success', title: 'Resolved' })}
-            title="Resolve"
+            className="h-8 px-3 rounded-lg text-[12px] font-semibold text-white bg-[#2355A7] flex items-center gap-1.5 hover:bg-[#1f4b93] transition-colors"
+            onClick={() => addToast({ type: 'success', title: 'Conversation resolved' })}
+            title="Mark as resolved"
           >
             <CheckCircle className="w-3.5 h-3.5" /> Resolve
           </button>
@@ -1298,20 +1723,7 @@ export function InboxPage() {
 
               <button
                 type="button"
-                onClick={() => setIsInternal(false)}
-                className={cn(
-                  'flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium transition-colors',
-                  !isInternal
-                    ? 'bg-[#0E1013] text-white'
-                    : 'text-[#8B9299] hover:text-[#5C6370] hover:bg-[#F6F7F9]',
-                )}
-              >
-                <Send className="w-3 h-3" /> Reply
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsInternal(true)}
+                onClick={() => setIsInternal(v => !v)}
                 className={cn(
                   'flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium transition-colors',
                   isInternal
@@ -1492,12 +1904,12 @@ export function InboxPage() {
                       value={templateSearch}
                       onChange={e => setTemplateSearch(e.target.value)}
                       placeholder="Search templates…"
-                      className="w-full h-8 pl-8 pr-3 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[12px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                      className="w-full h-8 pl-8 pr-3 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[12px] text-[#5C6370] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
                     />
                   </div>
                   <button
                     onClick={() => { setTemplatesOpen(false); setTemplateSearch(''); setTemplateCategory('All'); }}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors text-[16px] leading-none"
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#5C6370] transition-colors text-[16px] leading-none"
                   >×</button>
                 </div>
 
@@ -1510,7 +1922,7 @@ export function InboxPage() {
                       className={cn(
                         'flex-shrink-0 h-6 px-2.5 rounded-full text-[11px] font-medium transition-colors',
                         templateCategory === cat
-                          ? 'bg-[#0E1013] text-white'
+                          ? 'bg-[#2355A7] text-white'
                           : 'bg-[#F6F7F9] text-[#5C6370] hover:bg-[#EDEEF1]',
                       )}
                     >{cat}</button>
@@ -1534,7 +1946,7 @@ export function InboxPage() {
                       className="w-full text-left px-4 py-2.5 hover:bg-[#F6F7F9] transition-colors group"
                     >
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[12px] font-semibold text-[#0E1013] group-hover:text-[#2355A7] transition-colors">{t.title}</span>
+                        <span className="text-[12px] font-semibold text-[#5C6370] group-hover:text-[#2355A7] transition-colors">{t.title}</span>
                         <span className="text-[10px] font-medium text-[#8B9299] bg-[#F6F7F9] border border-[#EDEEF1] px-1.5 py-0.5 rounded-md">{t.category}</span>
                       </div>
                       <p className="text-[11px] text-[#8B9299] leading-snug line-clamp-1">{t.body}</p>
@@ -1552,7 +1964,7 @@ export function InboxPage() {
                 onClick={() => setTemplatesOpen(v => !v)}
                 className={cn(
                   'flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[11px] font-medium transition-colors',
-                  templatesOpen ? 'bg-[#0E1013] text-white' : 'text-[#8B9299] hover:text-[#5C6370] hover:bg-[#F6F7F9]',
+                  templatesOpen ? 'bg-[#2355A7] text-white' : 'text-[#8B9299] hover:text-[#5C6370] hover:bg-[#F6F7F9]',
                 )}
               >
                 <FileText className="w-3.5 h-3.5" /> Templates
@@ -1592,9 +2004,9 @@ export function InboxPage() {
                   <Avatar name={guest.name} size="md" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="text-[13px] font-semibold text-[#0E1013] truncate leading-tight">{guest.name}</h3>
+                      <h3 className="text-[13px] font-semibold text-[#5C6370] truncate leading-tight">{guest.name}</h3>
                       {guest.tags.includes('VIP') && (
-                        <span className="text-[9px] font-bold tracking-wider text-white bg-[#0E1013] px-1.5 py-0.5 rounded">VIP</span>
+                        <span className="text-[9px] font-bold tracking-wider text-white bg-[#2355A7] px-1.5 py-0.5 rounded">VIP</span>
                       )}
                     </div>
                     <p className="text-[11px] text-[#8B9299] mt-0.5">{guest.nationality} · {guest.language.toUpperCase()}</p>
@@ -1604,21 +2016,37 @@ export function InboxPage() {
                 <div className="relative flex-shrink-0">
                   <button
                     onClick={() => setProfileMenuOpen(v => !v)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#5C6370] transition-colors"
                     title="More"
                   >
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                   {profileMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-[180px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-1.5">
-                      <button
-                        className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors"
-                        onClick={() => { setProfileMenuOpen(false); addToast({ type: 'info', title: 'Blocked', message: `${guest.name} blocked` }); }}
-                      >Block guest</button>
-                      <button
-                        className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors"
-                        onClick={() => { setProfileMenuOpen(false); setMergeOpen(true); }}
-                      >Merge profiles…</button>
+                    <div className="absolute right-0 mt-1 w-[200px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-1.5">
+                      <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Guest</p>
+                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
+                        onClick={() => { setProfileMenuOpen(false); setMergeOpen(true); }}>
+                        <ArrowLeftRight className="w-3.5 h-3.5 text-[#8B9299]" /> Merge profiles…
+                      </button>
+                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
+                        onClick={() => { setProfileMenuOpen(false); setGuestProfileOpen(true); }}>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-[#8B9299]" /> Open full profile
+                      </button>
+                      <div className="my-1 h-px bg-[#EDEEF1]" />
+                      <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Conversation</p>
+                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
+                        onClick={() => { setProfileMenuOpen(false); addToast({ type: 'info', title: 'Chat exported' }); }}>
+                        <FileText className="w-3.5 h-3.5 text-[#8B9299]" /> Export chat
+                      </button>
+                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
+                        onClick={() => { setProfileMenuOpen(false); addToast({ type: 'info', title: 'Notifications muted' }); }}>
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#8B9299]" /> Mute notifications
+                      </button>
+                      <div className="my-1 h-px bg-[#EDEEF1]" />
+                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
+                        onClick={() => { setProfileMenuOpen(false); addToast({ type: 'info', title: 'Blocked', message: `${guest.name} blocked` }); }}>
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#8B9299]" /> Block guest
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1632,7 +2060,7 @@ export function InboxPage() {
                     value={mergeQuery}
                     onChange={e => setMergeQuery(e.target.value)}
                     placeholder="Enter guest ID…"
-                    className="w-full h-8 px-3 rounded-lg border border-[#EDEEF1] bg-white text-[12px] text-[#0E1013] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                    className="w-full h-8 px-3 rounded-lg border border-[#EDEEF1] bg-white text-[12px] text-[#5C6370] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
                   />
                   <div className="flex gap-2 mt-2">
                     <Button size="xs" variant="outline" onClick={() => { setMergeOpen(false); setMergeQuery(''); }}>Cancel</Button>
@@ -1647,12 +2075,12 @@ export function InboxPage() {
               <div className="mt-3 flex items-stretch gap-0 divide-x divide-[#EDEEF1]">
                 <div className="flex-1 pr-3">
                   <p className="text-[10px] text-[#8B9299]">Stays</p>
-                  <p className="text-[20px] font-semibold text-[#0E1013] tabular-nums leading-tight mt-0.5"
+                  <p className="text-[20px] font-semibold text-[#5C6370] tabular-nums leading-tight mt-0.5"
                     style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
                 </div>
                 <div className="flex-1 px-3">
                   <p className="text-[10px] text-[#8B9299]">Lifetime value</p>
-                  <p className="text-[13px] font-semibold text-[#0E1013] tabular-nums leading-tight mt-0.5"
+                  <p className="text-[13px] font-semibold text-[#5C6370] tabular-nums leading-tight mt-0.5"
                     style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
                 </div>
                 {guest.satisfactionScore && (
@@ -1669,31 +2097,47 @@ export function InboxPage() {
               </div>
             </div>
 
-            {/* ── Tabs (9, scrollable) ── */}
-            <div className="flex overflow-x-auto scrollbar-none border-b border-[#EDEEF1]">
-              {[
-                { id: 'info',     label: 'Info' },
-                { id: 'stay',     label: 'Stay' },
-                { id: 'pms',      label: 'PMS' },
-                { id: 'actions',  label: 'Actions' },
-                { id: 'log',      label: 'Log' },
-                { id: 'signals',  label: 'Signals' },
-                { id: 'props',    label: 'Props' },
-                { id: 'calls',    label: 'Calls' },
-                { id: 'tags',     label: 'Tags' },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setProfileTab(tab.id)}
-                  className={cn(
-                    'flex-shrink-0 px-3 py-2.5 text-[11px] font-medium transition-colors border-b-2 -mb-px',
-                    profileTab === tab.id
-                      ? 'text-[#2355A7] border-[#2355A7]'
-                      : 'text-[#8B9299] border-transparent hover:text-[#0E1013]',
-                  )}
-                >{tab.label}</button>
-              ))}
-            </div>
+            {/* ── Icon tabs — 9 items, evenly distributed ── */}
+            {(() => {
+              const tabs = [
+                { id: 'info',    label: 'Info',     icon: User      },
+                { id: 'stay',    label: 'Stay',     icon: BedDouble },
+                { id: 'calls',   label: 'Calls',    icon: PhoneCall },
+                { id: 'tags',    label: 'Tags',     icon: Tag       },
+              ];
+              const active = tabs.find(t => t.id === profileTab);
+              return (
+                <>
+                  <div className="flex border-b border-[#EDEEF1] px-1 py-1.5 gap-0.5">
+                    {tabs.map(({ id, label, icon: Icon }) => {
+                      const isActive = profileTab === id;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => setProfileTab(id)}
+                          title={label}
+                          className={cn(
+                            'flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg transition-colors',
+                            isActive
+                              ? 'bg-[#EEF2FC] text-[#2355A7]'
+                              : 'text-[#C4C8CF] hover:text-[#5C6370] hover:bg-[#F6F7F9]',
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          <span className={cn('text-[8px] font-semibold leading-none', isActive ? 'text-[#2355A7]' : 'text-[#C4C8CF]')}>
+                            {label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Active section label */}
+                  <div className="px-4 pt-3 pb-0">
+                    <p className="text-[11px] font-semibold text-[#0E1013]">{active?.label}</p>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* ── Tab content ── */}
             <div className="p-4 space-y-4">
@@ -1746,7 +2190,7 @@ export function InboxPage() {
                   ].map(([label, val]) => (
                     <div key={label} className="flex justify-between items-baseline py-1.5 border-b border-[#F4F5F7] last:border-0">
                       <span className="text-[11px] text-[#8B9299]">{label}</span>
-                      <span className="text-[12px] font-medium text-[#0E1013] text-right max-w-[150px] truncate">{val}</span>
+                      <span className="text-[12px] font-medium text-[#5C6370] text-right max-w-[150px] truncate">{val}</span>
                     </div>
                   ))}
                   {reservation.specialRequests.length > 0 && (
@@ -1761,144 +2205,6 @@ export function InboxPage() {
               )}
               {profileTab === 'stay' && !reservation && (
                 <p className="text-[12px] text-[#8B9299]">No active reservation.</p>
-              )}
-
-              {/* PMS */}
-              {profileTab === 'pms' && (
-                <>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2.5">Past visits</p>
-                    {[
-                      { date: '12 Mar 2025', room: 'Junior Suite', nights: 3, spend: 1840 },
-                      { date: '5 Aug 2024',  room: 'Deluxe Room',  nights: 2, spend: 920  },
-                      { date: '20 Dec 2023', room: 'Grand Suite',  nights: 5, spend: 4200 },
-                    ].map((v, i) => (
-                      <div key={i} className="flex gap-2.5 py-2 border-b border-[#F4F5F7] last:border-0">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex justify-between items-center">
-                            <p className="text-[11px] font-semibold text-[#0E1013]">{v.room}</p>
-                            <p className="text-[11px] font-semibold text-[#0E1013]">{formatCurrency(v.spend)}</p>
-                          </div>
-                          <p className="text-[10px] text-[#8B9299] mt-0.5">{v.date} · {v.nights} nights</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Preferences</p>
-                    {['High floor room', 'Hypoallergenic bedding', 'Late check-out', 'Extra pillows', 'Quiet room'].map(p => (
-                      <p key={p} className="text-[12px] text-[#5C6370] py-0.5">· {p}</p>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* ACTIONS */}
-              {profileTab === 'actions' && (
-                <div className="space-y-2">
-                  <Button size="sm" variant="primary" className="w-full justify-start gap-2"
-                    onClick={() => addToast({ type: 'info', title: 'Booking flow opened' })}>
-                    <Plus className="w-3.5 h-3.5" /> Create / edit booking
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start gap-2"
-                    onClick={() => addToast({ type: 'success', title: 'Upsell flow opened' })}>
-                    <Star className="w-3.5 h-3.5" /> Send upsell
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start gap-2"
-                    onClick={() => addToast({ type: 'info', title: 'Check-in initiated' })}>
-                    <CheckCircle className="w-3.5 h-3.5" /> Online check-in
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start gap-2"
-                    onClick={() => addToast({ type: 'info', title: 'Feedback request sent' })}>
-                    <Star className="w-3.5 h-3.5" /> Request feedback
-                  </Button>
-                </div>
-              )}
-
-              {/* LOG */}
-              {profileTab === 'log' && (
-                <div className="space-y-0">
-                  <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Engine activity</p>
-                  {[
-                    { engine: 'Upsell',     action: 'Dinner package offered',      result: 'Accepted',  time: '21 Apr, 11:15' },
-                    { engine: 'Arrival',    action: 'Pre-arrival message sent',    result: 'Delivered', time: '20 Apr, 09:00' },
-                    { engine: 'Conversion', action: 'Rate plan comparison sent',   result: 'Opened',    time: '18 Apr, 14:32' },
-                    { engine: 'Reputation', action: 'Review request triggered',    result: 'Pending',   time: '15 Apr, 18:00' },
-                    { engine: 'Concierge',  action: 'Restaurant recommendation',   result: 'Clicked',   time: '14 Apr, 12:44' },
-                  ].map((entry, i) => (
-                    <div key={i} className="flex gap-2.5 py-2.5 border-b border-[#F4F5F7] last:border-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#2355A7] flex-shrink-0 mt-1.5" />
-                      <div className="min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <p className="text-[11px] font-semibold text-[#0E1013]">{entry.engine}</p>
-                          <span className="text-[9px] font-medium text-[#8B9299] bg-[#F6F7F9] border border-[#EDEEF1] px-1.5 py-0.5 rounded-md">{entry.result}</span>
-                        </div>
-                        <p className="text-[11px] text-[#5C6370] leading-snug mt-0.5">{entry.action}</p>
-                        <p className="text-[10px] text-[#C4C8CF] mt-0.5">{entry.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* SIGNALS */}
-              {profileTab === 'signals' && (
-                <>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2.5">Satisfaction history</p>
-                    {[
-                      { date: '21 Apr 2026', score: 5, label: 'Excellent',  note: 'Loved the champagne welcome' },
-                      { date: '12 Mar 2025', score: 4, label: 'Good',       note: 'Slight delay at check-in' },
-                      { date: '5 Aug 2024',  score: 3, label: 'Average',    note: 'Noise from adjacent room' },
-                    ].map((s, i) => (
-                      <div key={i} className="py-2 border-b border-[#F4F5F7] last:border-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(j => (
-                              <Star key={j} className={cn('w-3 h-3', j <= s.score ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
-                            ))}
-                          </div>
-                          <span className="text-[10px] text-[#8B9299]">{s.date}</span>
-                        </div>
-                        <p className="text-[11px] text-[#5C6370] mt-1">{s.note}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Sentiment tags</p>
-                    <div className="flex flex-wrap gap-1">
-                      {['Loyal', 'Anniversary stay', 'High spender', 'Promo-sensitive', 'Quiet preference'].map(tag => (
-                        <span key={tag} className="text-[11px] text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] px-2 py-0.5 rounded-md">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* PROPS */}
-              {profileTab === 'props' && (
-                <>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2.5">Auto-collected</p>
-                    {[
-                      ['Source',       'Google Ads — Brand campaign'],
-                      ['Landing page', '/offers/grand-suite'],
-                      ['Sessions',     '7 visits over 14 days'],
-                      ['Device',       'Desktop · Chrome 124'],
-                      ['Location',     'Berlin, Germany'],
-                      ['UTM medium',   'cpc'],
-                      ['UTM campaign', 'spring-promo-2026'],
-                    ].map(([k, v]) => (
-                      <div key={k} className="flex justify-between items-baseline py-1.5 border-b border-[#F4F5F7] last:border-0">
-                        <span className="text-[11px] text-[#8B9299]">{k}</span>
-                        <span className="text-[11px] font-medium text-[#0E1013] text-right max-w-[140px] truncate">{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-[11px] text-[#8B9299] leading-relaxed bg-[#F6F7F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
-                    Additional properties are configured in <span className="font-medium text-[#2355A7]">Settings → Tracking</span>.
-                  </p>
-                </>
               )}
 
               {/* CALLS */}
@@ -1943,21 +2249,39 @@ export function InboxPage() {
               )}
 
               {/* TAGS */}
-              {profileTab === 'tags' && (
-                <>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Tags</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {editableTags.map(tag => (
-                        <span key={tag} className="inline-flex items-center gap-1 text-[11px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] pl-2 pr-1 py-0.5 rounded-md">
-                          {tag}
-                          <button
-                            onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
-                            className="w-3.5 h-3.5 flex items-center justify-center text-[#C4C8CF] hover:text-[#0E1013] transition-colors rounded-sm hover:bg-[#EDEEF1] text-[11px] leading-none"
-                          >×</button>
-                        </span>
-                      ))}
+              {profileTab === 'tags' && (() => {
+                const suggested = [
+                  'VIP', 'Returning', 'Loyal', 'Anniversary', 'High spender',
+                  'Corporate', 'Group booking', 'Long stay', 'Early bird',
+                  'Promo-sensitive', 'Quiet preference', 'Late checkout',
+                ];
+                const addTag = (t: string) => {
+                  const tag = t.trim();
+                  if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
+                  setNewTagInput('');
+                };
+                return (
+                  <>
+                    {/* Active tags */}
+                    <div className="space-y-2">
+                      {editableTags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {editableTags.map(tag => (
+                            <span key={tag} className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0E1013] bg-[#0E1013]/[0.06] pl-2.5 pr-1.5 py-1 rounded-full">
+                              {tag}
+                              <button
+                                onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
+                                className="w-3.5 h-3.5 flex items-center justify-center text-[#8B9299] hover:text-[#0E1013] transition-colors rounded-full hover:bg-[#0E1013]/10 text-[12px] leading-none"
+                              >×</button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[12px] text-[#C4C8CF] italic">No tags yet. Add from suggestions or type below.</p>
+                      )}
                     </div>
+
+                    {/* Input */}
                     <div className="flex gap-1.5">
                       <input
                         value={newTagInput}
@@ -1965,41 +2289,53 @@ export function InboxPage() {
                         onKeyDown={e => {
                           if ((e.key === 'Enter' || e.key === ',') && newTagInput.trim()) {
                             e.preventDefault();
-                            const t = newTagInput.trim().replace(/,$/, '');
-                            if (t && !editableTags.includes(t)) setEditableTags(prev => [...prev, t]);
-                            setNewTagInput('');
+                            addTag(newTagInput.replace(/,$/, ''));
                           }
                         }}
-                        placeholder="Add tag…"
-                        className="flex-1 h-7 px-2.5 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[12px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
+                        placeholder="Type tag and press Enter…"
+                        className="flex-1 h-8 px-3 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[12px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
                       />
                       <button
-                        onClick={() => {
-                          const t = newTagInput.trim();
-                          if (t && !editableTags.includes(t)) setEditableTags(prev => [...prev, t]);
-                          setNewTagInput('');
-                        }}
+                        onClick={() => addTag(newTagInput)}
                         disabled={!newTagInput.trim()}
-                        className="h-7 px-2.5 rounded-lg bg-[#0E1013] text-white text-[11px] font-medium disabled:opacity-40 hover:bg-[#1a1f26] transition-colors"
+                        className="h-8 px-3 rounded-lg bg-[#0E1013] text-white text-[11px] font-semibold disabled:opacity-30 hover:bg-[#1a1f26] transition-colors"
                       >Add</button>
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Notes</p>
-                    <textarea
-                      value={editableNotes}
-                      onChange={e => setEditableNotes(e.target.value)}
-                      rows={5}
-                      placeholder="Add a note about this guest…"
-                      className="w-full resize-none text-[12px] text-[#0E1013] rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] px-3 py-2.5 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed"
-                    />
-                    <button
-                      onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
-                      className="w-full h-7 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[11px] font-medium text-[#5C6370] hover:bg-white hover:text-[#0E1013] transition-colors"
-                    >Save notes</button>
-                  </div>
-                </>
-              )}
+
+                    {/* Suggestions */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Suggestions</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggested.filter(t => !editableTags.includes(t)).map(tag => (
+                          <button
+                            key={tag}
+                            onClick={() => addTag(tag)}
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] border-dashed px-2.5 py-0.5 rounded-full hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#EEF2FC] transition-colors"
+                          >
+                            + {tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="space-y-1.5 pt-1 border-t border-[#EDEEF1]">
+                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider pt-1">Notes</p>
+                      <textarea
+                        value={editableNotes}
+                        onChange={e => setEditableNotes(e.target.value)}
+                        rows={4}
+                        placeholder="Add a note about this guest…"
+                        className="w-full resize-none text-[12px] text-[#0E1013] rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] px-3 py-2.5 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed"
+                      />
+                      <button
+                        onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
+                        className="w-full h-8 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[11px] font-semibold text-[#5C6370] hover:bg-[#0E1013] hover:text-white hover:border-[#0E1013] transition-colors"
+                      >Save notes</button>
+                    </div>
+                  </>
+                );
+              })()}
 
             </div>
           </>

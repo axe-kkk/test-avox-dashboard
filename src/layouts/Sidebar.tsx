@@ -127,7 +127,7 @@ export function Sidebar() {
 
                     {'badge' in item && item.badge != null && item.badge > 0 && (
                       <span className={cn(
-                        'flex items-center justify-center font-bold bg-[#0E1013] text-white rounded-full leading-none',
+                        'flex items-center justify-center font-bold bg-[#2355A7] text-white rounded-full leading-none',
                         sidebarCollapsed
                           ? 'absolute top-0.5 right-0.5 w-[14px] h-[14px] text-[8px]'
                           : 'ml-auto min-w-[18px] h-[18px] text-[10px] px-1',
