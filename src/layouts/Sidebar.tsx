@@ -69,7 +69,7 @@ export function Sidebar() {
         </div>
         {!sidebarCollapsed && (
           <span
-            className="text-[15px] font-semibold tracking-[0.08em] text-[#0E1013]"
+            className="text-[12px] font-semibold tracking-[0.10em] text-[#0E1013]"
             style={{ fontFamily: "'Azeret Mono', monospace" }}
           >
             AVOX
@@ -83,7 +83,7 @@ export function Sidebar() {
           <div key={group.label}>
             {/* Group label */}
             {!sidebarCollapsed && (
-              <p className="px-2.5 mb-1.5 text-[9px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">
+              <p className="px-2.5 mb-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">
                 {group.label}
               </p>
             )}
@@ -120,7 +120,7 @@ export function Sidebar() {
                     />
 
                     {!sidebarCollapsed && (
-                      <span className={cn('text-[13px]', active ? 'font-semibold' : 'font-normal')}>
+                      <span className={cn('text-[12px]', active ? 'font-semibold' : 'font-normal')}>
                         {item.label}
                       </span>
                     )}
@@ -161,7 +161,7 @@ export function Sidebar() {
           )}
         >
           <ChevronRight className={cn('w-3.5 h-3.5 transition-transform duration-200', !sidebarCollapsed && 'rotate-180')} />
-          {!sidebarCollapsed && <span className="text-[11px]">Collapse</span>}
+          {!sidebarCollapsed && <span className="text-[10px]">Collapse</span>}
         </button>
       </div>
     </aside>

@@ -41,8 +41,8 @@ export function CardHeader({ title, subtitle, action, className }: CardHeaderPro
   return (
     <div className={cn('flex items-start justify-between mb-4', className)}>
       <div>
-        <h3 className="text-[13px] font-semibold text-[#0E1013]">{title}</h3>
-        {subtitle && <p className="text-[12px] text-[#8B9299] mt-0.5 leading-relaxed">{subtitle}</p>}
+        <h3 className="text-[12px] font-semibold text-[#0E1013]">{title}</h3>
+        {subtitle && <p className="text-[10px] text-[#8B9299] mt-0.5 leading-relaxed">{subtitle}</p>}
       </div>
       {action && <div className="ml-4 flex-shrink-0">{action}</div>}
     </div>

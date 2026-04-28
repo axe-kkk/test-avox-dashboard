@@ -53,7 +53,7 @@ export function Topbar() {
         <input
           type="text"
           placeholder="Search guests, conversations…"
-          className="w-full pl-10 pr-4 py-2 text-[13px] bg-[#F6F7F9] rounded-xl text-[#0E1013] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-all border border-transparent focus:border-[#BED4F6]"
+          className="w-full pl-10 pr-4 py-2 text-[12px] bg-[#F6F7F9] rounded-xl text-[#0E1013] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-all border border-transparent focus:border-[#BED4F6]"
         />
       </div>
 
@@ -63,7 +63,7 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => { setShowProperty(!showProperty); setShowRole(false); }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] text-[#5C6370] hover:bg-[#F6F7F9] transition-colors group"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] text-[#5C6370] hover:bg-[#F6F7F9] transition-colors group"
           >
             <Building2 className="w-3.5 h-3.5 text-[#8B9299]" />
             <span className="font-medium text-[#0E1013] max-w-[140px] truncate">{property.name}</span>
@@ -80,8 +80,8 @@ export function Topbar() {
                 className="w-full text-left px-3 py-2 hover:bg-[#F6F7F9] transition-colors flex items-center justify-between gap-3 mx-0"
               >
                 <div>
-                  <div className="text-[13px] font-medium text-[#0E1013]">{p.name}</div>
-                  <div className="text-[11px] text-[#8B9299] mt-0.5">{p.city}, {p.country}</div>
+                  <div className="text-[12px] font-medium text-[#0E1013]">{p.name}</div>
+                  <div className="text-[10px] text-[#8B9299] mt-0.5">{p.city}, {p.country}</div>
                 </div>
                 {p.id === property.id && <Check className="w-3.5 h-3.5 text-[#2355A7] flex-shrink-0" />}
               </button>
@@ -109,7 +109,7 @@ export function Topbar() {
               <button
                 key={r}
                 onClick={() => { setRole(r); setShowRole(false); }}
-                className="w-full text-left px-3 py-2 text-[13px] hover:bg-[#F6F7F9] transition-colors flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-[12px] hover:bg-[#F6F7F9] transition-colors flex items-center justify-between"
               >
                 <span className={r === role ? 'font-semibold text-[#2355A7]' : 'text-[#5C6370]'}>
                   {roleLabels[r]}
@@ -132,8 +132,8 @@ export function Topbar() {
         <div className="flex items-center gap-2.5 pl-1">
           <Avatar name={currentUser.name} size="sm" />
           <div className="hidden sm:block leading-tight">
-            <p className="text-[13px] font-semibold text-[#0E1013]">{currentUser.name.split(' ')[0]}</p>
-            <p className="text-[11px] text-[#8B9299]">{currentUser.department}</p>
+            <p className="text-[12px] font-semibold text-[#0E1013]">{currentUser.name.split(' ')[0]}</p>
+            <p className="text-[10px] text-[#8B9299]">{currentUser.department}</p>
           </div>
         </div>
       </div>

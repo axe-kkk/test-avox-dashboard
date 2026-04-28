@@ -15,10 +15,10 @@ const variants = {
 };
 
 const sizes = {
-  xs: 'px-2.5 py-1   text-[11px] rounded-lg  gap-1',
+  xs: 'px-2.5 py-1   text-[10px] rounded-lg  gap-1',
   sm: 'px-3   py-1.5 text-[12px] rounded-xl  gap-1.5',
-  md: 'px-4   py-2   text-[13px] rounded-xl  gap-2',
-  lg: 'px-5   py-2.5 text-[13px] rounded-xl  gap-2',
+  md: 'px-4   py-2   text-[12px] rounded-xl  gap-2',
+  lg: 'px-5   py-2.5 text-[12px] rounded-xl  gap-2',
 };
 
 export function Button({

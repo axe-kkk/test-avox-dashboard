@@ -17,8 +17,8 @@ function ToastItem({ toast }: { toast: Toast }) {
     <div className={cn('flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg min-w-[280px] max-w-[360px]', cls)}>
       <Icon className={cn('w-4 h-4 mt-0.5 flex-shrink-0', iconCls)} />
       <div className="flex-1 min-w-0">
-        <p className={cn('text-[13px] font-semibold', textCls)}>{toast.title}</p>
-        {toast.message && <p className={cn('text-[12px] mt-0.5', subCls)}>{toast.message}</p>}
+        <p className={cn('text-[12px] font-semibold', textCls)}>{toast.title}</p>
+        {toast.message && <p className={cn('text-[10px] mt-0.5', subCls)}>{toast.message}</p>}
       </div>
       <button onClick={() => removeToast(toast.id)} className="text-[#D1CFCF] hover:text-[#5C6370] flex-shrink-0 transition-colors">
         <X className="w-3.5 h-3.5" />

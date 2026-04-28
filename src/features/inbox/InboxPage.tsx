@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Search, Send, FileText, ArrowUpRight, CheckCircle, Phone, Mail, Plus, Star, Tag, ChevronDown, Filter,
-  AlertTriangle, Settings2, Smile, Paperclip, Mic, Languages, MoreHorizontal, ArrowLeftRight,
+  Search, Send, FileText, ArrowUpRight, ArrowLeft, CheckCircle, Phone, Mail, Plus, Star, Tag, ChevronDown, Filter,
+  AlertTriangle, Settings2, Smile, Paperclip, Mic, Languages, MoreHorizontal, ArrowLeftRight, ChevronRight, X,
   User, BedDouble, Database, Zap, Activity, TrendingUp, PhoneCall,
 } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
@@ -13,7 +13,7 @@ import { mockConversations } from '../../data/mock/conversations';
 import { mockGuests } from '../../data/mock/guests';
 import { mockReservations } from '../../data/mock/reservations';
 import { mockUsers } from '../../data/mock/users';
-import { formatDateTime, formatDate, formatCurrency, channelLabels, cn } from '../../utils';
+import { formatDateTime, formatRelativeTime, formatDate, formatCurrency, channelLabels, cn } from '../../utils';
 import type { Conversation } from '../../types';
 import { useApp } from '../../app/AppContext';
 
@@ -31,6 +31,17 @@ type InboxView =
   | 'my_paused'
   | 'my_urgent'
   | 'my_closed';
+
+type GuestSidebarSection =
+  | 'info'
+  | 'reservation'
+  | 'pms'
+  | 'actions'
+  | 'engines'
+  | 'signals'
+  | 'properties'
+  | 'calls'
+  | 'tags_notes';
 
 const viewLabels: Record<InboxView, string> = {
   all: 'All',
@@ -107,10 +118,47 @@ function languageLabel(code?: string) {
 }
 
 // ── Conversation row ────────────────────────────────────────────────────────
+
 function ConvRow({ conv, isActive, onClick }: {
   conv: Conversation; isActive: boolean; onClick: () => void;
 }) {
   const lastChannel = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1]?.channel : conv.channel;
+  const guest = mockGuests.find(g => g.id === conv.guestId);
+  const primaryTag =
+    (guest?.tags?.includes('VIP') ? 'VIP' : guest?.tags?.[0]) ??
+    conv.tags?.[0];
+
+  const tagBadge = useMemo(() => {
+    if (!primaryTag) return null;
+    const t = primaryTag.trim();
+    if (!t) return null;
+    const letter = t[0]?.toUpperCase() ?? '';
+
+    const preset: Record<string, string> = {
+      VIP: 'bg-[#F59E0B]/15 text-[#92400E] border-[#F59E0B]/25',
+      Anniversary: 'bg-[#8B5CF6]/12 text-[#5B21B6] border-[#8B5CF6]/20',
+      Honeymoon: 'bg-[#EC4899]/12 text-[#9D174D] border-[#EC4899]/20',
+      'Baby cot': 'bg-[#EAB308]/15 text-[#854D0E] border-[#EAB308]/25',
+      'Maintenance issue': 'bg-[#EF4444]/12 text-[#991B1B] border-[#EF4444]/20',
+    };
+
+    const palette = [
+      'bg-[#2355A7]/10 text-[#1D4ED8] border-[#2355A7]/20',
+      'bg-[#0E1013]/8 text-[#0E1013] border-[#0E1013]/15',
+      'bg-[#10B981]/12 text-[#047857] border-[#10B981]/20',
+      'bg-[#F97316]/12 text-[#9A3412] border-[#F97316]/20',
+      'bg-[#06B6D4]/12 text-[#155E75] border-[#06B6D4]/20',
+      'bg-[#64748B]/12 text-[#334155] border-[#64748B]/20',
+    ];
+
+    const cls = preset[t] ?? (() => {
+      let h = 0;
+      for (let i = 0; i < t.length; i++) h = (h + t.charCodeAt(i)) % palette.length;
+      return palette[h];
+    })();
+
+    return { letter, cls, title: t };
+  }, [primaryTag]);
   return (
     <button
       onClick={onClick}
@@ -120,48 +168,52 @@ function ConvRow({ conv, isActive, onClick }: {
       )}
     >
       <div className="flex items-start gap-2.5">
-        <Avatar name={conv.guestName} size="sm" />
+        <Avatar
+          name={conv.guestName}
+          size="sm"
+          badge={<ChannelIcon channel={lastChannel} size="sm" className="text-[#2355A7]" />}
+        />
         <div className="flex-1 min-w-0">
           {/* Name + time */}
           <div className="flex items-center justify-between gap-2 mb-0.5">
             <div className="flex items-center gap-2 min-w-0">
-              {/* Source of the last message */}
-              <span title={channelLabels[lastChannel]} className="flex-shrink-0">
-                <ChannelIcon channel={lastChannel} size="md" />
-              </span>
               <span className={cn(
-                'text-[13px] truncate',
+                'text-[14px] truncate',
                 conv.unreadCount > 0 ? 'font-semibold text-[#5C6370]' : 'font-medium text-[#5C6370]',
               )}>
                 {conv.guestName}
               </span>
+              {tagBadge && (
+                <span
+                  className={cn(
+                    'w-5 h-5 flex items-center justify-center flex-shrink-0',
+                    'text-[8px] font-semibold leading-none',
+                    'rounded-[4px]',
+                    'border',
+                    tagBadge.cls,
+                  )}
+                  title={tagBadge.title}
+                  aria-label={`Tag: ${tagBadge.title}`}
+                >
+                  {tagBadge.letter}
+                </span>
+              )}
             </div>
-            <span className="text-[11px] text-[#8B9299] whitespace-nowrap flex-shrink-0 mt-0.5">
-              {formatDateTime(conv.lastMessageAt)}
-            </span>
+            {conv.unreadCount > 0 && (
+              <span className="w-2 h-2 rounded-full bg-[#2355A7] flex-shrink-0" aria-label="Unread" />
+            )}
           </div>
 
           {/* Last message */}
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[12px] text-[#5C6370] truncate leading-relaxed min-w-0">
+            <p className="text-[10px] text-[#5C6370] truncate leading-relaxed min-w-0">
               {conv.lastMessage}
             </p>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              {conv.status === 'escalated' && (
-                <span className="text-[10px] font-medium text-[#5C6370] bg-[#F6F7F9] px-2 py-0.5 rounded-full border border-[#EDEEF1]">
-                  Escalated
-                </span>
-              )}
-              {conv.unreadCount > 0 && (
-                <span
-                  className="min-w-5 h-5 px-1.5 rounded-full text-white text-[10px] font-semibold flex items-center justify-center tabular-nums"
-                  style={{ backgroundColor: '#2355A7' }}
-                  aria-label={`${conv.unreadCount} unread`}
-                >
-                  {conv.unreadCount}
-                </span>
-              )}
+              <span className="text-[10px] text-[#8B9299] tabular-nums whitespace-nowrap">
+                {formatRelativeTime(conv.lastMessageAt)}
+              </span>
             </div>
           </div>
         </div>
@@ -213,7 +265,7 @@ function Bubble({
   if (isSystem) {
     return (
       <div className="flex justify-center my-3">
-        <div className="flex items-center gap-2 text-[11px] text-[#8B9299] bg-[#F6F7F9] px-3 py-1.5 rounded-full border border-[#EDEEF1]">
+        <div className="flex items-center gap-2 text-[10px] text-[#8B9299] bg-[#F6F7F9] px-3 py-1.5 rounded-full border border-[#EDEEF1]">
           <ChannelIcon channel={msg.channel} size="sm" />
           <span>{cleanContent}</span>
           <span className="text-[#D1CFCF]">·</span>
@@ -235,25 +287,23 @@ function Bubble({
         >
           {/* Sender meta */}
           <div className="flex items-center gap-1.5 px-1 flex-row-reverse">
-            <span className="text-[11px] font-medium text-[#8B9299]">{msg.senderName}</span>
-            <span className="text-[9px] font-semibold tracking-wider uppercase text-[#A07B20]">
+            <span className="text-[10px] font-medium text-[#8B9299]">{msg.senderName}</span>
+            <span className="text-[10px] font-semibold tracking-wider uppercase text-[#A07B20]">
               Note
             </span>
           </div>
 
           {/* Note body — subtle yellow */}
           <div
-            className="rounded-2xl rounded-tr-sm px-4 py-3"
+            className="relative rounded-2xl rounded-tr-sm px-4 pt-3 pb-7"
             style={{ backgroundColor: '#FFFBEB', border: '1px solid #F5E2A0' }}
           >
-            <p className="text-[13px] leading-relaxed" style={{ color: '#3D2E00' }}>
+            <p className="text-[10px] leading-relaxed" style={{ color: '#3D2E00' }}>
               {cleanContent}
             </p>
-          </div>
 
-          {/* Footer: timestamp */}
-          <div className="flex items-center gap-2 px-1 flex-row-reverse">
-            <span className="text-[10px] text-[#C4C8CF] tabular-nums">
+            {/* Timestamp inside note bubble (bottom-right) */}
+            <span className="absolute bottom-1.5 right-3 text-[10px] tabular-nums select-none text-[#C4C8CF]">
               {formatDateTime(msg.timestamp)}
             </span>
           </div>
@@ -266,17 +316,19 @@ function Bubble({
   return (
     <div className={cn('flex gap-2.5 my-2 items-end', isGuest ? '' : 'flex-row-reverse')}>
       {/* Avatar */}
-      {isGuest
-        ? <Avatar name={msg.senderName} size="xs" />
-        : (
-          <div
-            className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
-            style={{ backgroundColor: '#2355A7' }}
-          >
-            AI
-          </div>
-        )
-      }
+      <div className="flex-shrink-0">
+        {isGuest
+          ? <Avatar name={msg.senderName} size="xs" />
+          : (
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+              style={{ backgroundColor: '#2355A7' }}
+            >
+              AI
+            </div>
+          )
+        }
+      </div>
 
       {/* Bubble column */}
       <div className={cn('max-w-[72%] flex flex-col gap-1', isGuest ? 'items-start' : 'items-end')}>
@@ -284,7 +336,7 @@ function Bubble({
         {/* Sender meta row */}
         <div className={cn('flex items-center gap-1.5 px-1', isGuest ? '' : 'flex-row-reverse')}>
           <ChannelIcon channel={msg.channel} size="sm" className="opacity-60" />
-          <span className="text-[11px] font-medium text-[#8B9299]">{msg.senderName}</span>
+          <span className="text-[10px] font-medium text-[#8B9299]">{msg.senderName}</span>
           {msg.engineName && (
             <span className="text-[10px] text-[#BED4F6] font-medium">{msg.engineName}</span>
           )}
@@ -293,7 +345,7 @@ function Bubble({
         {/* Bubble body */}
         <div
           className={cn(
-            'rounded-2xl px-4 py-3 transition-colors',
+            'relative rounded-2xl px-4 pt-3 pb-7 transition-colors',
             isGuest
               ? cn(
                   'border rounded-tl-sm',
@@ -309,7 +361,7 @@ function Bubble({
           {/* Language badge when showing original */}
           {canTranslate && showOriginal && (
             <div className="flex items-center gap-1 mb-2">
-              <span className="text-[9px] font-bold tracking-widest uppercase text-[#8B9299] bg-[#EDEEF1] px-1.5 py-0.5 rounded-sm">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-[#8B9299] bg-[#EDEEF1] px-1.5 py-0.5 rounded-sm">
                 {guestLang.toUpperCase()}
               </span>
               <span className="text-[10px] text-[#8B9299]">Original</span>
@@ -318,7 +370,7 @@ function Bubble({
 
           <p
             className={cn(
-              'text-[13px] leading-relaxed transition-all',
+              'text-[10px] leading-relaxed transition-all',
               isGuest
                 ? showOriginal
                   ? 'text-[#5C6370] italic'   // Foreign-language look: muted + italic
@@ -328,14 +380,20 @@ function Bubble({
           >
             {displayText}
           </p>
+
+          {/* Timestamp inside bubble (bottom-right) */}
+          <span
+            className={cn(
+              'absolute bottom-1.5 right-3 text-[10px] tabular-nums select-none',
+              isGuest ? 'text-[#C4C8CF]' : 'text-white/65',
+            )}
+          >
+            {formatDateTime(msg.timestamp)}
+          </span>
         </div>
 
         {/* Footer row */}
         <div className={cn('flex items-center gap-2 px-1', isGuest ? '' : 'flex-row-reverse')}>
-          <span className="text-[10px] text-[#C4C8CF] tabular-nums">
-            {formatDateTime(msg.timestamp)}
-          </span>
-
           {/* Translated ↔ Original toggle */}
           {canTranslate && (
             <button
@@ -371,7 +429,7 @@ function Bubble({
 function SystemEvent({ text }: { text: string }) {
   return (
     <div className="flex justify-center my-3">
-      <div className="text-[11px] text-[#8B9299] bg-[#F6F7F9] px-3 py-1.5 rounded-full border border-[#EDEEF1]">
+      <div className="text-[10px] text-[#8B9299] bg-[#F6F7F9] px-3 py-1.5 rounded-full border border-[#EDEEF1]">
         {text}
       </div>
     </div>
@@ -400,7 +458,7 @@ export function InboxPage() {
   const [newConvGuestSearch, setNewConvGuestSearch] = useState('');
   const [newConvGuestId, setNewConvGuestId] = useState<string | null>(null);
 
-  const [activeConv, setActiveConv] = useState<Conversation>(mockConversations[0]);
+  const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [replyText, setReplyText] = useState('');
   const [isInternal, setIsInternal] = useState(false);
   const [sendChannel, setSendChannel] = useState<Conversation['channel']>('whatsapp');
@@ -416,42 +474,32 @@ export function InboxPage() {
   const [replyLangOpen, setReplyLangOpen] = useState(false);
   const [showOriginalById, setShowOriginalById] = useState<Set<string>>(new Set());
   const [assigneeOpen, setAssigneeOpen] = useState(false);
-  const [statusOpen, setStatusOpen] = useState(false);
+  const [assigneeDept, setAssigneeDept] = useState<string | null>(null);
+  const [assigneeQuery, setAssigneeQuery] = useState('');
 
-  const [profileTab, setProfileTab] = useState('info');
+  const [guestSidebarOpen, setGuestSidebarOpen] = useState(false);
+  const [guestSidebarSection, setGuestSidebarSection] = useState<GuestSidebarSection>('info');
   const [newTagInput, setNewTagInput] = useState('');
   const [editableTags, setEditableTags] = useState<string[]>([]);
   const [editableNotes, setEditableNotes] = useState('');
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [guestProfileOpen, setGuestProfileOpen] = useState(false);
-  const [guestProfileTab, setGuestProfileTab] = useState('reservation');
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeQuery, setMergeQuery] = useState('');
 
-  const guest = mockGuests.find(g => g.id === activeConv.guestId);
-  const reservation = mockReservations.find(r => r.guestId === activeConv.guestId);
-  const assignee = activeConv.assignedTo ? mockUsers.find(u => u.id === activeConv.assignedTo) : null;
+  const guest = activeConv ? mockGuests.find(g => g.id === activeConv.guestId) : undefined;
+  const reservation = activeConv ? mockReservations.find(r => r.guestId === activeConv.guestId) : undefined;
+  const assignee = activeConv?.assignedTo ? mockUsers.find(u => u.id === activeConv.assignedTo) : null;
+  const departments = useMemo(() => {
+    return Array.from(new Set(mockUsers.map(u => u.department))).sort((a, b) => a.localeCompare(b));
+  }, []);
 
-  const conversationStatusOptions: { id: Conversation['status']; label: string }[] = [
-    { id: 'open', label: 'New' },
-    { id: 'pending', label: 'Pending' },
-    { id: 'ai_handled', label: 'Paused' },
-    { id: 'escalated', label: 'Urgent' },
-    { id: 'resolved', label: 'Closed' },
-  ];
-
-  const statusLabel = (s: Conversation['status']) => {
-    if (s === 'open') return 'New';
-    if (s === 'pending') return 'Pending';
-    if (s === 'ai_handled') return 'Paused';
-    if (s === 'escalated') return 'Urgent';
-    if (s === 'resolved') return 'Closed';
-    return s;
-  };
+  // Status selector removed (kept status logic elsewhere).
 
   const availableChannels = useMemo(() => {
     const set = new Set<Conversation['channel']>();
     for (const c of mockConversations) set.add(c.channel);
+    // Ensure filter shows the full set of supported channels.
+    for (const ch of ['sms', 'telegram', 'viber', 'web_widget'] as Conversation['channel'][]) set.add(ch);
     return Array.from(set);
   }, []);
 
@@ -460,6 +508,15 @@ export function InboxPage() {
     for (const c of mockConversations) for (const t of c.tags ?? []) set.add(t);
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, []);
+
+  useEffect(() => {
+    // Close guest drawer when switching conversations.
+    setGuestSidebarOpen(false);
+    setGuestSidebarSection('info');
+    setProfileMenuOpen(false);
+    setMergeOpen(false);
+    setMergeQuery('');
+  }, [activeConv?.id]);
 
   const urgentConversations = useMemo(() => {
     return mockConversations.filter(c => c.priority === 'urgent' || c.status === 'escalated');
@@ -485,6 +542,7 @@ export function InboxPage() {
   const clientChannels = useMemo(() => {
     // In the spec: enabled only if available for this client. For mock, we assume all connected channels are possible,
     // but visually "available" are those that appear in the thread.
+    if (!activeConv) return allReplyChannels;
     const set = new Set<Conversation['channel']>();
     for (const m of activeConv.messages) set.add(m.channel);
     if (set.size === 0) set.add(activeConv.channel);
@@ -498,21 +556,23 @@ export function InboxPage() {
   }, [guest]);
 
   useEffect(() => {
+    if (!activeConv) return;
     setReplyLang(translator.read);
     setShowOriginalById(new Set());
     if (clientChannels.length > 0 && !clientChannels.includes(sendChannel)) {
       setSendChannel(clientChannels[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConv.id, translator.read]);
+  }, [activeConv?.id, translator.read]);
 
   useEffect(() => {
+    if (!activeConv) return;
     if (guest) {
       setEditableTags([...guest.tags]);
       setEditableNotes(guest.notes ?? '');
     }
     setNewTagInput('');
-  }, [activeConv.id]);
+  }, [activeConv?.id]);
 
   const languageOptions = useMemo(() => (['en', 'de', 'fr', 'es', 'it', 'uk', 'pl'] as const), []);
 
@@ -542,6 +602,7 @@ export function InboxPage() {
   }
 
   const threadSystemEvents = useMemo(() => {
+    if (!activeConv) return [];
     const events: string[] = [];
     if (activeConv.assignedTo) events.push(`Assigned to ${activeConv.assignedTo}`);
     events.push(`Status: ${activeConv.status}`);
@@ -615,6 +676,7 @@ export function InboxPage() {
   }, [activeView, channelFilter, tagFilter, searchQuery]);
 
   const handleSend = () => {
+    if (!activeConv) return;
     if (!replyText.trim()) return;
     const now = new Date().toISOString();
     const content = isInternal
@@ -622,6 +684,7 @@ export function InboxPage() {
       : (translatorEnabled ? translateMyToReply(replyText.trim()) : replyText.trim());
 
     setActiveConv(prev => {
+      if (!prev) return prev;
       const nextMsg: import('../../types').Message = {
         id: `msg_local_${Date.now()}`,
         conversationId: prev.id,
@@ -721,7 +784,7 @@ export function InboxPage() {
               {filtersOpen && (
                 <div className="absolute left-0 mt-2 w-[280px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Filters</p>
+                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Filter channels</p>
                     <button
                       className="text-[11px] font-semibold text-[#2355A7] hover:underline"
                       onClick={() => { setChannelFilter(new Set()); setTagFilter(new Set()); }}
@@ -732,7 +795,7 @@ export function InboxPage() {
 
                   <div className="space-y-3">
                     <div>
-                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em] mb-2">Channels</p>
+                      <p className="sr-only">Channels</p>
                       <div className="flex flex-wrap gap-1.5">
                         {availableChannels.map(ch => {
                           const selected = channelFilter.has(ch);
@@ -901,8 +964,8 @@ export function InboxPage() {
             <ConvRow
               key={conv.id}
               conv={conv}
-              isActive={conv.id === activeConv.id}
-              onClick={() => setActiveConv(conv)}
+              isActive={conv.id === activeConv?.id}
+              onClick={() => { setActiveConv(conv); setReplyText(''); }}
             />
           ))}
         </div>
@@ -1094,576 +1157,175 @@ export function InboxPage() {
         );
       })()}
 
-      {/* ── Guest full profile modal ── */}
-      {guestProfileOpen && guest && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <button className="absolute inset-0 bg-[#0E1013]/40 backdrop-blur-[2px]" onClick={() => setGuestProfileOpen(false)} aria-label="Close" />
-          <div className="relative w-[880px] h-[640px] flex bg-white border border-[#EDEEF1] rounded-2xl shadow-panel overflow-hidden">
-
-            {/* ── LEFT SIDEBAR ── */}
-            <div className="w-[220px] flex-shrink-0 bg-[#F9F9F9] border-r border-[#EDEEF1] flex flex-col">
-
-              {/* Identity block */}
-              <div className="px-5 pt-6 pb-5 border-b border-[#EDEEF1]">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <Avatar name={guest.name} size="lg" />
-                  <div>
-                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                      <h2 className="text-[14px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.name}</h2>
-                      {guest.tags.includes('VIP') && (
-                        <span className="text-[9px] font-bold tracking-wider text-[#2355A7] bg-[#EEF2FC] px-1.5 py-0.5 rounded">VIP</span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-[#8B9299] mt-0.5">{guest.nationality} · {guest.language.toUpperCase()}</p>
-                    <p className="text-[11px] text-[#8B9299]">{guest.source}</p>
-                  </div>
-                </div>
-
-                {/* Key stats */}
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <div className="bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5">
-                    <p className="text-[10px] text-[#8B9299] mb-0.5">Stays</p>
-                    <p className="text-[18px] font-semibold text-[#2355A7] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
-                  </div>
-                  <div className="bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5">
-                    <p className="text-[10px] text-[#8B9299] mb-0.5">LTV</p>
-                    <p className="text-[13px] font-semibold text-[#2355A7] tabular-nums leading-tight mt-0.5" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
-                  </div>
-                </div>
-                {guest.satisfactionScore && (
-                  <div className="mt-2 bg-white border border-[#EDEEF1] rounded-xl px-3 py-2.5 flex items-center justify-between">
-                    <p className="text-[10px] text-[#8B9299]">Rating</p>
-                    <div className="flex items-center gap-0.5">
-                      {[1,2,3,4,5].map(i => (
-                        <Star key={i} className={cn('w-3 h-3', i <= (guest.satisfactionScore ?? 0) ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Nav items */}
-              <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-                {[
-                  { id: 'reservation', label: 'Reservation', icon: BedDouble },
-                  { id: 'pms',         label: 'PMS',         icon: Database  },
-                  { id: 'log',         label: 'Engine log',  icon: Zap       },
-                  { id: 'signals',     label: 'Signals',     icon: TrendingUp},
-                  { id: 'calls',       label: 'Calls',       icon: PhoneCall },
-                  { id: 'tags',        label: 'Tags & notes',icon: Tag       },
-                ].map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setGuestProfileTab(id)}
-                    className={cn(
-                      'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-colors text-[13px] font-medium',
-                      guestProfileTab === id
-                        ? 'bg-[#EEF2FC] text-[#2355A7]'
-                        : 'text-[#5C6370] hover:bg-white hover:text-[#3D4550]',
-                    )}
-                  >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    {label}
-                  </button>
-                ))}
-              </nav>
-
-              {/* Contact footer */}
-              <div className="px-4 py-4 border-t border-[#EDEEF1] space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-3.5 h-3.5 text-[#8B9299] flex-shrink-0" />
-                  <span className="text-[11px] text-[#5C6370] truncate">{guest.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 text-[#8B9299] flex-shrink-0" />
-                  <span className="text-[11px] text-[#5C6370]">{guest.phone}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ── RIGHT CONTENT ── */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-
-              {/* Content header */}
-              <div className="px-6 py-4 border-b border-[#EDEEF1] flex items-center justify-between flex-shrink-0">
-                <p className="text-[13px] font-semibold text-[#2355A7]">
-                  {guestProfileTab === 'reservation' && 'Reservation'}
-                  {guestProfileTab === 'pms' && 'PMS History'}
-                  {guestProfileTab === 'log' && 'Engine Log'}
-                  {guestProfileTab === 'signals' && 'Signals'}
-                  {guestProfileTab === 'calls' && 'Calls'}
-                  {guestProfileTab === 'tags' && 'Tags & Notes'}
-                </p>
+      {/* ── Center: thread ── */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#F9F9F9]">
+        {activeConv ? (
+          <>
+            {/* Thread header */}
+            <div className="relative z-30 bg-white border-b border-[#EDEEF1] px-5 py-3 flex items-center gap-2 flex-shrink-0">
+              {/* Assignment + status (keep compact) */}
+              <div className="relative">
                 <button
-                  onClick={() => setGuestProfileOpen(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#3D4550] transition-colors text-[16px] leading-none"
-                >×</button>
-              </div>
+                  onClick={() => {
+                    const nextOpen = !assigneeOpen;
+                    setAssigneeOpen(nextOpen);
+                    if (nextOpen) {
+                      setAssigneeDept(assignee?.department ?? departments[0] ?? null);
+                      setAssigneeQuery('');
+                    }
+                  }}
+                  className="h-10 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[#5C6370] flex items-center gap-2 hover:bg-white transition-colors max-w-[240px]"
+                  title="Department / employee"
+                >
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="text-[12px] font-semibold text-[#3D4550] truncate">
+                      {assignee?.name ?? 'Unassigned'}
+                    </span>
+                    <span className="text-[12px] text-[#8B9299] flex-shrink-0">·</span>
+                    <span className="text-[12px] text-[#8B9299] truncate">
+                      {assignee?.department ?? (assigneeDept ?? 'Department')}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8B9299]" />
+                </button>
+                {assigneeOpen && (
+                  <div className="absolute left-0 mt-2 w-[540px] bg-white border border-[#EDEEF1] rounded-2xl shadow-panel z-[200] overflow-hidden">
+                    <div className="grid grid-cols-[220px_1fr]">
+                      {/* Left: departments */}
+                      <div className="border-r border-[#EDEEF1]">
+                        <div className="px-3 py-2 border-b border-[#EDEEF1]">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Departments</p>
+                        </div>
+                        <div className="max-h-[320px] overflow-y-auto p-2">
+                          {departments.map(dep => {
+                            const active = dep === assigneeDept;
+                            return (
+                              <button
+                                key={dep}
+                                type="button"
+                                onClick={() => { setAssigneeDept(dep); setAssigneeQuery(''); }}
+                                className={cn(
+                                  'w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors',
+                                  active ? 'bg-[#EEF2FC]' : 'hover:bg-[#F6F7F9]',
+                                )}
+                              >
+                                <span className={cn('text-[12px] font-medium truncate', active ? 'text-[#2355A7]' : 'text-[#3D4550]')}>{dep}</span>
+                                <ChevronDown className={cn('w-3.5 h-3.5 ml-auto -rotate-90', active ? 'text-[#2355A7]' : 'text-[#C4C8CF]')} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-              {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto p-6">
-
-                {/* RESERVATION */}
-                {guestProfileTab === 'reservation' && (
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Current reservation</p>
-                      {reservation ? (
-                        <div className="space-y-0">
-                          {[
-                            ['Booking ref',  reservation.bookingRef],
-                            ['Room',         `${reservation.roomType} · #${reservation.roomNumber}`],
-                            ['Check-in',     formatDate(reservation.checkIn)],
-                            ['Check-out',    formatDate(reservation.checkOut)],
-                            ['Rate code',    reservation.rateCode],
-                            ['Rate / night', formatCurrency(reservation.ratePerNight)],
-                            ['Total',        formatCurrency(reservation.totalAmount)],
-                            ['Adults',       String(reservation.adults)],
-                            ['Channel',      reservation.channel],
-                            ['Status',       reservation.status],
-                          ].map(([label, val]) => (
-                            <div key={label} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
-                              <span className="text-[12px] text-[#8B9299]">{label}</span>
-                              <span className="text-[12px] font-medium text-[#3D4550]">{val}</span>
-                            </div>
-                          ))}
-                          {reservation.specialRequests.length > 0 && (
-                            <div className="pt-3">
-                              <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Special requests</p>
-                              {reservation.specialRequests.map(r => (
-                                <p key={r} className="text-[12px] text-[#5C6370] py-0.5 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#BED4F6] flex-shrink-0" />{r}</p>
-                              ))}
+                      {/* Right: people */}
+                      <div>
+                        <div className="px-3 py-2 border-b border-[#EDEEF1] flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em] truncate">
+                            {assigneeDept ?? 'People'}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => { setAssigneeOpen(false); setActiveConv(prev => (prev ? { ...prev, assignedTo: null } : prev)); }}
+                            className="text-[11px] font-semibold text-[#2355A7] hover:underline flex-shrink-0"
+                          >
+                            Unassign
+                          </button>
+                        </div>
+                        <div className="px-3 pt-2">
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8B9299]" />
+                            <input
+                              value={assigneeQuery}
+                              onChange={e => setAssigneeQuery(e.target.value)}
+                              placeholder="Search manager…"
+                              className="w-full h-8 pl-8 pr-3 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[12px] text-[#3D4550] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition"
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-[320px] overflow-y-auto p-2">
+                          {(assigneeDept ? mockUsers.filter(u => u.department === assigneeDept) : mockUsers)
+                            .filter(u => {
+                              const q = assigneeQuery.trim().toLowerCase();
+                              if (!q) return true;
+                              return `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(q);
+                            })
+                            .map(u => {
+                            const active = activeConv?.assignedTo === u.id;
+                            const initials = u.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+                            return (
+                              <button
+                                key={u.id}
+                                type="button"
+                                onClick={() => {
+                                  setAssigneeOpen(false);
+                                  setActiveConv(prev => (prev ? { ...prev, assignedTo: u.id } : prev));
+                                  addToast({ type: 'success', title: 'Assigned', message: `${u.name}` });
+                                }}
+                                className={cn(
+                                    'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-colors',
+                                  active ? 'bg-[#EEF2FC]' : 'hover:bg-[#F6F7F9]',
+                                )}
+                              >
+                                <span className={cn(
+                                  'w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0',
+                                  active ? 'bg-[#2355A7] text-white' : 'bg-[#F6F7F9] text-[#5C6370] border border-[#EDEEF1]',
+                                )}>{initials}</span>
+                                <div className="min-w-0">
+                                  <div className={cn('text-[12px] font-medium truncate', active ? 'text-[#2355A7]' : 'text-[#3D4550]')}>
+                                    {u.name}
+                                  </div>
+                                  <div className="text-[10px] text-[#8B9299] truncate">{u.role}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                          {((assigneeDept ? mockUsers.filter(u => u.department === assigneeDept) : mockUsers)
+                            .filter(u => {
+                              const q = assigneeQuery.trim().toLowerCase();
+                              if (!q) return true;
+                              return `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(q);
+                            }).length === 0) && (
+                            <div className="px-3 py-10 text-center text-[12px] text-[#8B9299]">
+                              No results
                             </div>
                           )}
                         </div>
-                      ) : (
-                        <p className="text-[13px] text-[#8B9299]">No active reservation.</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Guest details</p>
-                      {[
-                        ['Preferred channel', channelLabels[guest.preferredChannel]],
-                        ['Source', guest.source],
-                        ['Status', guest.status],
-                        ['Last stay', guest.lastStayAt ? formatDate(guest.lastStayAt) : '—'],
-                        ['Upcoming stay', guest.upcomingStayAt ? formatDate(guest.upcomingStayAt) : '—'],
-                      ].map(([label, val]) => (
-                        <div key={label} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
-                          <span className="text-[12px] text-[#8B9299]">{label}</span>
-                          <span className="text-[12px] font-medium text-[#3D4550] capitalize">{val}</span>
-                        </div>
-                      ))}
-                      {guest.companions.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Companions</p>
-                          {guest.companions.map(c => (
-                            <p key={c} className="text-[12px] text-[#5C6370] py-0.5 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#BED4F6] flex-shrink-0" />{c}</p>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* PMS */}
-                {guestProfileTab === 'pms' && (
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Past visits</p>
-                      {[
-                        { date: '12 Mar 2025', room: 'Junior Suite', nights: 3, spend: 1840 },
-                        { date: '5 Aug 2024',  room: 'Deluxe Room',  nights: 2, spend: 920  },
-                        { date: '20 Dec 2023', room: 'Grand Suite',  nights: 5, spend: 4200 },
-                        { date: '3 Jun 2023',  room: 'Classic Room', nights: 1, spend: 310  },
-                        { date: '18 Jan 2023', room: 'Deluxe Room',  nights: 4, spend: 1280 },
-                      ].map((v, i) => (
-                        <div key={i} className="flex justify-between items-center py-2.5 border-b border-[#F4F5F7] last:border-0">
-                          <div>
-                            <p className="text-[12px] font-semibold text-[#3D4550]">{v.room}</p>
-                            <p className="text-[11px] text-[#8B9299] mt-0.5">{v.date} · {v.nights} nights</p>
-                          </div>
-                          <p className="text-[12px] font-semibold text-[#2355A7]">{formatCurrency(v.spend)}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Preferences</p>
-                      {['High floor room', 'Hypoallergenic bedding', 'Late check-out', 'Extra pillows', 'Quiet room', 'Twin beds', 'Non-smoking floor'].map(p => (
-                        <div key={p} className="flex items-center gap-2 py-2 border-b border-[#F4F5F7] last:border-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#BED4F6] flex-shrink-0" />
-                          <p className="text-[12px] text-[#5C6370]">{p}</p>
-                        </div>
-                      ))}
-                      <div className="mt-5 p-4 bg-[#EEF2FC] rounded-xl">
-                        <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-1">Total spend</p>
-                        <p className="text-[22px] font-semibold text-[#2355A7]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
-                        <p className="text-[11px] text-[#5C6370] mt-0.5">across {guest.totalVisits} visits</p>
                       </div>
                     </div>
                   </div>
                 )}
-
-                {/* LOG */}
-                {guestProfileTab === 'log' && (
-                  <div className="space-y-0">
-                    {[
-                      { engine: 'Upsell',      action: 'Dinner package offered',           result: 'Accepted',  time: '21 Apr 2026, 11:15', detail: 'Le Jardin, table for 2, 20:00' },
-                      { engine: 'Arrival',     action: 'Pre-arrival message sent',         result: 'Delivered', time: '20 Apr 2026, 09:00', detail: 'WhatsApp · Read at 09:14' },
-                      { engine: 'Conversion',  action: 'Rate plan comparison sent',        result: 'Opened',    time: '18 Apr 2026, 14:32', detail: 'Email click · 3 min dwell' },
-                      { engine: 'Reputation',  action: 'Review request triggered',         result: 'Pending',   time: '15 Apr 2026, 18:00', detail: 'Scheduled post-checkout' },
-                      { engine: 'Concierge',   action: 'Restaurant recommendation sent',   result: 'Clicked',   time: '14 Apr 2026, 12:44', detail: 'Le Jardin link clicked' },
-                      { engine: 'Upsell',      action: 'Spa package offered',              result: 'Ignored',   time: '13 Apr 2026, 10:30', detail: 'No response after 48h' },
-                      { engine: 'Reservation', action: 'Booking confirmation sent',        result: 'Delivered', time: '10 Apr 2026, 08:00', detail: 'Email + WhatsApp' },
-                    ].map((entry, i) => (
-                      <div key={i} className="flex gap-4 py-3 border-b border-[#F4F5F7] last:border-0">
-                        <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                          <div className="w-2 h-2 rounded-full bg-[#2355A7] mt-1" />
-                          {i < 6 && <div className="w-px flex-1 bg-[#EDEEF1]" />}
-                        </div>
-                        <div className="flex-1 min-w-0 pb-1">
-                          <div className="flex items-center justify-between gap-2 mb-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-semibold text-[#3D4550]">{entry.engine}</span>
-                              <span className={cn(
-                                'text-[10px] font-medium px-1.5 py-0.5 rounded-md',
-                                entry.result === 'Accepted' || entry.result === 'Clicked' ? 'bg-[#EEF2FC] text-[#2355A7]' :
-                                entry.result === 'Delivered' || entry.result === 'Opened' ? 'bg-[#F6F7F9] text-[#5C6370]' :
-                                'bg-[#F6F7F9] text-[#C4C8CF]'
-                              )}>{entry.result}</span>
-                            </div>
-                            <span className="text-[11px] text-[#C4C8CF] flex-shrink-0">{entry.time}</span>
-                          </div>
-                          <p className="text-[12px] text-[#5C6370]">{entry.action}</p>
-                          <p className="text-[11px] text-[#8B9299] mt-0.5">{entry.detail}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* SIGNALS */}
-                {guestProfileTab === 'signals' && (
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Satisfaction history</p>
-                      {[
-                        { date: '21 Apr 2026', score: 5, note: 'Loved the champagne welcome and room setup' },
-                        { date: '12 Mar 2025', score: 4, note: 'Slight delay at check-in, otherwise excellent' },
-                        { date: '5 Aug 2024',  score: 3, note: 'Noise from adjacent room disrupted sleep' },
-                        { date: '3 Jun 2023',  score: 5, note: 'Perfect anniversary stay' },
-                      ].map((s, i) => (
-                        <div key={i} className="py-3 border-b border-[#F4F5F7] last:border-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex gap-0.5">
-                              {[1,2,3,4,5].map(j => (
-                                <Star key={j} className={cn('w-3.5 h-3.5', j <= s.score ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
-                              ))}
-                            </div>
-                            <span className="text-[11px] text-[#8B9299]">{s.date}</span>
-                          </div>
-                          <p className="text-[12px] text-[#5C6370]">{s.note}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Sentiment tags</p>
-                      <div className="flex flex-wrap gap-1.5 mb-5">
-                        {['Loyal', 'Anniversary stay', 'High spender', 'Promo-sensitive', 'Quiet preference', 'Romance traveller'].map(tag => (
-                          <span key={tag} className="text-[11px] text-[#2355A7] bg-[#EEF2FC] px-2.5 py-1 rounded-full">{tag}</span>
-                        ))}
-                      </div>
-                      <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-3">Complaints</p>
-                      <div className="space-y-2">
-                        {[
-                          { date: '5 Aug 2024', text: 'Noise from adjacent room', resolved: true },
-                          { date: '12 Mar 2025', text: 'Check-in wait time exceeded 15 min', resolved: true },
-                        ].map((c, i) => (
-                          <div key={i} className="p-3 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-[11px] text-[#8B9299]">{c.date}</span>
-                              <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-md', c.resolved ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#8B9299]')}>
-                                {c.resolved ? 'Resolved' : 'Open'}
-                              </span>
-                            </div>
-                            <p className="text-[12px] text-[#5C6370]">{c.text}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* CALLS */}
-                {guestProfileTab === 'calls' && (
-                  <div className="space-y-0">
-                    {[
-                      { dir: 'in',  duration: '3m 42s', date: '21 Apr 2026, 10:30', agent: 'Elena K.',  status: 'answered', topic: 'Rose petals & dinner reservation' },
-                      { dir: 'out', duration: '1m 15s', date: '20 Apr 2026, 14:00', agent: 'Sophie M.', status: 'answered', topic: 'Check-in time confirmation' },
-                      { dir: 'in',  duration: '—',      date: '18 Apr 2026, 09:22', agent: '—',          status: 'missed',   topic: '' },
-                      { dir: 'out', duration: '5m 08s', date: '15 Apr 2026, 16:45', agent: 'Elena K.',  status: 'answered', topic: 'Booking modification' },
-                      { dir: 'in',  duration: '2m 30s', date: '10 Apr 2026, 11:00', agent: 'Sophie M.', status: 'answered', topic: 'Welcome call' },
-                    ].map((call, i) => (
-                      <div key={i} className="flex gap-4 py-3.5 border-b border-[#F4F5F7] last:border-0">
-                        <div className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold',
-                          call.dir === 'in' ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#5C6370]',
-                        )}>
-                          {call.dir === 'in' ? '↙' : '↗'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-[12px] font-semibold text-[#3D4550]">{call.dir === 'in' ? 'Inbound' : 'Outbound'} · {call.duration}</p>
-                            <span className="text-[11px] text-[#8B9299] flex-shrink-0">{call.date}</span>
-                          </div>
-                          {call.topic && <p className="text-[12px] text-[#5C6370] mt-0.5">{call.topic}</p>}
-                          <div className="flex items-center gap-3 mt-1.5">
-                            {call.agent !== '—' && <span className="text-[11px] text-[#8B9299]">Agent: {call.agent}</span>}
-                            {call.status === 'answered' && (
-                              <>
-                                <button className="text-[11px] font-medium text-[#2355A7] hover:underline">▶ Listen</button>
-                                <button className="text-[11px] font-medium text-[#2355A7] hover:underline">Transcript</button>
-                              </>
-                            )}
-                            {call.status === 'missed' && <span className="text-[11px] text-[#8B9299] bg-[#F6F7F9] px-2 py-0.5 rounded-md">Missed</span>}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* TAGS */}
-                {guestProfileTab === 'tags' && (() => {
-                  const suggested = ['VIP', 'Returning', 'Loyal', 'Anniversary', 'High spender', 'Corporate', 'Group booking', 'Long stay', 'Early bird', 'Promo-sensitive', 'Quiet preference', 'Late checkout'];
-                  const addTag = (t: string) => {
-                    const tag = t.trim();
-                    if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
-                    setNewTagInput('');
-                  };
-                  return (
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Active tags</p>
-                          <div className="flex flex-wrap gap-1.5 min-h-[40px]">
-                            {editableTags.length > 0 ? editableTags.map(tag => (
-                              <span key={tag} className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#2355A7] bg-[#EEF2FC] pl-3 pr-1.5 py-1 rounded-full">
-                                {tag}
-                                <button onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
-                                  className="w-4 h-4 flex items-center justify-center text-[#2355A7]/50 hover:text-[#2355A7] transition-colors rounded-full hover:bg-[#BED4F6]/40">×</button>
-                              </span>
-                            )) : <p className="text-[13px] text-[#C4C8CF] italic">No tags yet.</p>}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Add tag</p>
-                          <div className="flex gap-2">
-                            <input value={newTagInput} onChange={e => setNewTagInput(e.target.value)}
-                              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ',') && newTagInput.trim()) { e.preventDefault(); addTag(newTagInput.replace(/,$/, '')); } }}
-                              placeholder="Type and press Enter…"
-                              className="flex-1 h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#3D4550] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white" />
-                            <button onClick={() => addTag(newTagInput)} disabled={!newTagInput.trim()}
-                              className="h-9 px-4 rounded-xl bg-[#2355A7] text-white text-[12px] font-semibold disabled:opacity-30 hover:bg-[#1c4490] transition-colors">Add</button>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider mb-2">Suggestions</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {suggested.filter(t => !editableTags.includes(t)).map(tag => (
-                              <button key={tag} onClick={() => addTag(tag)}
-                                className="text-[12px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-dashed border-[#EDEEF1] px-3 py-1 rounded-full hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#EEF2FC] transition-colors">
-                                + {tag}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-[#2355A7] uppercase tracking-wider">Notes</p>
-                        <textarea value={editableNotes} onChange={e => setEditableNotes(e.target.value)}
-                          rows={10} placeholder="Add a note about this guest…"
-                          className="w-full resize-none text-[13px] text-[#3D4550] rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] px-4 py-3 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed" />
-                        <button onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
-                          className="w-full h-9 rounded-xl bg-[#2355A7] text-white text-[12px] font-semibold hover:bg-[#1c4490] transition-colors">Save notes</button>
-                      </div>
-                    </div>
-                  );
-                })()}
-
               </div>
+
+              {/* Status menu removed */}
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* ── Center: thread ── */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#F9F9F9]">
-        {/* Thread header */}
-        <div className="bg-white border-b border-[#EDEEF1] px-5 py-3 flex items-center gap-2 flex-shrink-0">
-          {/* Spacer — pushes controls to the right */}
-          <div className="flex-1" />
-
-          {/* Assignment + status (keep compact) */}
-          <div className="relative">
-            <button
-              onClick={() => setAssigneeOpen(v => !v)}
-              className="h-8 px-3 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-medium text-[#5C6370] flex items-center gap-2 hover:bg-white transition-colors"
-              title="Department / employee"
-            >
-              <span className="text-[#8B9299]">{assignee?.department ?? 'Unassigned'}</span>
-              <span className="text-[#5C6370] font-semibold">{assignee?.name?.split(' ')[0] ?? '—'}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#8B9299]" />
-            </button>
-            {assigneeOpen && (
-              <div className="absolute right-0 mt-2 w-[260px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-1.5">
-                <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Departments</p>
-                {Array.from(new Set(mockUsers.map(u => u.department))).map(dep => (
-                  <div key={dep} className="px-1.5 py-1">
-                    <div className="px-1.5 py-1 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">
-                      {dep}
-                    </div>
-                    {mockUsers.filter(u => u.department === dep).map(u => (
-                      <button
-                        key={u.id}
-                        onClick={() => {
-                          setAssigneeOpen(false);
-                          setActiveConv(prev => ({ ...prev, assignedTo: u.id }));
-                          addToast({ type: 'success', title: 'Assigned', message: `${u.name}` });
-                        }}
-                        className="w-full px-2.5 py-2 rounded-lg hover:bg-[#F6F7F9] transition-colors flex items-center justify-between text-[12px]"
-                      >
-                        <span className="font-medium text-[#5C6370]">{u.name}</span>
-                        <span className="text-[#8B9299]">{u.role}</span>
-                      </button>
-                    ))}
-                  </div>
-                ))}
-                <div className="my-1 h-px bg-[#EDEEF1]" />
-                <button
-                  onClick={() => { setAssigneeOpen(false); setActiveConv(prev => ({ ...prev, assignedTo: null })); }}
-                  className="w-full px-2.5 py-2 rounded-lg hover:bg-[#F6F7F9] transition-colors text-left text-[12px] font-medium text-[#5C6370]"
-                >
-                  Unassign
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Status dropdown (spec UA list) */}
-          <div className="relative">
-            <button
-              onClick={() => setStatusOpen(v => !v)}
-              className="h-8 px-3 rounded-lg bg-white border border-[#EDEEF1] text-[12px] font-semibold text-[#0E1013] flex items-center gap-2 hover:bg-[#F6F7F9] transition-colors"
-              title="Status"
-            >
-              <span className="text-[#2355A7]">{statusLabel(activeConv.status)}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#8B9299]" />
-            </button>
-            {statusOpen && (
-              <div className="absolute right-0 mt-2 w-[220px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-1.5">
-                <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Status</p>
-                {conversationStatusOptions.map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => {
-                      setStatusOpen(false);
-                      setActiveConv(prev => ({ ...prev, status: opt.id }));
-                      addToast({ type: 'info', title: 'Status updated', message: opt.label });
-                    }}
-                    className={cn(
-                      'w-full px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors',
-                      activeConv.status === opt.id ? 'bg-[#EEF2FC] text-[#0E1013]' : 'text-[#5C6370] hover:bg-[#F6F7F9] hover:text-[#0E1013]',
-                    )}
-                  >
-                    <span className="font-medium">{opt.label}</span>
-                    {activeConv.status === opt.id && <span className="text-[#2355A7] font-semibold">•</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Separator */}
-          <div className="w-px h-5 bg-[#EDEEF1] mx-1" />
-
-          {/* ── Group 1: Guest actions ── */}
-          <button
-            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'info', title: 'Booking flow opened' })}
-            title="Create / edit booking"
-          >
-            <Plus className="w-3.5 h-3.5" /> Booking
-          </button>
-          <button
-            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'success', title: 'Upsell sent' })}
-            title="Send upsell offer"
-          >
-            <Star className="w-3.5 h-3.5" /> Upsell
-          </button>
-          <button
-            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'info', title: 'Online check-in initiated' })}
-            title="Online check-in"
-          >
-            <CheckCircle className="w-3.5 h-3.5" /> Check-in
-          </button>
-          <button
-            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'info', title: 'Feedback request sent' })}
-            title="Request guest feedback"
-          >
-            <FileText className="w-3.5 h-3.5" /> Feedback
-          </button>
-
-          {/* ── Separator ── */}
-          <div className="w-px h-5 bg-[#EDEEF1] mx-1" />
-
-          {/* ── Group 2: Conversation actions ── */}
-          <button
-            className="h-8 px-2.5 rounded-lg text-[12px] font-medium text-[#5C6370] flex items-center gap-1.5 hover:bg-[#F6F7F9] hover:text-[#0E1013] transition-colors"
-            onClick={() => addToast({ type: 'warning', title: 'Conversation escalated' })}
-            title="Escalate conversation"
-          >
-            <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
-          </button>
-          <button
-            className="h-8 px-3 rounded-lg text-[12px] font-semibold text-white bg-[#2355A7] flex items-center gap-1.5 hover:bg-[#1f4b93] transition-colors"
-            onClick={() => addToast({ type: 'success', title: 'Conversation resolved' })}
-            title="Mark as resolved"
-          >
-            <CheckCircle className="w-3.5 h-3.5" /> Resolve
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          {activeConv.messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-[13px] text-[#8B9299]">
-              No messages yet.
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {activeConv.messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-[14px] text-[#8B9299]">
+                  No messages yet.
+                </div>
+              ) : (
+                <>
+                  {threadSystemEvents.map((e, i) => <SystemEvent key={`${e}-${i}`} text={e} />)}
+                  {activeConv.messages.map(msg => (
+                    <Bubble
+                      key={msg.id}
+                      msg={msg}
+                      translatorEnabled={translatorEnabled}
+                      translateGuestToMy={translateGuestToMy}
+                      guestLang={translator.read}
+                      myLang={myLang}
+                      showOriginalById={showOriginalById}
+                      toggleOriginal={toggleOriginal}
+                    />
+                  ))}
+                </>
+              )}
             </div>
-          ) : (
-            <>
-              {threadSystemEvents.map((e, i) => <SystemEvent key={`${e}-${i}`} text={e} />)}
-              {activeConv.messages.map(msg => (
-                <Bubble
-                  key={msg.id}
-                  msg={msg}
-                  translatorEnabled={translatorEnabled}
-                  translateGuestToMy={translateGuestToMy}
-                  guestLang={translator.read}
-                  myLang={myLang}
-                  showOriginalById={showOriginalById}
-                  toggleOriginal={toggleOriginal}
-                />
-              ))}
-            </>
-          )}
-        </div>
 
-        {/* ── Reply box ── */}
-        <div className="bg-white border-t border-[#EDEEF1] flex-shrink-0">
+            {/* ── Reply box ── */}
+            <div className="bg-white border-t border-[#EDEEF1] flex-shrink-0">
 
           {/* ── Zone B: Compose ──────────────────────────────────────────────
                HOW the message is composed: mode tabs + translator + textarea  */}
@@ -1984,16 +1646,32 @@ export function InboxPage() {
               size="sm"
               variant="primary"
               onClick={handleSend}
-              disabled={!replyText.trim()}
+              disabled={!replyText.trim() || !activeConv}
             >
               <Send className="w-3.5 h-3.5" /> Send
             </Button>
           </div>
         </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center px-8">
+            <div className="flex items-start gap-4 max-w-[560px]">
+              <div className="w-12 h-12 rounded-2xl bg-[#F6F7F9] border border-[#EDEEF1] flex items-center justify-center flex-shrink-0">
+                <ArrowLeft className="w-6 h-6 text-[#2355A7]" />
+              </div>
+              <div className="pt-1">
+                <h2 className="text-[14px] font-semibold text-[#3D4550] mb-1">Select a chat on the left</h2>
+                <p className="text-[12px] text-[#8B9299] leading-relaxed">
+                  Click any conversation to open the thread and start replying.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Right: guest sidebar ── */}
-      <div className="w-[272px] flex-shrink-0 border-l border-[#EDEEF1] bg-white overflow-y-auto">
+      <div className="w-[272px] flex-shrink-0 border-l border-[#EDEEF1] bg-white relative overflow-hidden">
         {guest ? (
           <>
             {/* ── Guest identity block ── */}
@@ -2027,10 +1705,6 @@ export function InboxPage() {
                       <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
                         onClick={() => { setProfileMenuOpen(false); setMergeOpen(true); }}>
                         <ArrowLeftRight className="w-3.5 h-3.5 text-[#8B9299]" /> Merge profiles…
-                      </button>
-                      <button className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] font-medium text-[#0E1013] hover:bg-[#F6F7F9] transition-colors flex items-center gap-2"
-                        onClick={() => { setProfileMenuOpen(false); setGuestProfileOpen(true); }}>
-                        <ArrowUpRight className="w-3.5 h-3.5 text-[#8B9299]" /> Open full profile
                       </button>
                       <div className="my-1 h-px bg-[#EDEEF1]" />
                       <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">Conversation</p>
@@ -2071,277 +1745,508 @@ export function InboxPage() {
                 </div>
               )}
 
-              {/* Key stats row */}
-              <div className="mt-3 flex items-stretch gap-0 divide-x divide-[#EDEEF1]">
-                <div className="flex-1 pr-3">
-                  <p className="text-[10px] text-[#8B9299]">Stays</p>
-                  <p className="text-[20px] font-semibold text-[#5C6370] tabular-nums leading-tight mt-0.5"
-                    style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
-                </div>
-                <div className="flex-1 px-3">
-                  <p className="text-[10px] text-[#8B9299]">Lifetime value</p>
-                  <p className="text-[13px] font-semibold text-[#5C6370] tabular-nums leading-tight mt-0.5"
-                    style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
-                </div>
-                {guest.satisfactionScore && (
-                  <div className="flex-1 pl-3">
-                    <p className="text-[10px] text-[#8B9299]">Rating</p>
-                    <div className="flex items-center gap-0.5 mt-1.5">
-                      {[1,2,3,4,5].map(i => (
-                        <Star key={i} className={cn('w-3 h-3',
-                          i <= (guest.satisfactionScore ?? 0) ? 'fill-[#2355A7] text-[#2355A7]' : 'text-[#D1CFCF] fill-transparent')} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Key stats row removed */}
             </div>
 
-            {/* ── Icon tabs — 9 items, evenly distributed ── */}
+            {/* ── Menu + sliding detail panel ── */}
             {(() => {
-              const tabs = [
-                { id: 'info',    label: 'Info',     icon: User      },
-                { id: 'stay',    label: 'Stay',     icon: BedDouble },
-                { id: 'calls',   label: 'Calls',    icon: PhoneCall },
-                { id: 'tags',    label: 'Tags',     icon: Tag       },
+              const menu = [
+                { id: 'info' as const,        label: 'User info',            icon: User },
+                { id: 'reservation' as const, label: 'Reservations',         icon: BedDouble },
+                { id: 'pms' as const,         label: 'PMS data',              icon: Database },
+                { id: 'actions' as const,     label: 'Quick actions',        icon: Activity },
+                { id: 'engines' as const,     label: 'Engines log',          icon: Zap },
+                { id: 'signals' as const,     label: 'Satisfaction signals', icon: TrendingUp },
+                { id: 'properties' as const,  label: 'User properties',      icon: Settings2 },
+                { id: 'calls' as const,       label: 'Calls',                icon: PhoneCall },
+                { id: 'tags_notes' as const,  label: 'Tags & notes',         icon: Tag },
               ];
-              const active = tabs.find(t => t.id === profileTab);
+
+              const activeMeta = menu.find(m => m.id === guestSidebarSection) ?? menu[0];
+              const openSection = (id: GuestSidebarSection) => {
+                setGuestSidebarSection(id);
+                setGuestSidebarOpen(true);
+              };
+
               return (
                 <>
-                  <div className="flex border-b border-[#EDEEF1] px-1 py-1.5 gap-0.5">
-                    {tabs.map(({ id, label, icon: Icon }) => {
-                      const isActive = profileTab === id;
-                      return (
-                        <button
-                          key={id}
-                          onClick={() => setProfileTab(id)}
-                          title={label}
-                          className={cn(
-                            'flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg transition-colors',
-                            isActive
-                              ? 'bg-[#EEF2FC] text-[#2355A7]'
-                              : 'text-[#C4C8CF] hover:text-[#5C6370] hover:bg-[#F6F7F9]',
-                          )}
-                        >
-                          <Icon className="w-3.5 h-3.5" />
-                          <span className={cn('text-[8px] font-semibold leading-none', isActive ? 'text-[#2355A7]' : 'text-[#C4C8CF]')}>
-                            {label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {/* Active section label */}
-                  <div className="px-4 pt-3 pb-0">
-                    <p className="text-[11px] font-semibold text-[#0E1013]">{active?.label}</p>
-                  </div>
-                </>
-              );
-            })()}
-
-            {/* ── Tab content ── */}
-            <div className="p-4 space-y-4">
-
-              {/* INFO */}
-              {profileTab === 'info' && (
-                <>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Contact</p>
-                    <div className="flex items-center gap-2 text-[12px] text-[#5C6370]">
-                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-[#C4C8CF]" />
-                      <span className="truncate">{guest.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[12px] text-[#5C6370]">
-                      <Phone className="w-3.5 h-3.5 flex-shrink-0 text-[#C4C8CF]" />
-                      <span>{guest.phone}</span>
-                    </div>
-                  </div>
-                  {guest.notes && (
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Guest notes</p>
-                      <p className="text-[12px] text-[#5C6370] leading-relaxed bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">{guest.notes}</p>
-                    </div>
-                  )}
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Tags</p>
-                    <div className="flex flex-wrap gap-1">
-                      {editableTags.map(tag => (
-                        <span key={tag} className="text-[11px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] px-2 py-0.5 rounded-md">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* STAY */}
-              {profileTab === 'stay' && reservation && (
-                <div className="space-y-0">
-                  <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Current reservation</p>
-                  {[
-                    ['Ref',       reservation.bookingRef],
-                    ['Room',      `${reservation.roomType} · #${reservation.roomNumber}`],
-                    ['Check-in',  formatDate(reservation.checkIn)],
-                    ['Check-out', formatDate(reservation.checkOut)],
-                    ['Rate',      reservation.rateCode],
-                    ['Rate/night',formatCurrency(reservation.ratePerNight)],
-                    ['Total',     formatCurrency(reservation.totalAmount)],
-                    ['Adults',    String(reservation.adults)],
-                    ['Channel',   reservation.channel],
-                  ].map(([label, val]) => (
-                    <div key={label} className="flex justify-between items-baseline py-1.5 border-b border-[#F4F5F7] last:border-0">
-                      <span className="text-[11px] text-[#8B9299]">{label}</span>
-                      <span className="text-[12px] font-medium text-[#5C6370] text-right max-w-[150px] truncate">{val}</span>
-                    </div>
-                  ))}
-                  {reservation.specialRequests.length > 0 && (
-                    <div className="pt-3">
-                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-1.5">Special requests</p>
-                      {reservation.specialRequests.map(r => (
-                        <p key={r} className="text-[12px] text-[#5C6370] leading-relaxed py-0.5">· {r}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-              {profileTab === 'stay' && !reservation && (
-                <p className="text-[12px] text-[#8B9299]">No active reservation.</p>
-              )}
-
-              {/* CALLS */}
-              {profileTab === 'calls' && (
-                <div className="space-y-0">
-                  <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Call history</p>
-                  {[
-                    { dir: 'in',  duration: '3m 42s', date: '21 Apr, 10:30', status: 'answered'  },
-                    { dir: 'out', duration: '1m 15s', date: '20 Apr, 14:00', status: 'answered'  },
-                    { dir: 'in',  duration: '—',      date: '18 Apr, 09:22', status: 'missed'    },
-                    { dir: 'out', duration: '5m 08s', date: '15 Apr, 16:45', status: 'answered'  },
-                  ].map((call, i) => (
-                    <div key={i} className="flex gap-2.5 py-2.5 border-b border-[#F4F5F7] last:border-0">
-                      <div className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold',
-                        call.dir === 'in' ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#5C6370]',
-                      )}>
-                        {call.dir === 'in' ? '↙' : '↗'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                          <p className="text-[12px] font-medium text-[#0E1013]">{call.dir === 'in' ? 'Inbound' : 'Outbound'}</p>
-                          <span className={cn('text-[10px] font-medium', call.status === 'missed' ? 'text-[#8B9299]' : 'text-[#5C6370]')}>{call.duration}</span>
-                        </div>
-                        <p className="text-[10px] text-[#8B9299] mt-0.5">{call.date}</p>
-                        <div className="flex gap-1.5 mt-1.5">
-                          {call.status === 'answered' && (
-                            <>
-                              <button className="text-[10px] font-medium text-[#2355A7] hover:underline">▶ Listen</button>
-                              <span className="text-[#D1CFCF]">·</span>
-                              <button className="text-[10px] font-medium text-[#2355A7] hover:underline">Transcript</button>
-                            </>
-                          )}
-                          {call.status === 'missed' && (
-                            <span className="text-[10px] text-[#8B9299]">Missed call</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* TAGS */}
-              {profileTab === 'tags' && (() => {
-                const suggested = [
-                  'VIP', 'Returning', 'Loyal', 'Anniversary', 'High spender',
-                  'Corporate', 'Group booking', 'Long stay', 'Early bird',
-                  'Promo-sensitive', 'Quiet preference', 'Late checkout',
-                ];
-                const addTag = (t: string) => {
-                  const tag = t.trim();
-                  if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
-                  setNewTagInput('');
-                };
-                return (
-                  <>
-                    {/* Active tags */}
-                    <div className="space-y-2">
-                      {editableTags.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {editableTags.map(tag => (
-                            <span key={tag} className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0E1013] bg-[#0E1013]/[0.06] pl-2.5 pr-1.5 py-1 rounded-full">
-                              {tag}
-                              <button
-                                onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
-                                className="w-3.5 h-3.5 flex items-center justify-center text-[#8B9299] hover:text-[#0E1013] transition-colors rounded-full hover:bg-[#0E1013]/10 text-[12px] leading-none"
-                              >×</button>
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[12px] text-[#C4C8CF] italic">No tags yet. Add from suggestions or type below.</p>
-                      )}
-                    </div>
-
-                    {/* Input */}
-                    <div className="flex gap-1.5">
-                      <input
-                        value={newTagInput}
-                        onChange={e => setNewTagInput(e.target.value)}
-                        onKeyDown={e => {
-                          if ((e.key === 'Enter' || e.key === ',') && newTagInput.trim()) {
-                            e.preventDefault();
-                            addTag(newTagInput.replace(/,$/, ''));
-                          }
-                        }}
-                        placeholder="Type tag and press Enter…"
-                        className="flex-1 h-8 px-3 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[12px] text-[#0E1013] placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white"
-                      />
-                      <button
-                        onClick={() => addTag(newTagInput)}
-                        disabled={!newTagInput.trim()}
-                        className="h-8 px-3 rounded-lg bg-[#0E1013] text-white text-[11px] font-semibold disabled:opacity-30 hover:bg-[#1a1f26] transition-colors"
-                      >Add</button>
-                    </div>
-
-                    {/* Suggestions */}
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Suggestions</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {suggested.filter(t => !editableTags.includes(t)).map(tag => (
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-2">
+                      <div className="rounded-2xl border border-[#EDEEF1] bg-white overflow-hidden">
+                        {menu.map(({ id, label, icon: Icon }) => (
                           <button
-                            key={tag}
-                            onClick={() => addTag(tag)}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] border-dashed px-2.5 py-0.5 rounded-full hover:border-[#2355A7] hover:text-[#2355A7] hover:bg-[#EEF2FC] transition-colors"
+                            key={id}
+                            onClick={() => openSection(id)}
+                            className="w-full px-3 py-2.5 flex items-center gap-2.5 hover:bg-[#F6F7F9] transition-colors border-b border-[#F4F5F7] last:border-0"
                           >
-                            + {tag}
+                            <div className="w-8 h-8 rounded-xl bg-[#F6F7F9] border border-[#EDEEF1] flex items-center justify-center flex-shrink-0">
+                              <Icon className="w-4 h-4 text-[#5C6370]" />
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <p className="text-[12px] font-semibold text-[#5C6370] truncate">{label}</p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-[#C4C8CF] flex-shrink-0" />
                           </button>
                         ))}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Notes */}
-                    <div className="space-y-1.5 pt-1 border-t border-[#EDEEF1]">
-                      <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider pt-1">Notes</p>
-                      <textarea
-                        value={editableNotes}
-                        onChange={e => setEditableNotes(e.target.value)}
-                        rows={4}
-                        placeholder="Add a note about this guest…"
-                        className="w-full resize-none text-[12px] text-[#0E1013] rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] px-3 py-2.5 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed"
-                      />
+                  {/* Sliding detail */}
+                  <div
+                    className={cn(
+                      'absolute inset-0 bg-white flex flex-col transition-transform duration-200 ease-out',
+                      guestSidebarOpen ? 'translate-x-0' : 'translate-x-full',
+                    )}
+                    aria-hidden={!guestSidebarOpen}
+                  >
+                    <div className="px-3 py-3 border-b border-[#EDEEF1] flex items-center gap-2">
                       <button
-                        onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
-                        className="w-full h-8 rounded-lg bg-[#F6F7F9] border border-[#EDEEF1] text-[11px] font-semibold text-[#5C6370] hover:bg-[#0E1013] hover:text-white hover:border-[#0E1013] transition-colors"
-                      >Save notes</button>
+                        onClick={() => setGuestSidebarOpen(false)}
+                        className="w-8 h-8 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] flex items-center justify-center hover:bg-white transition-colors"
+                        title="Back"
+                      >
+                        <ArrowLeft className="w-4 h-4 text-[#5C6370]" />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[12px] font-semibold text-[#5C6370] truncate">{activeMeta.label}</p>
+                        <p className="text-[10px] text-[#8B9299] truncate">{guest.name}</p>
+                      </div>
+                      <button
+                        onClick={() => setGuestSidebarOpen(false)}
+                        className="w-8 h-8 rounded-xl hover:bg-[#F6F7F9] text-[#8B9299] hover:text-[#3D4550] transition-colors flex items-center justify-center"
+                        title="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                  </>
-                );
-              })()}
 
-            </div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                      {/* INFO */}
+                      {guestSidebarSection === 'info' && (
+                        <>
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Contact</p>
+                            <div className="flex items-center gap-2 text-[12px] text-[#5C6370]">
+                              <Mail className="w-3.5 h-3.5 flex-shrink-0 text-[#C4C8CF]" />
+                              <span className="truncate">{guest.email}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-[12px] text-[#5C6370]">
+                              <Phone className="w-3.5 h-3.5 flex-shrink-0 text-[#C4C8CF]" />
+                              <span className="truncate">{guest.phone}</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Profile</p>
+                            {[
+                              ['Nationality', guest.nationality],
+                              ['Language', guest.language.toUpperCase()],
+                              ['Source', guest.source],
+                              ['Preferred channel', channelLabels[guest.preferredChannel]],
+                              ['Status', guest.status],
+                            ].map(([k, v]) => (
+                              <div key={k} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
+                                <span className="text-[11px] text-[#8B9299]">{k}</span>
+                                <span className="text-[12px] font-medium text-[#3D4550] text-right max-w-[150px] truncate">{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* RESERVATIONS */}
+                      {guestSidebarSection === 'reservation' && (
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Current / upcoming reservation</p>
+                            {reservation ? (
+                              <div className="space-y-0">
+                                {[
+                                  ['Room', `#${reservation.roomNumber} · ${reservation.roomType}`],
+                                  ['Dates', `${formatDate(reservation.checkIn)} → ${formatDate(reservation.checkOut)}`],
+                                  ['Rate code', reservation.rateCode],
+                                  ['Rate/night', formatCurrency(reservation.ratePerNight)],
+                                ].map(([label, val]) => (
+                                  <div key={label} className="flex justify-between items-baseline py-2 border-b border-[#F4F5F7] last:border-0">
+                                    <span className="text-[11px] text-[#8B9299]">{label}</span>
+                                    <span className="text-[12px] font-medium text-[#3D4550] text-right max-w-[160px] truncate">{val}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-[12px] text-[#8B9299]">No active reservation.</p>
+                            )}
+                          </div>
+
+                          {reservation?.specialRequests?.length ? (
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Special requests</p>
+                              <div className="rounded-2xl border border-[#EDEEF1] bg-[#F9F9F9] p-3 space-y-1">
+                                {reservation.specialRequests.map(r => (
+                                  <p key={r} className="text-[12px] text-[#5C6370] leading-relaxed">- {r}</p>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+
+                      {/* PMS */}
+                      {guestSidebarSection === 'pms' && (
+                        <div className="space-y-3">
+                          <div className="rounded-2xl border border-[#EDEEF1] bg-white p-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Past visits</p>
+                              <p className="text-[12px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
+                            </div>
+                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F4F5F7]">
+                              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Total spend</p>
+                              <p className="text-[12px] font-semibold text-[#2355A7]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Preferences</p>
+                            <div className="rounded-2xl border border-[#EDEEF1] bg-[#F9F9F9] p-3 space-y-1">
+                              {[
+                                'Quiet room',
+                                'Late check-out',
+                                'High floor',
+                                'Extra pillows',
+                                'Non-smoking floor',
+                              ].map(p => (
+                                <div key={p} className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#BED4F6]" />
+                                  <p className="text-[12px] text-[#5C6370]">{p}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* QUICK ACTIONS */}
+                      {guestSidebarSection === 'actions' && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Quick actions</p>
+                          <div className="grid grid-cols-1 gap-2">
+                            <button
+                              onClick={() => addToast({ type: 'info', title: 'Booking', message: 'Create / edit booking (mock)' })}
+                              className="rounded-2xl border border-[#EDEEF1] bg-[#F6F7F9] hover:bg-white transition-colors px-3 py-3 text-left"
+                            >
+                              <div className="flex flex-col items-start">
+                                <p className="text-[12px] font-semibold text-[#3D4550] leading-tight">Create / edit booking</p>
+                                <p className="text-[10px] text-[#8B9299] mt-1 leading-tight">PMS / booking workflow</p>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => addToast({ type: 'success', title: 'Upsell', message: 'Upsell sent (mock)' })}
+                              className="rounded-2xl border border-[#BED4F6] bg-[#2355A7]/10 hover:bg-[#2355A7]/15 transition-colors px-3 py-3 text-left"
+                            >
+                              <div className="flex flex-col items-start">
+                                <p className="text-[12px] font-semibold text-[#2355A7] leading-tight">Send upsell</p>
+                                <p className="text-[10px] text-[#5C6370] mt-1 leading-tight">Offer add-ons to the guest</p>
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ENGINES LOG */}
+                      {guestSidebarSection === 'engines' && (
+                        <div className="space-y-0">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">All engine actions</p>
+                          {[
+                            { engine: 'Upsell',     action: 'Dinner package offered',         result: 'Accepted',  time: '21 Apr 2026, 11:15' },
+                            { engine: 'Arrival',    action: 'Pre-arrival message sent',      result: 'Delivered', time: '20 Apr 2026, 09:00' },
+                            { engine: 'Concierge',  action: 'Restaurant recommendation',     result: 'Clicked',   time: '14 Apr 2026, 12:44' },
+                            { engine: 'Reputation', action: 'Review request triggered',      result: 'Pending',   time: '15 Apr 2026, 18:00' },
+                          ].map((entry, i) => (
+                            <div key={i} className="py-2.5 border-b border-[#F4F5F7] last:border-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[12px] font-semibold text-[#3D4550] truncate">{entry.engine}</p>
+                                <span className="text-[10px] text-[#C4C8CF] flex-shrink-0">{entry.time}</span>
+                              </div>
+                              <p className="text-[12px] text-[#5C6370] mt-0.5">{entry.action}</p>
+                              <span className="inline-flex mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#F6F7F9] border border-[#EDEEF1] text-[#5C6370]">{entry.result}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* SIGNALS */}
+                      {guestSidebarSection === 'signals' && (
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Ratings</p>
+                            <div className="rounded-2xl border border-[#EDEEF1] bg-white p-3 space-y-2">
+                              {[
+                                { date: '21 Apr 2026', score: 5, note: 'Loved the room setup' },
+                                { date: '12 Mar 2025', score: 4, note: 'Small delay at check-in' },
+                              ].map((s, i) => (
+                                <div key={i} className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <div className="flex gap-0.5">
+                                      {[1,2,3,4,5].map(j => (
+                                        <Star key={j} className={cn('w-3 h-3', j <= s.score ? 'fill-[#2355A7] text-[#2355A7]' : 'fill-transparent text-[#D1CFCF]')} />
+                                      ))}
+                                    </div>
+                                    <p className="text-[11px] text-[#5C6370] mt-1 leading-relaxed">{s.note}</p>
+                                  </div>
+                                  <span className="text-[10px] text-[#8B9299] flex-shrink-0">{s.date}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Complaints</p>
+                            <div className="rounded-2xl border border-[#EDEEF1] bg-[#F9F9F9] p-3 space-y-2">
+                              {[
+                                { date: '5 Aug 2024', text: 'Noise from adjacent room', resolved: true },
+                                { date: '12 Mar 2025', text: 'Check-in wait time', resolved: true },
+                              ].map((c, i) => (
+                                <div key={i} className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="text-[12px] text-[#5C6370]">{c.text}</p>
+                                    <p className="text-[10px] text-[#C4C8CF] mt-0.5">{c.date}</p>
+                                  </div>
+                                  <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full border', c.resolved ? 'bg-[#EEF2FC] text-[#2355A7] border-[#BED4F6]' : 'bg-white text-[#8B9299] border-[#EDEEF1]')}>
+                                    {c.resolved ? 'Resolved' : 'Open'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Sentiment tags</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {['Loyal', 'Anniversary', 'Quiet preference', 'High spender'].map(t => (
+                                <span key={t} className="text-[11px] text-[#5C6370] bg-[#F6F7F9] border border-[#EDEEF1] px-2.5 py-1 rounded-full">{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* USER PROPERTIES */}
+                      {guestSidebarSection === 'properties' && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Automatically collected data</p>
+                          <div className="rounded-2xl border border-[#EDEEF1] bg-white p-3 space-y-2">
+                            {[
+                              ['UTM source', 'google / cpc'],
+                              ['Last website visit', '2d ago'],
+                              ['Viewed pages', 'Spa, Rooms, Restaurant'],
+                              ['Campaign', 'Spring getaway'],
+                              ['Device', 'Mobile'],
+                            ].map(([k, v]) => (
+                              <div key={k} className="flex justify-between items-baseline py-1.5 border-b border-[#F4F5F7] last:border-0">
+                                <span className="text-[11px] text-[#8B9299]">{k}</span>
+                                <span className="text-[12px] font-medium text-[#3D4550] text-right max-w-[160px] truncate">{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-[10px] text-[#8B9299] leading-relaxed">
+                            Configurable separately. Shown as an example.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* CALLS */}
+                      {guestSidebarSection === 'calls' && (
+                        <div className="space-y-0">
+                          <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-3">Inbound / outbound calls</p>
+                          {[
+                            { dir: 'in',  duration: '3m 42s', date: '21 Apr, 10:30', status: 'answered' },
+                            { dir: 'out', duration: '1m 15s', date: '20 Apr, 14:00', status: 'answered' },
+                            { dir: 'in',  duration: '—',      date: '18 Apr, 09:22', status: 'missed' },
+                            { dir: 'out', duration: '5m 08s', date: '15 Apr, 16:45', status: 'answered' },
+                          ].map((call, i) => (
+                            <div key={i} className="flex gap-2.5 py-2.5 border-b border-[#F4F5F7] last:border-0">
+                              <div className={cn(
+                                'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold',
+                                call.dir === 'in' ? 'bg-[#EEF2FC] text-[#2355A7]' : 'bg-[#F6F7F9] text-[#5C6370]',
+                              )}>
+                                {call.dir === 'in' ? '↙' : '↗'}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-[12px] font-medium text-[#0E1013]">{call.dir === 'in' ? 'Inbound' : 'Outbound'}</p>
+                                  <span className={cn('text-[10px] font-medium', call.status === 'missed' ? 'text-[#8B9299]' : 'text-[#5C6370]')}>{call.duration}</span>
+                                </div>
+                                <p className="text-[10px] text-[#8B9299] mt-0.5">{call.date}</p>
+                                <div className="flex gap-1.5 mt-1.5">
+                                  {call.status === 'answered' ? (
+                                    <>
+                                      <button className="text-[10px] font-medium text-[#2355A7] hover:underline">▶ Listen</button>
+                                      <span className="text-[#D1CFCF]">·</span>
+                                      <button className="text-[10px] font-medium text-[#2355A7] hover:underline">Transcript</button>
+                                    </>
+                                  ) : (
+                                    <span className="text-[10px] text-[#8B9299]">Missed call</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* TAGS + NOTES */}
+                      {guestSidebarSection === 'tags_notes' && (() => {
+                        const suggested = [
+                          'VIP', 'Returning', 'Loyal', 'Anniversary', 'High spender',
+                          'Corporate', 'Group booking', 'Long stay', 'Early bird',
+                          'Promo-sensitive', 'Quiet preference', 'Late checkout',
+                        ];
+                        const TAG_PALETTE = [
+                          { bg: '#FCE7F3', text: '#9D174D', border: '#FBCFE8' }, // pink
+                          { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' }, // amber
+                          { bg: '#DBEAFE', text: '#1D4ED8', border: '#BFDBFE' }, // blue
+                          { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' }, // green
+                          { bg: '#EDE9FE', text: '#5B21B6', border: '#DDD6FE' }, // violet
+                          { bg: '#F3F4F6', text: '#374151', border: '#E5E7EB' }, // gray
+                        ] as const;
+                        const tagStyle = (t: string) => {
+                          const idx = Math.abs(Array.from(t).reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)) % TAG_PALETTE.length;
+                          return TAG_PALETTE[idx];
+                        };
+                        const addTag = (t: string) => {
+                          const tag = t.trim();
+                          if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
+                          setNewTagInput('');
+                        };
+                        return (
+                          <>
+                            <div className="rounded-2xl border border-[#EDEEF1] bg-white overflow-hidden">
+                              <div className="px-4 py-3 border-b border-[#F4F5F7] flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Tag className="w-4 h-4 text-[#8B9299]" />
+                                  <p className="text-[12px] font-semibold text-[#5C6370]">Tags</p>
+                                </div>
+                                <ChevronDown className="w-4 h-4 text-[#C4C8CF]" />
+                              </div>
+
+                              <div className="px-4 py-3 border-b border-[#F4F5F7]">
+                                {editableTags.length === 0 ? (
+                                  <p className="text-[12px] text-[#8B9299]">This user has no tags</p>
+                                ) : (
+                                  <div className="flex flex-wrap gap-2">
+                                    {editableTags.map(tag => {
+                                      const s = tagStyle(tag);
+                                      return (
+                                        <button
+                                          key={tag}
+                                          onClick={() => setEditableTags(prev => prev.filter(t => t !== tag))}
+                                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider"
+                                          style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
+                                          title="Remove tag"
+                                        >
+                                          {tag}
+                                          <span className="text-[12px] leading-none opacity-70">×</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="px-4 py-3 border-b border-[#F4F5F7]">
+                                <button
+                                  className="w-full h-10 px-3 rounded-xl border border-[#EDEEF1] bg-white text-left text-[12px] text-[#8B9299] flex items-center justify-between"
+                                  onClick={() => { /* noop: visual only */ }}
+                                  type="button"
+                                >
+                                  <span className="truncate">
+                                    {newTagInput.trim() ? newTagInput : 'Find and add a tag…'}
+                                  </span>
+                                  <ChevronDown className="w-4 h-4 text-[#C4C8CF] flex-shrink-0" />
+                                </button>
+                                <input
+                                  value={newTagInput}
+                                  onChange={e => setNewTagInput(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter' && newTagInput.trim()) {
+                                      e.preventDefault();
+                                      addTag(newTagInput);
+                                    }
+                                  }}
+                                  className="sr-only"
+                                  aria-label="Find and add a tag"
+                                />
+                              </div>
+
+                              <div className="px-4 py-3">
+                                <div className="rounded-xl border border-[#EDEEF1] bg-white">
+                                  <div className="max-h-[210px] overflow-y-auto p-3 flex flex-wrap gap-2">
+                                    {suggested.map(tag => {
+                                      const s = tagStyle(tag);
+                                      const isSelected = editableTags.includes(tag);
+                                      return (
+                                        <button
+                                          key={tag}
+                                          onClick={() => (isSelected ? null : addTag(tag))}
+                                          disabled={isSelected}
+                                          className={cn(
+                                            'px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider transition-colors',
+                                            isSelected ? 'opacity-40 cursor-default' : 'hover:opacity-90',
+                                          )}
+                                          style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
+                                        >
+                                          {tag}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="border-t border-[#F4F5F7] p-3">
+                                    <button
+                                      onClick={() => addTag(newTagInput || 'New tag')}
+                                      className="w-full h-10 rounded-xl border border-[#BED4F6] bg-[#2355A7]/10 text-[#2355A7] text-[12px] font-semibold hover:bg-[#2355A7]/15 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                      Create new tag
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1.5 pt-1 border-t border-[#EDEEF1]">
+                              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider pt-1">Notes</p>
+                              <textarea
+                                value={editableNotes}
+                                onChange={e => setEditableNotes(e.target.value)}
+                                rows={6}
+                                placeholder="Add a note about this guest…"
+                                className="w-full resize-none text-[12px] text-[#0E1013] rounded-2xl border border-[#EDEEF1] bg-[#F9F9F9] px-3 py-2.5 placeholder:text-[#C4C8CF] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white leading-relaxed"
+                              />
+                              <button
+                                onClick={() => addToast({ type: 'success', title: 'Notes saved' })}
+                                className="w-full h-9 rounded-xl bg-[#F6F7F9] border border-[#EDEEF1] text-[12px] font-semibold text-[#5C6370] hover:bg-white hover:text-[#3D4550] transition-colors"
+                              >Save notes</button>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </>
         ) : (
-          <div className="flex items-center justify-center h-32 text-[13px] text-[#8B9299]">
-            No guest profile.
+          <div className="h-full flex items-center justify-center p-6">
+            <div className="w-full rounded-2xl border border-[#EDEEF1] bg-[#F9F9F9] p-5 text-center">
+              <div className="w-11 h-11 rounded-2xl bg-white border border-[#EDEEF1] flex items-center justify-center mx-auto mb-3">
+                <User className="w-5 h-5 text-[#8B9299]" />
+              </div>
+              <p className="text-[12px] font-semibold text-[#3D4550]">No guest selected</p>
+              <p className="text-[10px] text-[#8B9299] mt-1 leading-relaxed">
+                Open a conversation on the left to view the guest profile.
+              </p>
+            </div>
           </div>
         )}
       </div>

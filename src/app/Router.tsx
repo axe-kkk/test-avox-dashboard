@@ -10,8 +10,8 @@ function ComingSoonPage({ label }: { label: string }) {
         <div className="w-14 h-14 rounded-2xl bg-[#EEF2FC] flex items-center justify-center mx-auto mb-4">
           <Icon className="w-7 h-7 text-[#2355A7]" />
         </div>
-        <p className="text-[16px] font-semibold text-[#3D4550] mb-1">{label}</p>
-        <p className="text-[13px] text-[#8B9299]">Coming soon</p>
+        <p className="text-[12px] font-semibold text-[#3D4550] mb-1">{label}</p>
+        <p className="text-[10px] text-[#8B9299]">Coming soon</p>
       </div>
     </div>
   );

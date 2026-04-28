@@ -34,7 +34,7 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
   const activePath = `${location.pathname}${location.search}`;
   return (
     <div className="px-3 py-3">
-      <p className="px-2 mb-2 text-[9px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">{title}</p>
+      <p className="px-2 mb-2 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">{title}</p>
       <div className="space-y-0.5">
         {items.map((it, idx) => {
           if (it.type === 'divider') {
@@ -57,9 +57,9 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
                 active ? 'bg-[#EEF2FC] text-[#0E1013]' : 'text-[#5C6370] hover:text-[#0E1013] hover:bg-[#F6F7F9]',
               )}
             >
-              <div className="text-[13px] font-medium">{it.label}</div>
+              <div className="text-[12px] font-medium">{it.label}</div>
               {it.description && (
-                <div className="text-[11px] text-[#8B9299] mt-0.5 leading-relaxed line-clamp-2">{it.description}</div>
+                <div className="text-[10px] text-[#8B9299] mt-0.5 leading-relaxed line-clamp-2">{it.description}</div>
               )}
             </NavLink>
           );
@@ -103,7 +103,7 @@ function EnginesSection() {
                 )} />
                 {/* Name */}
                 <span className={cn(
-                  'flex-1 text-[13px] font-medium truncate',
+                  'flex-1 text-[12px] font-medium truncate',
                   isSelected ? 'text-[#2355A7]' : 'text-[#5C6370] group-hover:text-[#3D4550]',
                 )}>
                   {engine.name}
@@ -140,7 +140,7 @@ function EnginesSection() {
                       >
                         <span className="text-[12px] font-medium">{item.label}</span>
                         {item.badge && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#D97706] whitespace-nowrap flex-shrink-0">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#D97706] whitespace-nowrap flex-shrink-0">
                             {item.badge}
                           </span>
                         )}
@@ -204,7 +204,7 @@ export function SubSidebar() {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
         <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-          <div className="text-[13px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Inbox</div>
+          <div className="text-[12px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Inbox</div>
         </div>
         <Section title="Inbox" items={inboxItems} />
       </aside>
@@ -228,7 +228,7 @@ export function SubSidebar() {
   return (
     <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
       <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-        <div className="text-[13px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{title}</div>
+        <div className="text-[12px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{title}</div>
       </div>
       <Section title={title} items={items} />
     </aside>

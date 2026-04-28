@@ -22,6 +22,14 @@
   --font-family-sans:  'Roboto', system-ui, -apple-system, sans-serif;
   --font-family-mono:  'Azeret Mono', 'Courier New', monospace;
 
+  /* ── Font sizes (unified) ──────────────────────────────── */
+  --font-size-14: 14px;
+  --font-size-12: 12px;
+  --font-size-10: 10px;
+
+  /* ── Global UI scale ───────────────────────────────────── */
+  --ui-scale: 1.17;
+
   /* ── Radii ─────────────────────────────────────────────── */
   --radius-md:  12px;
   --radius-lg:  16px;
@@ -33,12 +41,6 @@
   --shadow-panel: 0 4px 24px -4px rgb(0 0 0 / 0.08);
 }
 
-/* Global UI scaling (fonts + controls). */
-:root{
-  /* Tweak between 1.15–1.20 */
-  --ui-scale: 1.17;
-}
-
 /* ── Base ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -48,24 +50,24 @@ html, body {
   color: var(--color-brand-black);
   margin: 0;
   padding: 0;
-  font-size: 16px;
+  font-size: var(--font-size-12);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.005em;
 }
 
-/* Best on Chromium (Edge/Chrome) */
-body { zoom: var(--ui-scale); }
+/* Prevent document-level scrollbars; scroll inside app containers */
+html, body { height: 100%; overflow: hidden; }
+#root { height: 100%; }
 
-/* Fallback when zoom isn't supported */
-@supports not (zoom: 1) {
-  #root {
-    transform: scale(var(--ui-scale));
-    transform-origin: top left;
-    width: calc(100% / var(--ui-scale));
-    min-height: calc(100vh / var(--ui-scale));
-  }
+/* Scale the whole interface up by 17%.
+   Use transform-based scaling to avoid layout/scroll quirks from `zoom`. */
+#root {
+  transform: scale(var(--ui-scale));
+  transform-origin: top left;
+  width: calc(100% / var(--ui-scale));
+  height: calc(100% / var(--ui-scale));
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
@@ -83,6 +85,14 @@ body { zoom: var(--ui-scale); }
 .surface-2    { background: var(--color-surface-2); }
 .surface-3    { background: var(--color-surface-3); }
 .border-subtle { border-color: var(--color-brand-border); }
+
+/* ── Font size unification ───────────────────────────────────
+   Some parts of the UI use Tailwind arbitrary sizes (e.g. text-[11px]).
+   We normalize them to 14/12/10 without rewriting every class string. */
+[class*="text-[13px]"] { font-size: var(--font-size-14) !important; }
+[class*="text-[11px]"] { font-size: var(--font-size-12) !important; }
+[class*="text-[9px]"]  { font-size: var(--font-size-10) !important; }
+[class*="text-[8px]"]  { font-size: var(--font-size-10) !important; }
 
 /* Subtle premium accent (use sparingly) */
 .accent-hairline {

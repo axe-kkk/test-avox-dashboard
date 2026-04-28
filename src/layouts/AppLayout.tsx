@@ -10,7 +10,7 @@ export function AppLayout() {
   const isEngines = location.pathname.startsWith('/engines');
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-brand-bg)' }}>
+    <div className="flex h-full overflow-hidden" style={{ backgroundColor: 'var(--color-brand-bg)' }}>
       <Sidebar />
       {!isInbox && <SubSidebar />}
       <div className="flex flex-col flex-1 overflow-hidden">

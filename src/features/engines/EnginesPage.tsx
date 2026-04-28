@@ -55,10 +55,10 @@ export function EnginesPage() {
         {/* ── Header ── */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+            <h1 className="text-[12px] font-semibold text-[#3D4550]" style={{ fontFamily: "'Azeret Mono', monospace" }}>
               AI Engines
             </h1>
-            <p className="text-[13px] text-[#8B9299] mt-0.5">
+            <p className="text-[10px] text-[#8B9299] mt-0.5">
               {activeCount} active · {totalToday} actions today
             </p>
           </div>
@@ -71,8 +71,8 @@ export function EnginesPage() {
         {/* ── Guest Journey Timeline ── */}
         <div className="bg-white rounded-2xl border border-[#EDEEF1] p-6">
           <div className="flex items-center justify-between mb-5">
-            <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider">Guest Journey Timeline</p>
-            <span className="text-[11px] text-[#8B9299]">Actions today per stage</span>
+            <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">Guest Journey Timeline</p>
+            <span className="text-[10px] text-[#8B9299]">Actions today per stage</span>
           </div>
 
           {/* Timeline rail */}
@@ -95,7 +95,7 @@ export function EnginesPage() {
                     )}>
                       <span
                         className={cn(
-                          'text-[13px] font-bold tabular-nums',
+                          'text-[12px] font-bold tabular-nums',
                           stage.total > 0 ? 'text-[#2355A7]' : 'text-[#C4C8CF]',
                         )}
                         style={{ fontFamily: "'Azeret Mono', monospace" }}
@@ -131,7 +131,7 @@ export function EnginesPage() {
                       {stage.engines.map(name => (
                         <span
                           key={name}
-                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                           style={{
                             background: `${ENGINE_COLORS[name]}18`,
                             color: ENGINE_COLORS[name],
@@ -160,19 +160,19 @@ export function EnginesPage() {
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', sc.dot)} />
-                  <span className="text-[11px] font-semibold text-[#3D4550] truncate group-hover:text-[#2355A7] transition-colors">{engine.name}</span>
+                  <span className="text-[12px] font-semibold text-[#3D4550] truncate group-hover:text-[#2355A7] transition-colors">{engine.name}</span>
                 </div>
                 <p
-                  className="text-[20px] font-bold tabular-nums leading-none"
+                  className="text-[12px] font-bold tabular-nums leading-none"
                   style={{ fontFamily: "'Azeret Mono', monospace", color: ENGINE_COLORS[engine.name] }}
                 >
                   {engine.actionsToday}
                 </p>
-                <p className="text-[9px] text-[#A0A6B0] mt-1 leading-tight">actions today</p>
+                <p className="text-[10px] text-[#A0A6B0] mt-1 leading-tight">actions today</p>
                 {engine.lastError && (
                   <div className="mt-2 flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
-                    <span className="text-[9px] text-[#EF4444] truncate">Error</span>
+                    <span className="text-[10px] text-[#EF4444] truncate">Error</span>
                   </div>
                 )}
               </button>
@@ -187,7 +187,7 @@ export function EnginesPage() {
           <div className="bg-white rounded-2xl border border-[#EDEEF1] p-5 space-y-4">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
-              <p className="text-[13px] font-semibold text-[#3D4550]">PMS Sync Status</p>
+              <p className="text-[12px] font-semibold text-[#3D4550]">PMS Sync Status</p>
             </div>
             <div className="space-y-3">
               {[
@@ -212,8 +212,8 @@ export function EnginesPage() {
           {/* Action Log */}
           <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden">
             <div className="px-5 py-4 border-b border-[#EDEEF1] flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-[#3D4550]">Action Log</p>
-              <span className="text-[11px] text-[#8B9299]">All engines · today</span>
+              <p className="text-[12px] font-semibold text-[#3D4550]">Action Log</p>
+              <span className="text-[10px] text-[#8B9299]">All engines · today</span>
             </div>
             <div className="divide-y divide-[#F2F3F5] max-h-[360px] overflow-y-auto">
               {mockActivity.map(item => (
@@ -234,12 +234,12 @@ export function EnginesPage() {
                       </span>
                       <span className="text-[12px] font-medium text-[#3D4550] truncate">{item.guestName}</span>
                       {item.urgency === 'high' && (
-                        <span className="text-[9px] font-bold text-[#EF4444] bg-[#FEE2E2] px-1.5 py-0.5 rounded-full">URGENT</span>
+                        <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEE2E2] px-1.5 py-0.5 rounded-full">URGENT</span>
                       )}
                       <span className="text-[10px] text-[#A0A6B0] ml-auto flex-shrink-0">{formatDateTime(item.timestamp)}</span>
                     </div>
                     <p className="text-[12px] text-[#5C6370]">{item.action}</p>
-                    <p className="text-[11px] text-[#A0A6B0] mt-0.5">{item.result}</p>
+                    <p className="text-[10px] text-[#A0A6B0] mt-0.5">{item.result}</p>
                   </div>
                 </div>
               ))}
@@ -254,8 +254,8 @@ export function EnginesPage() {
               <Zap className="w-7 h-7 text-[#2355A7]" />
             </div>
             <div className="text-center">
-              <p className="text-[16px] font-semibold text-[#3D4550] mb-1">Налаштуйте свій перший AI Engine</p>
-              <p className="text-[13px] text-[#8B9299]">Виберіть Engine із панелі зліва, щоб почати налаштування</p>
+              <p className="text-[12px] font-semibold text-[#3D4550] mb-1">Налаштуйте свій перший AI Engine</p>
+              <p className="text-[10px] text-[#8B9299]">Виберіть Engine із панелі зліва, щоб почати налаштування</p>
             </div>
           </div>
         )}
