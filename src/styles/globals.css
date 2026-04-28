@@ -6,17 +6,29 @@
   --color-brand-blue:       #2355A7;
   --color-brand-blue-hover: #1f4b93;
   --color-brand-blue-light: #BED4F6;
+  --color-brand-blue-50:    #EEF2FC;
   --color-brand-gray:       #D1CFCF;
   --color-brand-bg:         #F9F9F9;
   --color-brand-border:     #EDEEF1;
+  --color-border-soft:      #F4F5F7;
 
   /* ── Surfaces & Text ───────────────────────────────────── */
   --color-surface:          #FFFFFF;
   --color-surface-2:        #F9F9F9;
   --color-surface-3:        #F6F7F9;
-  --color-text-muted:       #5C6370;
-  --color-text-subtle:      #8B9299;
+  --color-strong:           #3D4550;
+  --color-muted:            #5C6370;
+  --color-subtle:           #8B9299;
+  --color-faint:            #C4C8CF;
+  --color-text-muted:       #5C6370; /* legacy alias for .text-muted */
+  --color-text-subtle:      #8B9299; /* legacy alias for .text-subtle */
   --color-ring:             #BED4F6;
+
+  /* ── Internal-note accent ──────────────────────────────── */
+  --color-note-bg:          #FFFBEB;
+  --color-note-border:      #F5E2A0;
+  --color-note-text:        #A07B20;
+  --color-note-body:        #3D2E00;
 
   /* ── Typography ────────────────────────────────────────── */
   --font-family-sans:  'Roboto', system-ui, -apple-system, sans-serif;
