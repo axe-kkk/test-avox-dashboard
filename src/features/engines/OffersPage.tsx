@@ -5,9 +5,10 @@ import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 
+/* Inbox-style monochrome — every engine uses the brand-blue accent. */
 const ENGINE_COLORS: Record<string, string> = {
-  Conversion: '#2355A7', Reservation: '#0EA5E9', Upsell: '#8B5CF6',
-  Arrival: '#10B981', Concierge: '#F59E0B', Recovery: '#EF4444', Reputation: '#EC4899',
+  Conversion: '#2355A7', Reservation: '#2355A7', Upsell: '#2355A7',
+  Arrival: '#2355A7', Concierge: '#2355A7', Recovery: '#2355A7', Reputation: '#2355A7',
 };
 
 const OFFER_TYPES = [
@@ -84,25 +85,33 @@ export function OffersPage() {
   if (!engine) return null;
   const color = ENGINE_COLORS[engine.name] ?? '#2355A7';
 
+  /* Pre-Arrival Timeline tab is only meaningful for the Arrival engine. */
+  const isArrival = engine.name === 'Arrival';
   const tabs = [
     { id: 'offers' as const,    label: 'Offers'              },
-    { id: 'timeline' as const,  label: 'Pre-Arrival Timeline'},
+    ...(isArrival ? [{ id: 'timeline' as const, label: 'Pre-Arrival Timeline' }] : []),
     { id: 'templates' as const, label: 'WhatsApp Templates'  },
     { id: 'services' as const,  label: 'Mass Send Services'  },
   ];
+
+  /* If user lands on a tab that no longer exists for this engine, fall back. */
+  const currentTabValid = tabs.some(t => t.id === activeTab);
+  if (!currentTabValid && activeTab === 'timeline') {
+    setTab('offers');
+  }
 
   return (
     <div className="max-w-[1000px] mx-auto px-6 py-6">
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-[#F6F7F9] p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-5 bg-surface-3 p-1 rounded-xl w-fit">
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
               'px-4 py-2 rounded-lg text-[13px] font-medium transition-all',
-              activeTab === t.id ? 'bg-white text-[#3D4550] shadow-sm' : 'text-[#8B9299] hover:text-[#5C6370]',
+              activeTab === t.id ? 'bg-white text-strong shadow-sm' : 'text-subtle hover:text-muted',
             )}
           >{t.label}</button>
         ))}
@@ -112,7 +121,7 @@ export function OffersPage() {
       {activeTab === 'offers' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold text-[#3D4550]">{offers.length} offers configured</p>
+            <p className="text-[13px] font-semibold text-strong">{offers.length} offers configured</p>
             <button
               onClick={() => setShowAddOffer(true)}
               className="flex items-center gap-1.5 h-9 px-4 rounded-xl text-[13px] font-semibold text-white transition-colors"
@@ -123,42 +132,42 @@ export function OffersPage() {
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-brand-border overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-[#EDEEF1]">
+                <tr className="border-b border-brand-border">
                   {['Name', 'Type', 'Condition', 'Daily limit', 'Status', ''].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-subtle uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F2F3F5]">
+              <tbody className="divide-y divide-border-soft">
                 {offers.map(offer => (
-                  <tr key={offer.id} className="hover:bg-[#FAFAFA] transition-colors">
-                    <td className="px-5 py-3.5 text-[13px] font-medium text-[#3D4550]">{offer.name}</td>
+                  <tr key={offer.id} className="hover:bg-surface-2 transition-colors">
+                    <td className="px-5 py-3.5 text-[13px] font-medium text-strong">{offer.name}</td>
                     <td className="px-5 py-3.5">
-                      <span className="text-[11px] text-[#5C6370] bg-[#F6F7F9] px-2.5 py-1 rounded-md border border-[#EDEEF1]">{offer.type}</span>
+                      <span className="text-[11px] text-muted bg-surface-3 px-2.5 py-1 rounded-md border border-brand-border">{offer.type}</span>
                     </td>
-                    <td className="px-5 py-3.5 text-[12px] text-[#5C6370]">{offer.condition}</td>
-                    <td className="px-5 py-3.5 text-[12px] text-[#5C6370] tabular-nums">{offer.limit}</td>
+                    <td className="px-5 py-3.5 text-[12px] text-muted">{offer.condition}</td>
+                    <td className="px-5 py-3.5 text-[12px] text-muted tabular-nums">{offer.limit}</td>
                     <td className="px-5 py-3.5">
                       <button
                         onClick={() => setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: o.status === 'active' ? 'paused' : 'active' } : o))}
                         className={cn(
                           'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors',
                           offer.status === 'active'
-                            ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#BBF7D0]'
-                            : 'bg-[#FEF9C3] text-[#D97706] hover:bg-[#FEF3C7]',
+                            ? 'bg-brand-blue-50 text-brand-blue border border-brand-blue-light hover:bg-white'
+                            : 'bg-surface-3 text-subtle border border-brand-border hover:bg-white',
                         )}
                       >
-                        <span className={cn('w-1.5 h-1.5 rounded-full', offer.status === 'active' ? 'bg-[#16A34A]' : 'bg-[#F59E0B]')} />
+                        <span className={cn('w-1.5 h-1.5 rounded-full', offer.status === 'active' ? 'bg-brand-blue' : 'bg-brand-gray')} />
                         {offer.status === 'active' ? 'Active' : 'Paused'}
                       </button>
                     </td>
                     <td className="px-5 py-3.5">
                       <button
                         onClick={() => setOffers(prev => prev.filter(o => o.id !== offer.id))}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#C4C8CF] hover:bg-[#FEE2E2] hover:text-[#EF4444] transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-faint hover:bg-surface-3 hover:text-brand-black transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -170,22 +179,22 @@ export function OffersPage() {
           </div>
 
           {/* Send window + channels */}
-          <div className="bg-white rounded-2xl border border-[#EDEEF1] p-5 space-y-4">
-            <p className="text-[13px] font-semibold text-[#3D4550]">Send Windows</p>
+          <div className="bg-white rounded-2xl border border-brand-border p-5 space-y-4">
+            <p className="text-[13px] font-semibold text-strong">Send Windows</p>
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: 'Pre-arrival',  placeholder: 'days before check-in' },
                 { label: 'Post-stay',    placeholder: 'hours after check-out' },
               ].map(w => (
                 <div key={w.label} className="flex items-center gap-2">
-                  <span className="text-[12px] text-[#5C6370] whitespace-nowrap">{w.label} —</span>
-                  <input type="number" placeholder="3" className="w-16 h-8 px-2.5 rounded-lg border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white" />
-                  <span className="text-[12px] text-[#8B9299]">{w.placeholder}</span>
+                  <span className="text-[12px] text-muted whitespace-nowrap">{w.label} —</span>
+                  <input type="number" placeholder="3" className="w-16 h-8 px-2.5 rounded-lg border border-brand-border bg-surface-2 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white" />
+                  <span className="text-[12px] text-subtle">{w.placeholder}</span>
                 </div>
               ))}
             </div>
             <div>
-              <p className="text-[12px] font-semibold text-[#5C6370] mb-2.5">Send channels</p>
+              <p className="text-[12px] font-semibold text-muted mb-2.5">Send channels</p>
               <div className="flex flex-wrap gap-2">
                 {CHANNELS.map(ch => {
                   const active = channels.includes(ch.id);
@@ -195,7 +204,7 @@ export function OffersPage() {
                       onClick={() => setChannels(prev => active ? prev.filter(c => c !== ch.id) : [...prev, ch.id])}
                       className={cn(
                         'flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-medium border transition-all',
-                        active ? 'bg-[#2355A7] text-white border-[#2355A7]' : 'bg-white text-[#5C6370] border-[#E4E6EA] hover:border-[#2355A7] hover:text-[#2355A7]',
+                        active ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-muted border-brand-border hover:border-brand-blue hover:text-brand-blue',
                       )}
                     >
                       {active && <Check className="w-3 h-3" />}
@@ -212,9 +221,9 @@ export function OffersPage() {
       {/* ── Pre-Arrival Timeline ── */}
       {activeTab === 'timeline' && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-[#EDEEF1] p-6">
+          <div className="bg-white rounded-2xl border border-brand-border p-6">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-[13px] font-semibold text-[#3D4550]">Send schedule — days before check-in</p>
+              <p className="text-[13px] font-semibold text-strong">Send schedule — days before check-in</p>
               <button
                 onClick={() => setTimeline(prev => [...prev, { id: `t${Date.now()}`, days: 2, messageType: 'Informational', channel: 'email' }])}
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-medium text-white transition-colors"
@@ -227,7 +236,7 @@ export function OffersPage() {
 
             {/* Timeline visual */}
             <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#EDEEF1]" />
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-brand-border" />
               <div className="space-y-5">
                 {timeline.sort((a, b) => b.days - a.days).map((point, idx) => (
                   <div key={point.id} className="relative flex items-start gap-4 pl-14">
@@ -244,47 +253,47 @@ export function OffersPage() {
                       T−{point.days}d
                     </div>
 
-                    <div className="flex-1 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-4 flex items-center gap-3">
+                    <div className="flex-1 bg-surface-2 border border-brand-border rounded-xl p-4 flex items-center gap-3">
                       <div className="flex-1 grid grid-cols-3 gap-3">
                         <div>
-                          <p className="text-[10px] text-[#A0A6B0] mb-1">Days before</p>
+                          <p className="text-[10px] text-subtle mb-1">Days before</p>
                           <input
                             type="number"
                             value={point.days}
                             onChange={e => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, days: Number(e.target.value) } : p))}
-                            className="w-full h-8 px-2.5 rounded-lg border border-[#EDEEF1] bg-white text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                            className="w-full h-8 px-2.5 rounded-lg border border-brand-border bg-white text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                           />
                         </div>
                         <div>
-                          <p className="text-[10px] text-[#A0A6B0] mb-1">Type</p>
+                          <p className="text-[10px] text-subtle mb-1">Type</p>
                           <div className="relative">
                             <select
                               value={point.messageType}
                               onChange={e => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, messageType: e.target.value } : p))}
-                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-[#EDEEF1] bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-brand-border bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                             >
                               {['Informational', 'Reminder', 'Preferences', 'Upsell'].map(t => <option key={t}>{t}</option>)}
                             </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#A0A6B0] pointer-events-none" />
+                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-[10px] text-[#A0A6B0] mb-1">Channel</p>
+                          <p className="text-[10px] text-subtle mb-1">Channel</p>
                           <div className="relative">
                             <select
                               value={point.channel}
                               onChange={e => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, channel: e.target.value } : p))}
-                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-[#EDEEF1] bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-brand-border bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                             >
                               {CHANNELS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                             </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#A0A6B0] pointer-events-none" />
+                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => setTimeline(prev => prev.filter(p => p.id !== point.id))}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#C4C8CF] hover:bg-[#FEE2E2] hover:text-[#EF4444] transition-colors flex-shrink-0"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-faint hover:bg-surface-3 hover:text-brand-black transition-colors flex-shrink-0"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -295,15 +304,15 @@ export function OffersPage() {
             </div>
 
             {/* Send conditions */}
-            <div className="mt-6 pt-5 border-t border-[#F2F3F5] space-y-2">
-              <p className="text-[12px] font-semibold text-[#5C6370] mb-3">Send conditions</p>
+            <div className="mt-6 pt-5 border-t border-border-soft space-y-2">
+              <p className="text-[12px] font-semibold text-muted mb-3">Send conditions</p>
               {[
                 'Only for confirmed reservations',
                 'Do not send to returning guests (2+ visits)',
               ].map(cond => (
                 <label key={cond} className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded accent-[#2355A7]" />
-                  <span className="text-[13px] text-[#3D4550]">{cond}</span>
+                  <input type="checkbox" defaultChecked className="rounded accent-brand-blue" />
+                  <span className="text-[13px] text-strong">{cond}</span>
                 </label>
               ))}
             </div>
@@ -315,7 +324,7 @@ export function OffersPage() {
       {activeTab === 'templates' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold text-[#3D4550]">{WHATSAPP_TEMPLATES.length} templates</p>
+            <p className="text-[13px] font-semibold text-strong">{WHATSAPP_TEMPLATES.length} templates</p>
             <button
               onClick={() => addToast({ type: 'success', title: 'Template editor opening…' })}
               className="flex items-center gap-1.5 h-9 px-4 rounded-xl text-[13px] font-semibold text-white transition-colors"
@@ -325,32 +334,34 @@ export function OffersPage() {
               Create template
             </button>
           </div>
-          <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-brand-border overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-[#EDEEF1]">
+                <tr className="border-b border-brand-border">
                   {['Template name', 'Language', 'Category', 'Approval', 'Updated'].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-subtle uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F2F3F5]">
+              <tbody className="divide-y divide-border-soft">
                 {WHATSAPP_TEMPLATES.map(tpl => (
-                  <tr key={tpl.name} className="hover:bg-[#FAFAFA] transition-colors">
-                    <td className="px-5 py-3.5 text-[13px] font-mono text-[#3D4550]">{tpl.name}</td>
+                  <tr key={tpl.name} className="hover:bg-surface-2 transition-colors">
+                    <td className="px-5 py-3.5 text-[13px] font-mono text-strong">{tpl.name}</td>
                     <td className="px-5 py-3.5">
-                      <span className="text-[11px] font-semibold text-[#5C6370] bg-[#F6F7F9] px-2 py-0.5 rounded-md">{tpl.lang}</span>
+                      <span className="text-[11px] font-semibold text-muted bg-surface-3 px-2 py-0.5 rounded-md">{tpl.lang}</span>
                     </td>
-                    <td className="px-5 py-3.5 text-[12px] text-[#5C6370] capitalize">{tpl.category}</td>
+                    <td className="px-5 py-3.5 text-[12px] text-muted capitalize">{tpl.category}</td>
                     <td className="px-5 py-3.5">
                       <span className={cn(
-                        'text-[10px] font-semibold px-2 py-0.5 rounded-full',
-                        tpl.status === 'approved' ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEF9C3] text-[#D97706]',
+                        'text-[10px] font-semibold px-2 py-0.5 rounded-full border',
+                        tpl.status === 'approved'
+                          ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light'
+                          : 'bg-surface-3 text-subtle border-brand-border',
                       )}>
                         {tpl.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-[12px] text-[#8B9299]">{tpl.updated}</td>
+                    <td className="px-5 py-3.5 text-[12px] text-subtle">{tpl.updated}</td>
                   </tr>
                 ))}
               </tbody>
@@ -364,10 +375,10 @@ export function OffersPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {MASS_SERVICES.map(svc => (
-              <div key={svc.name} className="bg-white rounded-2xl border border-[#EDEEF1] p-5 flex items-center justify-between">
+              <div key={svc.name} className="bg-white rounded-2xl border border-brand-border p-5 flex items-center justify-between">
                 <div>
-                  <p className="text-[14px] font-semibold text-[#3D4550]">{svc.name}</p>
-                  <p className={cn('text-[12px] mt-0.5', svc.connected ? 'text-[#16A34A]' : 'text-[#8B9299]')}>
+                  <p className="text-[14px] font-semibold text-strong">{svc.name}</p>
+                  <p className={cn('text-[12px] mt-0.5', svc.connected ? 'text-brand-blue' : 'text-subtle')}>
                     {svc.connected ? 'Connected' : 'Not connected'}
                   </p>
                 </div>
@@ -377,14 +388,14 @@ export function OffersPage() {
                       className="relative cursor-pointer"
                       style={{ width: 40, height: 22 }}
                     >
-                      <div className="w-full h-full rounded-full bg-[#2355A7]" />
+                      <div className="w-full h-full rounded-full bg-brand-blue" />
                       <span className="absolute top-0.5 right-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm" />
                     </div>
                   )}
                   {!svc.connected && (
                     <button
                       onClick={() => addToast({ type: 'info', title: `Connect ${svc.name}` })}
-                      className="h-8 px-3 rounded-lg text-[12px] font-medium text-[#2355A7] bg-[#EEF2FC] hover:bg-[#E3EBFA] transition-colors"
+                      className="h-8 px-3 rounded-lg text-[12px] font-medium text-brand-blue bg-brand-blue-50 hover:bg-brand-blue-50 transition-colors"
                     >
                       Connect
                     </button>
@@ -395,7 +406,7 @@ export function OffersPage() {
           </div>
           <button
             onClick={() => addToast({ type: 'info', title: 'Custom connector form' })}
-            className="w-full py-3 rounded-2xl border-2 border-dashed border-[#EDEEF1] text-[13px] text-[#8B9299] hover:border-[#BED4F6] hover:text-[#2355A7] transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl border-2 border-dashed border-brand-border text-[13px] text-subtle hover:border-brand-blue-light hover:text-brand-blue transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Connect new service

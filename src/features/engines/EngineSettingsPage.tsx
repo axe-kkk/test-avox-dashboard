@@ -1,14 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Copy, Sparkles, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronRight, X, Check } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
-
-const ENGINE_COLORS: Record<string, string> = {
-  Conversion: '#2355A7', Reservation: '#0EA5E9', Upsell: '#8B5CF6',
-  Arrival: '#10B981', Concierge: '#F59E0B', Recovery: '#EF4444', Reputation: '#EC4899',
-};
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   Conversion: `You are a friendly hotel booking assistant for Grand Palace Hotel. Your goal is to help potential guests find the perfect room and complete their booking.
@@ -31,50 +26,59 @@ You can help with:
 Always be attentive, responsive, and proactive. If you cannot fulfill a request, escalate immediately to the duty manager.`,
 };
 
-const CONTEXT_VARS = [
-  { name: '{{guest_name}}',       desc: 'Full name of the guest'            },
-  { name: '{{check_in_date}}',    desc: 'Guest check-in date'               },
-  { name: '{{check_out_date}}',   desc: 'Guest check-out date'              },
-  { name: '{{room_type}}',        desc: 'Booked room type'                  },
-  { name: '{{reservation_id}}',   desc: 'PMS reservation reference'         },
-  { name: '{{total_nights}}',     desc: 'Number of nights booked'           },
-  { name: '{{hotel_name}}',       desc: 'Property name'                     },
-  { name: '{{language}}',         desc: 'Guest preferred language'          },
-];
+/* AI-improved version returned by the mock "Improve with AI" action.
+   In a real product this would come from a model — here it's a curated
+   rewrite that highlights the kind of polish the feature is meant to add. */
+function improvePromptMock(text: string, engineName: string): string {
+  const head = `You are the AI ${engineName} agent for Grand Palace Hotel — a 5-star property in central Paris. Speak in the guest's language whenever possible and stay strictly within your scope.\n\n`;
+  const cleaned = text
+    .replace(/^You are.*?\.\s*/i, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return `${head}Operating principles:\n• Be warm, concise, and proactive — never robotic.\n• Confirm guest intent before booking, charging, or escalating.\n• Surface relevant offers only when they fit the context.\n• Hand off to a human if the guest is upset or asks twice for one.\n\n${cleaned}\n\nClosing: end every conversation by inviting the guest to reach out again — same channel, no friction.`;
+}
 
-const PMS_CATEGORIES = [
+/* Per-field switcher value: none | read | write */
+type Access = 'none' | 'read' | 'write';
+
+const PMS_CATEGORIES: { id: string; label: string; fields: string[]; defaultAccess: Access }[] = [
   {
+    id: 'guest',
     label: 'Guest Profile',
     fields: ['Name', 'Email', 'Phone', 'Language', 'Country', 'VIP status'],
-    defaultAccess: 'read' as const,
+    defaultAccess: 'read',
   },
   {
+    id: 'reservation',
     label: 'Reservation',
-    fields: ['Check-in / Check-out dates', 'Room type', 'Guest count', 'Booking source', 'Reservation status'],
-    defaultAccess: 'read' as const,
+    fields: ['Check-in date', 'Check-out date', 'Room type', 'Guest count', 'Booking source', 'Reservation status'],
+    defaultAccess: 'read',
   },
   {
+    id: 'billing',
     label: 'Billing',
     fields: ['Total amount', 'Balance due', 'Payment method', 'Invoice'],
-    defaultAccess: 'none' as const,
+    defaultAccess: 'none',
   },
   {
+    id: 'housekeeping',
     label: 'Housekeeping',
     fields: ['Room status', 'Cleaning schedule', 'Special requests'],
-    defaultAccess: 'read' as const,
+    defaultAccess: 'read',
   },
   {
+    id: 'history',
     label: 'History',
     fields: ['Previous visits', 'Guest notes', 'Preferences', 'Complaints'],
-    defaultAccess: 'read' as const,
+    defaultAccess: 'read',
   },
 ];
 
 function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#EDEEF1]">
-        <p className="text-[13px] font-semibold text-[#3D4550]">{title}</p>
+    <div className="bg-white rounded-2xl border border-brand-border overflow-hidden">
+      <div className="px-6 py-4 border-b border-brand-border">
+        <p className="text-[13px] font-semibold text-strong">{title}</p>
       </div>
       <div className="p-6 space-y-5">{children}</div>
     </div>
@@ -84,15 +88,146 @@ function FieldGroup({ title, children }: { title: string; children: React.ReactN
 function FormRow({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[12px] font-semibold text-[#5C6370] mb-1.5">{label}</label>
-      {hint && <p className="text-[11px] text-[#A0A6B0] mb-2">{hint}</p>}
+      <label className="block text-[12px] font-semibold text-muted mb-1.5">{label}</label>
+      {hint && <p className="text-[11px] text-subtle mb-2">{hint}</p>}
       {children}
     </div>
   );
 }
 
-const inputCls = 'w-full h-9 px-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors';
+const inputCls = 'w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors';
 const selectCls = `${inputCls} appearance-none pr-8 cursor-pointer`;
+
+/* Three-state pill switcher for access level (per field & per category) */
+function AccessPill({
+  value,
+  onChange,
+  size = 'md',
+}: {
+  value: Access;
+  onChange: (v: Access) => void;
+  size?: 'sm' | 'md';
+}) {
+  const opts: { v: Access; l: string }[] = [
+    { v: 'none', l: 'No Access' },
+    { v: 'read', l: 'Read' },
+    { v: 'write', l: 'Write' },
+  ];
+  return (
+    <div className={cn(
+      'inline-flex items-center bg-surface-3 border border-brand-border rounded-lg p-0.5',
+      size === 'sm' ? 'gap-0.5' : 'gap-0.5',
+    )}>
+      {opts.map(o => (
+        <button
+          key={o.v}
+          type="button"
+          onClick={() => onChange(o.v)}
+          className={cn(
+            'rounded-md font-medium transition-colors',
+            size === 'sm' ? 'h-6 px-2 text-[10px]' : 'h-7 px-3 text-[11px]',
+            value === o.v
+              ? 'bg-brand-blue text-white'
+              : 'text-muted hover:text-strong',
+          )}
+        >
+          {o.l}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* Compact 3-icon switch for individual fields (×, ●, ✎) */
+function FieldAccessSwitch({
+  value,
+  onChange,
+}: {
+  value: Access;
+  onChange: (v: Access) => void;
+}) {
+  const opts: { v: Access; label: string; icon: React.ReactNode }[] = [
+    { v: 'none',  label: 'No access', icon: <X className="w-3 h-3" /> },
+    { v: 'read',  label: 'Read',      icon: <span className="w-1.5 h-1.5 rounded-full bg-current" /> },
+    { v: 'write', label: 'Write',     icon: <Check className="w-3 h-3" /> },
+  ];
+  return (
+    <div className="inline-flex items-center gap-1">
+      {opts.map(o => (
+        <button
+          key={o.v}
+          type="button"
+          title={o.label}
+          aria-label={o.label}
+          onClick={() => onChange(o.v)}
+          className={cn(
+            'w-6 h-6 inline-flex items-center justify-center rounded-md border transition-colors',
+            value === o.v
+              ? 'bg-brand-blue border-brand-blue text-white'
+              : 'bg-white border-brand-border text-faint hover:text-muted hover:border-brand-blue-light',
+          )}
+        >
+          {o.icon}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* Tiny diff-renderer used by the Improve-with-AI modal */
+function PromptDiff({ before, after }: { before: string; after: string }) {
+  const beforeLines = before.split('\n');
+  const afterLines  = after.split('\n');
+  const beforeSet = new Set(beforeLines.map(l => l.trim()).filter(Boolean));
+  const afterSet  = new Set(afterLines.map(l => l.trim()).filter(Boolean));
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="rounded-xl border border-brand-border bg-surface-2 overflow-hidden">
+        <div className="px-3 py-2 border-b border-brand-border bg-white">
+          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em]">Current</p>
+        </div>
+        <div className="p-3 max-h-[420px] overflow-y-auto font-mono text-[11px] leading-relaxed">
+          {beforeLines.map((line, i) => {
+            const removed = line.trim() && !afterSet.has(line.trim());
+            return (
+              <div
+                key={i}
+                className={cn(
+                  'whitespace-pre-wrap py-0.5 px-1 rounded',
+                  removed ? 'bg-brand-gray/30 text-muted line-through decoration-1' : 'text-strong',
+                )}
+              >
+                {line || ' '}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="rounded-xl border border-brand-blue-light bg-brand-blue-50/40 overflow-hidden">
+        <div className="px-3 py-2 border-b border-brand-blue-light bg-white flex items-center gap-1.5">
+          <Sparkles className="w-3 h-3 text-brand-blue" />
+          <p className="text-[10px] font-semibold text-brand-blue uppercase tracking-[0.16em]">Improved</p>
+        </div>
+        <div className="p-3 max-h-[420px] overflow-y-auto font-mono text-[11px] leading-relaxed">
+          {afterLines.map((line, i) => {
+            const added = line.trim() && !beforeSet.has(line.trim());
+            return (
+              <div
+                key={i}
+                className={cn(
+                  'whitespace-pre-wrap py-0.5 px-1 rounded',
+                  added ? 'bg-brand-blue-50 text-brand-blue' : 'text-strong',
+                )}
+              >
+                {line || ' '}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function EngineSettingsPage() {
   const { engineSlug } = useParams<{ engineSlug: string }>();
@@ -104,25 +239,71 @@ export function EngineSettingsPage() {
   const [lang, setLang] = useState('en');
   const [autoDetect, setAutoDetect] = useState(true);
   const [tone, setTone] = useState('friendly');
+  const [customTone, setCustomTone] = useState(
+    'Warm but precise. Slight literary touch. Refer to luxury without being pompous. Use the guest\'s first name once early on, then switch to "you".',
+  );
   const [maxMessages, setMaxMessages] = useState('10');
   const [fallback, setFallback] = useState('escalate');
   const [limitConnects, setLimitConnects] = useState(false);
   const [promptText, setPromptText] = useState(
-    engine ? (SYSTEM_PROMPTS[engine.name] ?? `You are an AI assistant for ${engine.name} operations at Grand Palace Hotel.`) : ''
-  );
-  const [pmsAccess, setPmsAccess] = useState<Record<string, 'none' | 'read' | 'write'>>(
-    Object.fromEntries(PMS_CATEGORIES.map(c => [c.label, c.defaultAccess]))
+    engine ? (SYSTEM_PROMPTS[engine.name] ?? `You are an AI assistant for ${engine.name} operations at Grand Palace Hotel.`) : '',
   );
   const [guardrails, setGuardrails] = useState({
     noCompetitors: true,
     noDiscounts: true,
     scopeOnly: true,
   });
-  const [showPromptHelper, setShowPromptHelper] = useState(false);
+
+  /* Per-category collapsed flag */
+  const [openCats, setOpenCats] = useState<Record<string, boolean>>(() => ({
+    guest:        true,
+    reservation:  false,
+    billing:      false,
+    housekeeping: false,
+    history:      false,
+  }));
+
+  /* Per-field access state, seeded from each category default */
+  const [fieldAccess, setFieldAccess] = useState<Record<string, Access>>(() => {
+    const map: Record<string, Access> = {};
+    for (const cat of PMS_CATEGORIES) {
+      for (const f of cat.fields) {
+        map[`${cat.id}:${f}`] = cat.defaultAccess;
+      }
+    }
+    return map;
+  });
+
+  /* Improve-with-AI diff modal */
+  const [diffOpen, setDiffOpen] = useState(false);
+  const improved = useMemo(
+    () => (engine ? improvePromptMock(promptText, engine.name) : ''),
+    [promptText, engine],
+  );
 
   if (!engine) return null;
-  const color = ENGINE_COLORS[engine.name] ?? '#2355A7';
   const charCount = promptText.length;
+
+  /* Aggregate access for a category — used to render the right-side pill
+     state at the category header. If all fields share the same level we
+     show that level; otherwise we show the highest. */
+  function categoryAggregate(catId: string): Access {
+    const cat = PMS_CATEGORIES.find(c => c.id === catId)!;
+    const levels = cat.fields.map(f => fieldAccess[`${catId}:${f}`]);
+    if (levels.every(l => l === levels[0])) return levels[0];
+    if (levels.includes('write')) return 'write';
+    if (levels.includes('read')) return 'read';
+    return 'none';
+  }
+
+  function setCategoryAccess(catId: string, level: Access) {
+    const cat = PMS_CATEGORIES.find(c => c.id === catId)!;
+    setFieldAccess(prev => {
+      const next = { ...prev };
+      for (const f of cat.fields) next[`${catId}:${f}`] = level;
+      return next;
+    });
+  }
 
   return (
     <div className="max-w-[860px] mx-auto px-6 py-6 space-y-5">
@@ -135,10 +316,12 @@ export function EngineSettingsPage() {
           </FormRow>
           <FormRow label="Avatar">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0" style={{ background: color }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0 bg-brand-blue">
                 {engine.name.slice(0, 2).toUpperCase()}
               </div>
-              <button className="h-9 px-3 rounded-xl border border-[#EDEEF1] text-[12px] text-[#5C6370] hover:bg-[#F6F7F9] transition-colors">Upload image</button>
+              <button className="h-9 px-3 rounded-xl border border-brand-border text-[12px] text-muted hover:bg-surface-3 transition-colors">
+                Upload image
+              </button>
             </div>
           </FormRow>
         </div>
@@ -147,9 +330,9 @@ export function EngineSettingsPage() {
             value={description}
             onChange={e => setDescription(e.target.value.slice(0, 200))}
             rows={2}
-            className="w-full px-3 py-2.5 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#3D4550] resize-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
+            className="w-full px-3 py-2.5 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong resize-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
           />
-          <p className="text-[10px] text-[#A0A6B0] mt-1 text-right">{description.length}/200</p>
+          <p className="text-[10px] text-subtle mt-1 text-right">{description.length}/200</p>
         </FormRow>
       </FieldGroup>
 
@@ -163,7 +346,7 @@ export function EngineSettingsPage() {
                   <option key={v} value={v}>{l}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A0A6B0] pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
             </div>
           </FormRow>
           <FormRow label="Communication tone">
@@ -173,20 +356,38 @@ export function EngineSettingsPage() {
                   <option key={v} value={v}>{l}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A0A6B0] pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
             </div>
           </FormRow>
         </div>
+
+        {/* Custom tone — only when "custom" is selected */}
+        {tone === 'custom' && (
+          <FormRow
+            label="Custom tone instructions"
+            hint="Free-form notes that the engine will follow. Up to 600 characters."
+          >
+            <textarea
+              value={customTone}
+              onChange={e => setCustomTone(e.target.value.slice(0, 600))}
+              rows={4}
+              placeholder="e.g. Warm and concise. Use British English. Mention our garden view whenever it fits."
+              className="w-full px-3 py-2.5 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong resize-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
+            />
+            <p className="text-[10px] text-subtle mt-1 text-right">{customTone.length}/600</p>
+          </FormRow>
+        )}
+
         <label className="flex items-center gap-3 cursor-pointer">
           <div
             onClick={() => setAutoDetect(v => !v)}
-            className={cn('w-10 h-5.5 rounded-full relative transition-colors cursor-pointer', autoDetect ? 'bg-[#2355A7]' : 'bg-[#D1D5DB]')}
+            className={cn('rounded-full relative transition-colors cursor-pointer flex-shrink-0', autoDetect ? 'bg-brand-blue' : 'bg-brand-gray')}
             style={{ width: 40, height: 22 }}
           >
-            <span className={cn('absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform', autoDetect ? 'translate-x-5' : 'translate-x-0.5')} style={{ width: 18, height: 18 }} />
+            <span className={cn('absolute top-0.5 rounded-full bg-white shadow-sm transition-transform', autoDetect ? 'translate-x-5' : 'translate-x-0.5')} style={{ width: 18, height: 18 }} />
           </div>
-          <span className="text-[13px] text-[#3D4550] font-medium">Auto-detect guest language</span>
-          <span className="text-[11px] text-[#A0A6B0]">Engine responds in the guest's language</span>
+          <span className="text-[13px] text-strong font-medium">Auto-detect guest language</span>
+          <span className="text-[11px] text-subtle">Engine responds in the guest's language</span>
         </label>
       </FieldGroup>
 
@@ -203,21 +404,21 @@ export function EngineSettingsPage() {
                 <option value="default_msg">Default message</option>
                 <option value="faq">Suggest FAQ</option>
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A0A6B0] pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
             </div>
           </FormRow>
         </div>
         <div>
-          <label className="block text-[12px] font-semibold text-[#5C6370] mb-2">CONNECTS limit</label>
+          <label className="block text-[12px] font-semibold text-muted mb-2">CONNECTS limit</label>
           <label className="flex items-center gap-3 cursor-pointer mb-3">
             <div
               onClick={() => setLimitConnects(v => !v)}
               className="rounded-full relative transition-colors cursor-pointer flex-shrink-0"
-              style={{ width: 40, height: 22, background: limitConnects ? '#2355A7' : '#D1D5DB' }}
+              style={{ width: 40, height: 22, background: limitConnects ? 'var(--color-brand-blue)' : 'var(--color-brand-gray)' }}
             >
               <span className={cn('absolute top-0.5 rounded-full bg-white shadow-sm transition-transform flex-shrink-0', limitConnects ? 'translate-x-5' : 'translate-x-0.5')} style={{ width: 18, height: 18 }} />
             </div>
-            <span className="text-[13px] text-[#3D4550]">{limitConnects ? 'Custom limit' : 'No limit'}</span>
+            <span className="text-[13px] text-strong">{limitConnects ? 'Custom limit' : 'No limit'}</span>
           </label>
           {limitConnects && (
             <div className="flex gap-3">
@@ -236,17 +437,17 @@ export function EngineSettingsPage() {
               value={promptText}
               onChange={e => setPromptText(e.target.value.slice(0, 5000))}
               rows={10}
-              className="w-full px-4 py-3 rounded-xl border border-[#EDEEF1] bg-[#F9F9F9] text-[13px] text-[#3D4550] font-mono resize-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition-colors"
+              className="w-full px-4 py-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong font-mono resize-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
             />
             <div className="flex items-center justify-between mt-1.5">
               <button
-                onClick={() => setShowPromptHelper(true)}
-                className="flex items-center gap-1.5 text-[11px] font-medium text-[#2355A7] hover:underline"
+                onClick={() => setDiffOpen(true)}
+                className="flex items-center gap-1.5 text-[11px] font-medium text-brand-blue hover:underline"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Improve with AI
               </button>
-              <span className={cn('text-[10px]', charCount > 4500 ? 'text-[#EF4444]' : 'text-[#A0A6B0]')}>
+              <span className={cn('text-[10px]', charCount > 4500 ? 'text-brand-black' : 'text-subtle')}>
                 {charCount.toLocaleString()} / 5,000
               </span>
             </div>
@@ -255,7 +456,7 @@ export function EngineSettingsPage() {
 
         {/* Guardrails */}
         <div>
-          <p className="text-[12px] font-semibold text-[#5C6370] mb-3">Guardrails</p>
+          <p className="text-[12px] font-semibold text-muted mb-3">Guardrails</p>
           <div className="space-y-2">
             {[
               { key: 'noCompetitors', label: "Don't discuss competitors" },
@@ -266,14 +467,14 @@ export function EngineSettingsPage() {
                 <div
                   onClick={() => setGuardrails(prev => ({ ...prev, [g.key]: !prev[g.key as keyof typeof prev] }))}
                   className="rounded-full relative transition-colors cursor-pointer flex-shrink-0"
-                  style={{ width: 32, height: 18, background: guardrails[g.key as keyof typeof guardrails] ? '#2355A7' : '#D1D5DB' }}
+                  style={{ width: 32, height: 18, background: guardrails[g.key as keyof typeof guardrails] ? 'var(--color-brand-blue)' : 'var(--color-brand-gray)' }}
                 >
                   <span
                     className={cn('absolute top-0.5 rounded-full bg-white shadow-sm transition-transform', guardrails[g.key as keyof typeof guardrails] ? 'translate-x-3.5' : 'translate-x-0.5')}
                     style={{ width: 14, height: 14 }}
                   />
                 </div>
-                <span className="text-[12px] text-[#3D4550]">{g.label}</span>
+                <span className="text-[12px] text-strong">{g.label}</span>
               </label>
             ))}
             <div className="mt-2">
@@ -281,81 +482,146 @@ export function EngineSettingsPage() {
             </div>
           </div>
         </div>
-
-        {/* Context Variables */}
-        <div>
-          <p className="text-[12px] font-semibold text-[#5C6370] mb-3">Context Variables</p>
-          <div className="grid grid-cols-2 gap-2">
-            {CONTEXT_VARS.map(v => (
-              <div key={v.name} className="flex items-center justify-between gap-2 bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-mono font-semibold text-[#2355A7] truncate">{v.name}</p>
-                  <p className="text-[10px] text-[#8B9299]">{v.desc}</p>
-                </div>
-                <button
-                  onClick={() => { navigator.clipboard?.writeText(v.name); addToast({ type: 'success', title: 'Copied!' }); }}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-[#A0A6B0] hover:bg-[#EEF2FC] hover:text-[#2355A7] transition-colors flex-shrink-0"
-                >
-                  <Copy className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
       </FieldGroup>
 
-      {/* ── Guest Data Access ── */}
+      {/* ── Guest Data Access — collapsible per-category, per-field switch ── */}
       <FieldGroup title="Guest Data Access">
-        <div className="space-y-3">
-          {PMS_CATEGORIES.map(cat => (
-            <div key={cat.label} className="flex items-start gap-4 py-3 border-b border-[#F2F3F5] last:border-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#3D4550] mb-0.5">{cat.label}</p>
-                <p className="text-[11px] text-[#8B9299]">{cat.fields.join(' · ')}</p>
-              </div>
-              <div className="flex gap-1 flex-shrink-0">
-                {(['none', 'read', 'write'] as const).map(level => (
+        <p className="text-[11px] text-subtle -mt-2">Control which data this engine can read or modify.</p>
+        <div className="space-y-2">
+          {PMS_CATEGORIES.map(cat => {
+            const open = openCats[cat.id];
+            const aggregate = categoryAggregate(cat.id);
+            return (
+              <div
+                key={cat.id}
+                className="rounded-xl border border-brand-border overflow-hidden"
+              >
+                {/* Category header — click expand area to toggle. Using a
+                    div (not button) so the nested AccessPill buttons remain
+                    valid HTML. */}
+                <div
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 transition-colors',
+                    open ? 'bg-surface-2' : 'bg-white',
+                  )}
+                >
                   <button
-                    key={level}
-                    onClick={() => setPmsAccess(prev => ({ ...prev, [cat.label]: level }))}
+                    type="button"
+                    onClick={() => setOpenCats(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all capitalize',
-                      pmsAccess[cat.label] === level
-                        ? 'bg-[#2355A7] text-white'
-                        : 'bg-[#F6F7F9] text-[#8B9299] hover:bg-[#EEF2FC] hover:text-[#2355A7]',
+                      'flex items-center gap-3 flex-1 min-w-0 text-left rounded-lg -mx-1 px-1 py-1',
+                      'hover:bg-white transition-colors',
                     )}
+                    aria-expanded={open}
                   >
-                    {level === 'none' ? 'No access' : level}
+                    {open
+                      ? <ChevronDown className="w-3.5 h-3.5 text-subtle flex-shrink-0" />
+                      : <ChevronRight className="w-3.5 h-3.5 text-subtle flex-shrink-0" />
+                    }
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-strong">{cat.label}</p>
+                      {!open && (
+                        <p className="text-[11px] text-subtle truncate">{cat.fields.join(' · ')}</p>
+                      )}
+                    </div>
                   </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <AccessPill
+                    value={aggregate}
+                    onChange={(v) => setCategoryAccess(cat.id, v)}
+                  />
+                </div>
 
-        {/* PMS Sync */}
-        <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-xl p-4 flex items-start gap-3 mt-2">
-          <span className="w-2 h-2 rounded-full bg-[#16A34A] mt-1.5 flex-shrink-0" />
-          <div>
-            <p className="text-[12px] font-semibold text-[#16A34A]">PMS Connected</p>
-            <p className="text-[11px] text-[#5C6370] mt-0.5">Cloudbeds · Last sync 2 min ago · 142 active reservations</p>
-          </div>
+                {/* Per-field rows */}
+                {open && (
+                  <div className="border-t border-brand-border divide-y divide-border-soft">
+                    {cat.fields.map(field => {
+                      const key = `${cat.id}:${field}`;
+                      const v = fieldAccess[key];
+                      return (
+                        <div
+                          key={field}
+                          className="flex items-center justify-between gap-4 px-4 py-2.5 bg-white"
+                        >
+                          <div>
+                            <p className="text-[12px] font-medium text-strong">{field}</p>
+                            <p className="text-[10px] text-subtle capitalize">
+                              {v === 'none' ? 'No access' : v === 'read' ? 'Read only' : 'Read & write'}
+                            </p>
+                          </div>
+                          <FieldAccessSwitch
+                            value={v}
+                            onChange={(next) =>
+                              setFieldAccess(prev => ({ ...prev, [key]: next }))
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </FieldGroup>
 
-      {/* ── Save ── */}
-      <div className="flex items-center justify-end gap-3 pb-6">
-        <button className="h-9 px-4 rounded-xl border border-[#EDEEF1] text-[13px] font-medium text-[#5C6370] hover:bg-[#F6F7F9] transition-colors">
-          Discard
-        </button>
-        <button
-          onClick={() => addToast({ type: 'success', title: 'Settings saved' })}
-          className="h-9 px-5 rounded-xl text-[13px] font-semibold text-white transition-colors"
-          style={{ background: color }}
+      {/* ── Improve-with-AI diff modal ── */}
+      {diffOpen && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="AI-improved system prompt"
         >
-          Save settings
-        </button>
-      </div>
+          <button
+            className="absolute inset-0 bg-brand-black/30"
+            onClick={() => setDiffOpen(false)}
+            aria-label="Close"
+          />
+          <div className="relative w-[860px] max-w-[calc(100vw-32px)] bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="px-6 pt-5 pb-4 border-b border-brand-border flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] mb-1">
+                  Improve with AI
+                </p>
+                <h3 className="text-[16px] font-semibold text-strong">Suggested system prompt</h3>
+                <p className="text-[11px] text-subtle mt-1">
+                  Review the diff before applying. Removed lines are struck through, added lines are highlighted.
+                </p>
+              </div>
+              <button
+                onClick={() => setDiffOpen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <PromptDiff before={promptText} after={improved} />
+            </div>
+            <div className="px-6 py-4 border-t border-brand-border flex items-center justify-end gap-2 flex-shrink-0">
+              <button
+                onClick={() => setDiffOpen(false)}
+                className="h-9 px-4 rounded-xl border border-brand-border text-[13px] font-medium text-muted hover:bg-surface-3 transition-colors"
+              >
+                Keep current
+              </button>
+              <button
+                onClick={() => {
+                  setPromptText(improved);
+                  setDiffOpen(false);
+                  addToast({ type: 'success', title: 'Prompt updated' });
+                }}
+                className="h-9 px-5 rounded-xl bg-brand-blue text-white text-[13px] font-semibold hover:bg-brand-blue-hover transition-colors"
+              >
+                Apply changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

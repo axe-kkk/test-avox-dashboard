@@ -6,8 +6,8 @@ import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 
 const ENGINE_COLORS: Record<string, string> = {
-  Conversion: '#2355A7', Reservation: '#0EA5E9', Upsell: '#8B5CF6',
-  Arrival: '#10B981', Concierge: '#F59E0B', Recovery: '#EF4444', Reputation: '#EC4899',
+  Conversion: '#2355A7', Reservation: '#2355A7', Upsell: '#2355A7',
+  Arrival: '#2355A7', Concierge: '#2355A7', Recovery: '#2355A7', Reputation: '#2355A7',
 };
 
 interface RoutingRule {

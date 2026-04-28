@@ -1,14 +1,36 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutGrid, TrendingUp, CalendarCheck, Sparkles, Plane,
+  BellRing, Heart, Star, Cpu, ChevronRight,
+} from 'lucide-react';
 import { cn } from '../utils';
 import { mockEngines } from '../data/mock/engines';
 import type { AIEngine } from '../types';
 
-/* ── Engine status colours ── */
+/* ── Engine status colours (inbox-style monochrome) ── */
 const statusDot: Record<string, string> = {
-  active:   'bg-[#16A34A]',
-  paused:   'bg-[#F59E0B]',
-  error:    'bg-[#EF4444]',
-  inactive: 'bg-[#C4C8CF]',
+  active:   'bg-brand-blue',
+  paused:   'bg-brand-gray',
+  error:    'bg-brand-black',
+  inactive: 'bg-faint',
+};
+
+/* ── Engine identity icons — semantic per stage of guest journey ── */
+const ENGINE_ICONS: Record<string, typeof TrendingUp> = {
+  Conversion:  TrendingUp,
+  Reservation: CalendarCheck,
+  Upsell:      Sparkles,
+  Arrival:     Plane,
+  Concierge:   BellRing,
+  Recovery:    Heart,
+  Reputation:  Star,
+};
+
+const statusLabel: Record<string, string> = {
+  active:   'Active',
+  paused:   'Paused',
+  error:    'Error',
+  inactive: 'Inactive',
 };
 
 /* ── Engine sub-nav items ── */
@@ -76,82 +98,194 @@ function EnginesSection() {
   const parts = location.pathname.split('/');         // ['', 'engines', slug?, sub?]
   const activeSlug = parts[2] ?? '';
   const activeSub  = parts[3] ?? '';
+  const isOverview = location.pathname === '/engines' || location.pathname === '/engines/';
+
+  const totalToday = mockEngines.reduce((s, e) => s + e.actionsToday, 0);
+  const activeCount = mockEngines.filter(e => e.status === 'active').length;
 
   return (
-    <div className="px-3 py-3">
-      <div className="space-y-0.5">
-        {mockEngines.map((engine: AIEngine) => {
-          const slug = engine.name.toLowerCase();
-          const isSelected = slug === activeSlug;
+    <div className="flex flex-col h-full">
+      {/* ── Section header (mirrors Inbox SubSidebar) ─────────────── */}
+      <div className="h-[56px] flex items-center justify-between px-4 border-b border-brand-border flex-shrink-0">
+        <div
+          className="text-[12px] font-semibold text-brand-black"
+          style={{ fontFamily: "'Azeret Mono', monospace" }}
+        >
+          AI Engines
+        </div>
+        <span className="text-[10px] text-subtle tabular-nums">
+          {activeCount}/{mockEngines.length} active
+        </span>
+      </div>
 
-          return (
-            <div key={engine.id}>
-              {/* Engine row */}
-              <button
-                onClick={() => navigate(`/engines/${slug}`)}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+
+        {/* ── Main "All Engines" CTA — primary entry to /engines ───── */}
+        <NavLink
+          to="/engines"
+          end
+          className={cn(
+            'group block rounded-xl p-3 transition-all',
+            isOverview
+              ? 'bg-brand-blue text-white shadow-card'
+              : 'bg-brand-blue-50 border border-brand-blue-light hover:bg-brand-blue hover:text-white hover:border-brand-blue',
+          )}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className={cn(
+                'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors',
+                isOverview
+                  ? 'bg-white/15'
+                  : 'bg-white border border-brand-blue-light group-hover:bg-white/15 group-hover:border-transparent',
+              )}
+            >
+              <LayoutGrid
                 className={cn(
-                  'w-full flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors text-left group',
-                  isSelected
-                    ? 'bg-[#EEF2FC]'
-                    : 'hover:bg-[#F6F7F9]',
+                  'w-4 h-4 transition-colors',
+                  isOverview ? 'text-white' : 'text-brand-blue group-hover:text-white',
+                )}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  'text-[12px] font-semibold leading-tight transition-colors',
+                  isOverview ? 'text-white' : 'text-brand-blue group-hover:text-white',
                 )}
               >
-                {/* Status dot */}
-                <span className={cn(
-                  'w-1.5 h-1.5 rounded-full flex-shrink-0',
-                  statusDot[engine.status] ?? statusDot.inactive,
-                )} />
-                {/* Name */}
-                <span className={cn(
-                  'flex-1 text-[12px] font-medium truncate',
-                  isSelected ? 'text-[#2355A7]' : 'text-[#5C6370] group-hover:text-[#3D4550]',
-                )}>
-                  {engine.name}
-                </span>
-                {/* Actions today badge */}
-                {engine.actionsToday > 0 && (
-                  <span className={cn(
-                    'text-[10px] font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0 tabular-nums',
-                    isSelected
-                      ? 'bg-[#BED4F6]/40 text-[#2355A7]'
-                      : 'bg-[#F0F1F3] text-[#8B9299] group-hover:bg-[#E8E9EC]',
-                  )}>
-                    {engine.actionsToday}
-                  </span>
+                All AI Engines
+              </p>
+              <p
+                className={cn(
+                  'text-[10px] leading-tight mt-0.5 tabular-nums transition-colors',
+                  isOverview ? 'text-white/70' : 'text-brand-blue/70 group-hover:text-white/80',
                 )}
-              </button>
-
-              {/* Sub-nav — slides in when this engine is selected */}
-              {isSelected && (
-                <div className="mt-0.5 ml-4 pl-3 border-l-2 border-[#BED4F6] space-y-0.5 pb-1">
-                  {ENGINE_SUB_NAV.map(item => {
-                    const isSubActive = activeSub === item.id;
-                    return (
-                      <NavLink
-                        key={item.id}
-                        to={`/engines/${slug}/${item.id}`}
-                        end
-                        className={cn(
-                          'flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors',
-                          isSubActive
-                            ? 'bg-[#EEF2FC] text-[#2355A7]'
-                            : 'text-[#5C6370] hover:text-[#3D4550] hover:bg-[#F6F7F9]',
-                        )}
-                      >
-                        <span className="text-[12px] font-medium">{item.label}</span>
-                        {item.badge && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#D97706] whitespace-nowrap flex-shrink-0">
-                            {item.badge}
-                          </span>
-                        )}
-                      </NavLink>
-                    );
-                  })}
-                </div>
-              )}
+              >
+                Overview · {totalToday} actions today
+              </p>
             </div>
-          );
-        })}
+            <ChevronRight
+              className={cn(
+                'w-3.5 h-3.5 flex-shrink-0 transition-colors',
+                isOverview ? 'text-white/70' : 'text-brand-blue/60 group-hover:text-white',
+              )}
+            />
+          </div>
+        </NavLink>
+
+        {/* ── Section label ─────────────────────────────────────── */}
+        <div className="px-2 pt-1">
+          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em]">Engines</p>
+        </div>
+
+        {/* ── Engine list ───────────────────────────────────────── */}
+        <div className="space-y-0.5">
+          {mockEngines.map((engine: AIEngine) => {
+            const slug = engine.name.toLowerCase();
+            const isSelected = slug === activeSlug;
+            const Icon = ENGINE_ICONS[engine.name] ?? Cpu;
+
+            return (
+              <div key={engine.id}>
+                {/* Engine row */}
+                <button
+                  onClick={() => navigate(`/engines/${slug}`)}
+                  className={cn(
+                    'relative w-full flex items-center gap-2.5 rounded-lg pl-3 pr-2 py-2 transition-colors text-left group',
+                    isSelected
+                      ? 'bg-brand-blue-50'
+                      : 'hover:bg-surface-3',
+                  )}
+                  title={engine.description}
+                >
+                  {/* Active left-accent bar (matches inbox row pattern) */}
+                  {isSelected && (
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-brand-blue rounded-r-full" />
+                  )}
+
+                  {/* Engine identity icon */}
+                  <Icon
+                    className={cn(
+                      'w-3.5 h-3.5 flex-shrink-0 transition-colors',
+                      isSelected ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
+                    )}
+                  />
+
+                  {/* Name + (when selected) inline status hint */}
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        'text-[12px] truncate',
+                        isSelected ? 'font-semibold text-brand-blue' : 'font-medium text-muted group-hover:text-strong',
+                      )}
+                    >
+                      {engine.name}
+                    </span>
+                    {/* Show status text only when not active (i.e. needs attention) */}
+                    {engine.status !== 'active' && (
+                      <span className="text-[9px] font-semibold uppercase tracking-wider text-subtle whitespace-nowrap">
+                        · {statusLabel[engine.status] ?? engine.status}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Status dot (monochrome) */}
+                  <span
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                      statusDot[engine.status] ?? statusDot.inactive,
+                    )}
+                    aria-label={statusLabel[engine.status]}
+                  />
+
+                  {/* Action count pill */}
+                  {engine.actionsToday > 0 && (
+                    <span
+                      className={cn(
+                        'text-[10px] font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0 tabular-nums min-w-[22px] text-center transition-colors',
+                        isSelected
+                          ? 'bg-white text-brand-blue border border-brand-blue-light'
+                          : 'bg-surface-3 text-subtle border border-brand-border group-hover:bg-white',
+                      )}
+                    >
+                      {engine.actionsToday}
+                    </span>
+                  )}
+                </button>
+
+                {/* Sub-nav — slides in when this engine is selected */}
+                {isSelected && (
+                  <div className="mt-0.5 ml-4 pl-3 border-l-2 border-brand-blue-light space-y-0.5 pb-2">
+                    {ENGINE_SUB_NAV.map(item => {
+                      const isSubActive = activeSub === item.id;
+                      return (
+                        <NavLink
+                          key={item.id}
+                          to={`/engines/${slug}/${item.id}`}
+                          end
+                          className={cn(
+                            'flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors',
+                            isSubActive
+                              ? 'bg-brand-blue-50 text-brand-blue'
+                              : 'text-muted hover:text-strong hover:bg-surface-3',
+                          )}
+                        >
+                          <span className="text-[12px] font-medium">{item.label}</span>
+                          {item.badge && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-brand-blue-50 text-brand-blue border border-brand-blue-light whitespace-nowrap flex-shrink-0">
+                              {item.badge}
+                            </span>
+                          )}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -214,7 +348,7 @@ export function SubSidebar() {
   /* Engines — custom renderer */
   if (location.pathname.startsWith('/engines')) {
     return (
-      <aside className="w-[260px] flex-shrink-0 bg-white overflow-y-auto" style={{ borderRight: '1px solid #EDEEF1' }}>
+      <aside className="w-[260px] flex-shrink-0 bg-white flex flex-col overflow-hidden" style={{ borderRight: '1px solid #EDEEF1' }}>
         <EnginesSection />
       </aside>
     );

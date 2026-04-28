@@ -8,21 +8,22 @@ import { ChannelIcon } from '../../components/ui/ChannelIcon';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { conversationsTrend } from '../../data/mock/analytics';
 
+/* Inbox-style monochrome — engine identity comes from name, not colour. */
 const ENGINE_COLORS: Record<string, string> = {
   Conversion:  '#2355A7',
-  Reservation: '#0EA5E9',
-  Upsell:      '#8B5CF6',
-  Arrival:     '#10B981',
-  Concierge:   '#F59E0B',
-  Recovery:    '#EF4444',
-  Reputation:  '#EC4899',
+  Reservation: '#2355A7',
+  Upsell:      '#2355A7',
+  Arrival:     '#2355A7',
+  Concierge:   '#2355A7',
+  Recovery:    '#2355A7',
+  Reputation:  '#2355A7',
 };
 
 const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  active:   { dot: 'bg-[#16A34A]', bg: 'bg-[#DCFCE7]', text: 'text-[#16A34A]', label: 'Active'   },
-  paused:   { dot: 'bg-[#F59E0B]', bg: 'bg-[#FEF9C3]', text: 'text-[#D97706]', label: 'Paused'   },
-  error:    { dot: 'bg-[#EF4444]', bg: 'bg-[#FEE2E2]', text: 'text-[#DC2626]', label: 'Error'    },
-  inactive: { dot: 'bg-[#C4C8CF]', bg: 'bg-[#F1F5F9]', text: 'text-[#64748B]', label: 'Inactive' },
+  active:   { dot: 'bg-brand-blue', bg: 'bg-brand-blue-50', text: 'text-brand-blue', label: 'Active'   },
+  paused:   { dot: 'bg-brand-gray', bg: 'bg-surface-3',     text: 'text-subtle',     label: 'Paused'   },
+  error:    { dot: 'bg-brand-black', bg: 'bg-brand-black/10', text: 'text-brand-black', label: 'Error'   },
+  inactive: { dot: 'bg-faint',      bg: 'bg-surface-3',     text: 'text-subtle',     label: 'Inactive' },
 };
 
 /* ═══════════════════════════════════════════════
@@ -39,8 +40,8 @@ export function EnginePage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-[16px] font-semibold text-[#3D4550] mb-2">Engine not found</p>
-          <button onClick={() => navigate('/engines')} className="text-[13px] text-[#2355A7] hover:underline">← Back to Engines</button>
+          <p className="text-[16px] font-semibold text-strong mb-2">Engine not found</p>
+          <button onClick={() => navigate('/engines')} className="text-[13px] text-brand-blue hover:underline">← Back to Engines</button>
         </div>
       </div>
     );
@@ -57,14 +58,14 @@ export function EnginePage() {
     <div className="h-full flex flex-col overflow-hidden" style={{ background: 'var(--color-brand-bg, #F7F8FA)' }}>
 
       {/* ── Engine header ── */}
-      <div className="flex-shrink-0 bg-white border-b border-[#EDEEF1] px-6 py-4">
+      <div className="flex-shrink-0 bg-white border-b border-brand-border px-6 py-4">
         <div className="flex items-center justify-between max-w-[1100px] mx-auto">
 
           {/* Left: back + engine identity */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/engines')}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8B9299] hover:bg-[#F6F7F9] hover:text-[#5C6370] transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -78,13 +79,13 @@ export function EnginePage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-[16px] font-semibold text-[#3D4550]">{engine.name} Engine</h1>
+                  <h1 className="text-[16px] font-semibold text-strong">{engine.name} Engine</h1>
                   <span className={cn('flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold', sc.bg, sc.text)}>
                     <span className={cn('w-1.5 h-1.5 rounded-full', sc.dot)} />
                     {sc.label}
                   </span>
                 </div>
-                <p className="text-[12px] text-[#8B9299] mt-0.5 max-w-[480px] truncate">{engine.description}</p>
+                <p className="text-[12px] text-subtle mt-0.5 max-w-[480px] truncate">{engine.description}</p>
               </div>
             </div>
           </div>
@@ -98,14 +99,14 @@ export function EnginePage() {
               { label: 'Avg reply',  value: engine.avgResponseTime,                                  unit: ''          },
             ].map(m => (
               <div key={m.label} className="text-right">
-                <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">{m.label}</p>
+                <p className="text-[10px] text-subtle uppercase tracking-wider">{m.label}</p>
                 <p
                   className="text-[16px] font-semibold tabular-nums leading-tight"
                   style={{ fontFamily: "'Azeret Mono', monospace", color }}
                 >
                   {m.value}
                 </p>
-                {m.unit && <p className="text-[9px] text-[#C4C8CF]">{m.unit}</p>}
+                {m.unit && <p className="text-[9px] text-faint">{m.unit}</p>}
               </div>
             ))}
           </div>
@@ -113,9 +114,9 @@ export function EnginePage() {
 
         {/* Error banner */}
         {engine.lastError && (
-          <div className="max-w-[1100px] mx-auto mt-3 flex items-start gap-2.5 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl px-4 py-3">
-            <AlertTriangle className="w-4 h-4 text-[#EF4444] flex-shrink-0 mt-0.5" />
-            <p className="text-[12px] text-[#DC2626]">{engine.lastError}</p>
+          <div className="max-w-[1100px] mx-auto mt-3 flex items-start gap-2.5 bg-surface-3 border border-brand-border rounded-xl px-4 py-3">
+            <AlertTriangle className="w-4 h-4 text-brand-black flex-shrink-0 mt-0.5" />
+            <p className="text-[12px] text-strong">{engine.lastError}</p>
           </div>
         )}
       </div>
@@ -154,9 +155,9 @@ export function EngineOverviewPage() {
           const Icon = kpi.icon;
           const isWarn = kpi.label.startsWith('Error') && engine.errorCount > 3;
           return (
-            <div key={kpi.label} className="bg-white rounded-2xl border border-[#EDEEF1] p-5">
+            <div key={kpi.label} className="bg-white rounded-2xl border border-brand-border p-5">
               <div className="flex items-start justify-between mb-3">
-                <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider leading-tight">{kpi.label}</p>
+                <p className="text-[11px] font-semibold text-subtle uppercase tracking-wider leading-tight">{kpi.label}</p>
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${color}18` }}
@@ -170,7 +171,7 @@ export function EngineOverviewPage() {
               >
                 {kpi.value}
               </p>
-              <p className={cn('text-[11px] mt-1.5', isWarn ? 'text-[#EF4444]' : 'text-[#A0A6B0]')}>{kpi.sub}</p>
+              <p className={cn('text-[11px] mt-1.5', isWarn ? 'text-brand-black font-medium' : 'text-subtle')}>{kpi.sub}</p>
             </div>
           );
         })}
@@ -180,8 +181,8 @@ export function EngineOverviewPage() {
       <div className="grid grid-cols-[1fr_380px] gap-5">
 
         {/* Volume chart */}
-        <div className="bg-white rounded-2xl border border-[#EDEEF1] p-5">
-          <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider mb-4">
+        <div className="bg-white rounded-2xl border border-brand-border p-5">
+          <p className="text-[11px] font-semibold text-subtle uppercase tracking-wider mb-4">
             Conversation Volume — last 12 days
           </p>
           <ResponsiveContainer width="100%" height={180}>
@@ -211,34 +212,34 @@ export function EngineOverviewPage() {
         </div>
 
         {/* Action / Error log */}
-        <div className="bg-white rounded-2xl border border-[#EDEEF1] overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-[#EDEEF1] flex items-center justify-between flex-shrink-0">
-            <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider">Recent Actions</p>
+        <div className="bg-white rounded-2xl border border-brand-border overflow-hidden flex flex-col">
+          <div className="px-5 py-4 border-b border-brand-border flex items-center justify-between flex-shrink-0">
+            <p className="text-[11px] font-semibold text-subtle uppercase tracking-wider">Recent Actions</p>
             {errors.length > 0 && (
-              <span className="text-[9px] font-bold text-[#EF4444] bg-[#FEE2E2] px-2 py-0.5 rounded-full">
+              <span className="text-[9px] font-bold text-white bg-brand-black px-2 py-0.5 rounded-full">
                 {errors.length} error{errors.length > 1 ? 's' : ''}
               </span>
             )}
           </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-[#F2F3F5]">
+          <div className="flex-1 overflow-y-auto divide-y divide-border-soft">
             {engineActions.length === 0 ? (
-              <p className="text-[13px] text-[#8B9299] text-center py-10">No recent actions.</p>
+              <p className="text-[13px] text-subtle text-center py-10">No recent actions.</p>
             ) : engineActions.map(item => (
               <div
                 key={item.id}
                 className={cn(
-                  'flex items-start gap-3 px-4 py-3 hover:bg-[#FAFAFA] transition-colors',
-                  item.urgency === 'high' && 'bg-[#FFF5F5]',
+                  'flex items-start gap-3 px-4 py-3 hover:bg-surface-2 transition-colors',
+                  item.urgency === 'high' && 'bg-surface-2',
                 )}
               >
                 <ChannelIcon channel={item.channel} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <span className="text-[12px] font-medium text-[#3D4550] truncate">{item.guestName}</span>
-                    <span className="text-[10px] text-[#A0A6B0] flex-shrink-0">{formatDateTime(item.timestamp)}</span>
+                    <span className="text-[12px] font-medium text-strong truncate">{item.guestName}</span>
+                    <span className="text-[10px] text-subtle flex-shrink-0">{formatDateTime(item.timestamp)}</span>
                   </div>
-                  <p className="text-[11px] text-[#5C6370]">{item.action}</p>
-                  <p className="text-[10px] text-[#A0A6B0] mt-0.5">{item.result}</p>
+                  <p className="text-[11px] text-muted">{item.action}</p>
+                  <p className="text-[10px] text-subtle mt-0.5">{item.result}</p>
                 </div>
               </div>
             ))}
