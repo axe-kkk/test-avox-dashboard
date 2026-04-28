@@ -117,6 +117,22 @@ function languageLabel(code?: string) {
   return code.toUpperCase();
 }
 
+const TAG_PALETTE = [
+  { bg: '#FCE7F3', text: '#9D174D', border: '#FBCFE8' }, // pink
+  { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' }, // amber
+  { bg: '#DBEAFE', text: '#1D4ED8', border: '#BFDBFE' }, // blue
+  { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' }, // green
+  { bg: '#EDE9FE', text: '#5B21B6', border: '#DDD6FE' }, // violet
+  { bg: '#F3F4F6', text: '#374151', border: '#E5E7EB' }, // gray
+] as const;
+
+function tagStyle(tag: string) {
+  const t = tag.trim();
+  const idx =
+    Math.abs(Array.from(t).reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)) % TAG_PALETTE.length;
+  return TAG_PALETTE[idx];
+}
+
 // ── Conversation row ────────────────────────────────────────────────────────
 
 function ConvRow({ conv, isActive, onClick }: {
@@ -124,41 +140,19 @@ function ConvRow({ conv, isActive, onClick }: {
 }) {
   const lastChannel = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1]?.channel : conv.channel;
   const guest = mockGuests.find(g => g.id === conv.guestId);
-  const primaryTag =
-    (guest?.tags?.includes('VIP') ? 'VIP' : guest?.tags?.[0]) ??
-    conv.tags?.[0];
-
-  const tagBadge = useMemo(() => {
-    if (!primaryTag) return null;
-    const t = primaryTag.trim();
-    if (!t) return null;
-    const letter = t[0]?.toUpperCase() ?? '';
-
-    const preset: Record<string, string> = {
-      VIP: 'bg-[#F59E0B]/15 text-[#92400E] border-[#F59E0B]/25',
-      Anniversary: 'bg-[#8B5CF6]/12 text-[#5B21B6] border-[#8B5CF6]/20',
-      Honeymoon: 'bg-[#EC4899]/12 text-[#9D174D] border-[#EC4899]/20',
-      'Baby cot': 'bg-[#EAB308]/15 text-[#854D0E] border-[#EAB308]/25',
-      'Maintenance issue': 'bg-[#EF4444]/12 text-[#991B1B] border-[#EF4444]/20',
-    };
-
-    const palette = [
-      'bg-[#2355A7]/10 text-[#1D4ED8] border-[#2355A7]/20',
-      'bg-[#0E1013]/8 text-[#0E1013] border-[#0E1013]/15',
-      'bg-[#10B981]/12 text-[#047857] border-[#10B981]/20',
-      'bg-[#F97316]/12 text-[#9A3412] border-[#F97316]/20',
-      'bg-[#06B6D4]/12 text-[#155E75] border-[#06B6D4]/20',
-      'bg-[#64748B]/12 text-[#334155] border-[#64748B]/20',
-    ];
-
-    const cls = preset[t] ?? (() => {
-      let h = 0;
-      for (let i = 0; i < t.length; i++) h = (h + t.charCodeAt(i)) % palette.length;
-      return palette[h];
-    })();
-
-    return { letter, cls, title: t };
-  }, [primaryTag]);
+  const [openTag, setOpenTag] = useState<string | null>(null);
+  const rowTags = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of guest?.tags ?? []) {
+      const v = t.trim();
+      if (v) set.add(v);
+    }
+    for (const t of conv.tags ?? []) {
+      const v = t.trim();
+      if (v) set.add(v);
+    }
+    return Array.from(set);
+  }, [guest?.tags, conv.tags]);
   return (
     <button
       onClick={onClick}
@@ -183,21 +177,6 @@ function ConvRow({ conv, isActive, onClick }: {
               )}>
                 {conv.guestName}
               </span>
-              {tagBadge && (
-                <span
-                  className={cn(
-                    'w-5 h-5 flex items-center justify-center flex-shrink-0',
-                    'text-[8px] font-semibold leading-none',
-                    'rounded-[4px]',
-                    'border',
-                    tagBadge.cls,
-                  )}
-                  title={tagBadge.title}
-                  aria-label={`Tag: ${tagBadge.title}`}
-                >
-                  {tagBadge.letter}
-                </span>
-              )}
             </div>
             {conv.unreadCount > 0 && (
               <span className="w-2 h-2 rounded-full bg-[#2355A7] flex-shrink-0" aria-label="Unread" />
@@ -216,6 +195,47 @@ function ConvRow({ conv, isActive, onClick }: {
               </span>
             </div>
           </div>
+
+          {/* Tags under preview */}
+          {rowTags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {rowTags.map(t => {
+                const s = tagStyle(t);
+                const letter = t.trim().charAt(0).toUpperCase();
+                const isOpen = openTag === t;
+                return (
+                  <span
+                    key={t}
+                    className={cn(
+                      'inline-flex items-center border font-bold uppercase tracking-wider select-none transition-all duration-150 ease-out will-change-transform',
+                      isOpen
+                        ? 'h-7 px-3 rounded-full text-[10px]'
+                        : 'w-7 h-7 justify-center rounded-full text-[10px]',
+                      'hover:scale-[1.03] active:scale-[0.98]',
+                    )}
+                    style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
+                    title={isOpen ? 'Collapse tag' : t}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={isOpen ? `Tag: ${t}` : `Tag: ${t}. Click to expand.`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenTag(prev => (prev === t ? null : t));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setOpenTag(prev => (prev === t ? null : t));
+                      }
+                    }}
+                  >
+                    {isOpen ? t : letter}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </button>
@@ -878,7 +898,7 @@ export function InboxPage() {
           </div>
 
           {/* Search (as part of submenu spec) */}
-          <div className="relative mt-2.5">
+          <div className="relative mt-2.5 z-40">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8B9299]" />
             <input
               placeholder="Search…"
@@ -903,7 +923,7 @@ export function InboxPage() {
                   </div>
                 </button>
                 {urgentOpen && (
-                  <div className="absolute right-0 mt-2 w-[260px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-2">
+                  <div className="absolute right-0 mt-2 w-[260px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-[300] p-2">
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">
                       Departments
                     </p>
@@ -934,7 +954,7 @@ export function InboxPage() {
                   <Settings2 className="w-4 h-4 text-[#8B9299]" />
                 </button>
                 {listSettingsOpen && (
-                  <div className="absolute right-0 mt-2 w-[220px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-50 p-2">
+                  <div className="absolute right-0 mt-2 w-[220px] bg-white border border-[#EDEEF1] rounded-xl shadow-panel z-[300] p-2">
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.18em]">
                       List view
                     </p>
@@ -2101,18 +2121,6 @@ export function InboxPage() {
                           'Corporate', 'Group booking', 'Long stay', 'Early bird',
                           'Promo-sensitive', 'Quiet preference', 'Late checkout',
                         ];
-                        const TAG_PALETTE = [
-                          { bg: '#FCE7F3', text: '#9D174D', border: '#FBCFE8' }, // pink
-                          { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' }, // amber
-                          { bg: '#DBEAFE', text: '#1D4ED8', border: '#BFDBFE' }, // blue
-                          { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' }, // green
-                          { bg: '#EDE9FE', text: '#5B21B6', border: '#DDD6FE' }, // violet
-                          { bg: '#F3F4F6', text: '#374151', border: '#E5E7EB' }, // gray
-                        ] as const;
-                        const tagStyle = (t: string) => {
-                          const idx = Math.abs(Array.from(t).reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)) % TAG_PALETTE.length;
-                          return TAG_PALETTE[idx];
-                        };
                         const addTag = (t: string) => {
                           const tag = t.trim();
                           if (tag && !editableTags.includes(tag)) setEditableTags(prev => [...prev, tag]);
