@@ -2258,34 +2258,35 @@ export function InboxPage() {
 
             {/* ── Menu + sliding detail panel ── */}
             {(() => {
-              const menuGroups = [
+              type MenuItem = { id: GuestSidebarSection; label: string; icon: typeof User };
+              const menuGroups: { label: string; items: MenuItem[] }[] = [
                 {
                   label: 'Guest',
                   items: [
-                    { id: 'info' as const,        label: 'User info',    icon: User     },
-                    { id: 'reservation' as const, label: 'Reservations', icon: BedDouble },
-                    { id: 'pms' as const,         label: 'PMS data',     icon: Database  },
+                    { id: 'info',        label: 'User info',    icon: User     },
+                    { id: 'reservation', label: 'Reservations', icon: BedDouble },
+                    { id: 'pms',         label: 'PMS data',     icon: Database  },
                   ],
                 },
                 {
                   label: 'Activity',
                   items: [
-                    { id: 'actions' as const, label: 'Quick actions',        icon: Activity   },
-                    { id: 'engines' as const, label: 'Engines log',          icon: Zap        },
-                    { id: 'signals' as const, label: 'Satisfaction signals', icon: TrendingUp },
+                    { id: 'actions', label: 'Quick actions',        icon: Activity   },
+                    { id: 'engines', label: 'Engines log',          icon: Zap        },
+                    { id: 'signals', label: 'Satisfaction signals', icon: TrendingUp },
                   ],
                 },
                 {
                   label: 'Details',
                   items: [
-                    { id: 'properties' as const, label: 'User properties', icon: Settings2 },
-                    { id: 'calls' as const,      label: 'Calls',            icon: PhoneCall },
-                    { id: 'tags_notes' as const, label: 'Tags & notes',     icon: Tag       },
+                    { id: 'properties', label: 'User properties', icon: Settings2 },
+                    { id: 'calls',      label: 'Calls',            icon: PhoneCall },
+                    { id: 'tags_notes', label: 'Tags & notes',     icon: Tag       },
                   ],
                 },
               ];
 
-              const allItems = menuGroups.flatMap(g => g.items);
+              const allItems: MenuItem[] = menuGroups.flatMap(g => g.items);
               const activeMeta = allItems.find(m => m.id === guestSidebarSection) ?? allItems[0];
               const openSection = (id: GuestSidebarSection) => {
                 setGuestSidebarSection(id);
