@@ -6,6 +6,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Avatar } from '../../components/ui/Avatar';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { Input, Select } from '../../components/ui/Input';
+import { Switch } from '../../components/ui/Switch';
 import { mockUsers } from '../../data/mock/users';
 import { mockProperties } from '../../data/mock/properties';
 import { useApp, usePermission } from '../../app/AppContext';
@@ -354,18 +355,10 @@ export function SettingsPage() {
                       <p className="text-xs text-[#5C6370]">{rule.desc}</p>
                     </div>
                     <Badge variant="default">{rule.channel}</Badge>
-                    <div
-                      className={cn(
-                        'w-9 h-5 rounded-full relative cursor-pointer transition-colors flex-shrink-0',
-                        rule.enabled ? 'bg-[#2355A7]' : 'bg-[#D1CFCF]',
-                      )}
-                      onClick={() => addToast({ type: 'info', title: rule.enabled ? 'Alert disabled' : 'Alert enabled' })}
-                    >
-                      <div className={cn(
-                        'absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform',
-                        rule.enabled ? 'translate-x-4' : 'translate-x-0.5',
-                      )} />
-                    </div>
+                    <Switch
+                      checked={rule.enabled}
+                      onChange={() => addToast({ type: 'info', title: rule.enabled ? 'Alert disabled' : 'Alert enabled' })}
+                    />
                   </div>
                 ))}
               </div>

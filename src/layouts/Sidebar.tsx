@@ -127,18 +127,20 @@ export function Sidebar() {
 
                     {'badge' in item && item.badge != null && item.badge > 0 && (
                       <span className={cn(
-                        'flex items-center justify-center font-bold bg-[#2355A7] text-white rounded-full leading-none',
+                        'flex items-center justify-center font-medium bg-[#2355A7] text-white rounded-full leading-none tabular-nums text-[10px]',
                         sidebarCollapsed
-                          ? 'absolute top-0.5 right-0.5 w-[14px] h-[14px] text-[8px]'
-                          : 'ml-auto min-w-[18px] h-[18px] text-[10px] px-1',
+                          ? 'absolute -top-1 -right-1 min-w-[16px] h-4 px-1'
+                          : 'ml-auto min-w-[18px] h-[18px] px-1',
                       )}>
                         {item.badge}
                       </span>
                     )}
 
-                    {/* Tooltip */}
+                    {/* Tooltip — `hidden group-hover:block` keeps it out of layout when collapsed,
+                        otherwise its 80–130px width forces overflow-x on <nav> and the browser
+                        auto-promotes overflow-x to auto, drawing a horizontal scrollbar. */}
                     {sidebarCollapsed && (
-                      <div className="pointer-events-none absolute left-full ml-3 px-2.5 py-1.5 bg-[#0E1013]/90 text-white text-[12px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-lg backdrop-blur-sm">
+                      <div className="pointer-events-none hidden group-hover:block absolute left-full ml-3 px-2.5 py-1.5 bg-[#0E1013]/90 text-white text-[12px] rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm">
                         {item.label}
                       </div>
                     )}

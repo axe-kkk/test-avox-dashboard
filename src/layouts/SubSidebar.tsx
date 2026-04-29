@@ -6,6 +6,7 @@ import {
 import { cn } from '../utils';
 import { mockEngines } from '../data/mock/engines';
 import type { AIEngine } from '../types';
+import { getEngineSpec } from '../features/engines/lib/engineSpec';
 
 /* ── Engine status colours (inbox-style monochrome) ── */
 const statusDot: Record<string, string> = {
@@ -33,18 +34,24 @@ const statusLabel: Record<string, string> = {
   inactive: 'Inactive',
 };
 
-/* ── Engine sub-nav items ── */
-const ENGINE_SUB_NAV = [
-  { id: 'activation',   label: 'Activation'         },
-  { id: 'settings',     label: 'General Settings', badge: '1 suggestion' },
-  { id: 'offers',       label: 'Offers / Actions'   },
-  { id: 'knowledge',    label: 'Knowledge Base'      },
-  { id: 'routing',      label: 'Routing'             },
-  { id: 'integrations', label: 'Integrations & MCP' },
-  { id: 'playground',   label: 'Playground'          },
-  { id: 'analytics',    label: 'Analytics'           },
-  { id: 'monitor',      label: 'Monitor Agent'       },
-];
+/* ── Engine sub-nav items.
+   `config` is engine-specific — its label changes per engine
+   (e.g. "Upgrade Rules" for Upsell, "Complaint Handling" for Recovery). */
+function getEngineSubNav(engineName: string): { id: string; label: string; badge?: string }[] {
+  const spec = getEngineSpec(engineName);
+  return [
+    { id: 'activation',   label: 'Activation'         },
+    { id: 'settings',     label: 'General Settings',  badge: '1 suggestion' },
+    { id: 'config',       label: spec.configLabel    },
+    { id: 'offers',       label: 'Offers / Actions'   },
+    { id: 'knowledge',    label: 'Knowledge Base'      },
+    { id: 'routing',      label: 'Routing'             },
+    { id: 'integrations', label: 'Integrations & MCP' },
+    { id: 'playground',   label: 'Playground'          },
+    { id: 'analytics',    label: 'Analytics'           },
+    { id: 'monitor',      label: 'Monitor Agent'       },
+  ];
+}
 
 /* ── Generic sub-item types ── */
 type SubItem =
@@ -257,7 +264,7 @@ function EnginesSection() {
                 {/* Sub-nav — slides in when this engine is selected */}
                 {isSelected && (
                   <div className="mt-0.5 ml-4 pl-3 border-l-2 border-brand-blue-light space-y-0.5 pb-2">
-                    {ENGINE_SUB_NAV.map(item => {
+                    {getEngineSubNav(engine.name).map(item => {
                       const isSubActive = activeSub === item.id;
                       return (
                         <NavLink

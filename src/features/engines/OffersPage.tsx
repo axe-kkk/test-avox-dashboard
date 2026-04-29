@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Trash2, ChevronDown, Send, Check } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, Check, X, Edit2, MessageSquare } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
+import { Switch } from '../../components/ui/Switch';
+import { getEngineSpec } from './lib/engineSpec';
 
 /* Inbox-style monochrome — every engine uses the brand-blue accent. */
 const ENGINE_COLORS: Record<string, string> = {
   Conversion: '#2355A7', Reservation: '#2355A7', Upsell: '#2355A7',
   Arrival: '#2355A7', Concierge: '#2355A7', Recovery: '#2355A7', Reputation: '#2355A7',
 };
-
-const OFFER_TYPES = [
-  'Room upgrade', 'Early check-in', 'Late check-out', 'Spa package',
-  'Restaurant reservation', 'Airport transfer', 'Discount %', 'Fixed discount',
-  'Free service', 'Gift',
-];
 
 const CHANNELS = [
   { id: 'whatsapp',  label: 'WhatsApp'   },
@@ -32,9 +28,28 @@ interface Offer {
   id: string;
   name: string;
   type: string;
+  description: string;
+  cost: string;
+  category: string;
   condition: string;
   limit: string;
+  validFrom: string;
+  validTo: string;
+  season: 'all' | 'high' | 'low';
+  pmsCheck: boolean;
   status: 'active' | 'paused';
+}
+
+interface WhatsAppTemplate {
+  name: string;
+  lang: string;
+  category: 'marketing' | 'utility' | 'authentication';
+  status: 'approved' | 'pending' | 'rejected';
+  updated: string;
+  header: string;
+  body: string;
+  footer: string;
+  cta: string;
 }
 
 interface TimelinePoint {
@@ -45,11 +60,17 @@ interface TimelinePoint {
 }
 
 const MOCK_OFFERS: Offer[] = [
-  { id: 'o1', name: 'Room Upgrade — Honeymoon',  type: 'Room upgrade',        condition: 'Tag: Honeymoon',      limit: '5/day',  status: 'active' },
-  { id: 'o2', name: 'Early Check-in 10:00 AM',   type: 'Early check-in',      condition: 'Arrival 3+ nights',   limit: '10/day', status: 'active' },
-  { id: 'o3', name: 'Spa Sunday Package',         type: 'Spa package',         condition: 'Weekend stay',        limit: '8/day',  status: 'paused' },
-  { id: 'o4', name: 'Airport Transfer Offer',     type: 'Airport transfer',    condition: 'First-time guest',    limit: '20/day', status: 'active' },
+  { id: 'o1', name: 'Room Upgrade — Honeymoon',  type: 'Room upgrade',        description: 'Complimentary upgrade to suite for honeymooners.',           cost: '0',     category: 'Stay',       condition: 'Tag: Honeymoon',      limit: '5/day',  validFrom: '2026-04-01', validTo: '2026-12-31', season: 'all',  pmsCheck: true,  status: 'active' },
+  { id: 'o2', name: 'Early Check-in 10:00 AM',   type: 'Early check-in',      description: '10am check-in for stays of 3 nights or more.',               cost: '40',    category: 'Stay',       condition: 'Arrival 3+ nights',   limit: '10/day', validFrom: '2026-01-01', validTo: '2026-12-31', season: 'all',  pmsCheck: true,  status: 'active' },
+  { id: 'o3', name: 'Spa Sunday Package',        type: 'Spa package',         description: 'Sunday spa day with massage + sauna access.',                cost: '120',   category: 'Wellness',   condition: 'Weekend stay',        limit: '8/day',  validFrom: '2026-04-01', validTo: '2026-09-30', season: 'high', pmsCheck: false, status: 'paused' },
+  { id: 'o4', name: 'Airport Transfer Offer',    type: 'Airport transfer',    description: 'Free luxury sedan transfer for first-time guests.',          cost: '0',     category: 'Transfer',   condition: 'First-time guest',    limit: '20/day', validFrom: '2026-01-01', validTo: '2026-12-31', season: 'all',  pmsCheck: false, status: 'active' },
 ];
+
+const EMPTY_OFFER: Offer = {
+  id: '', name: '', type: 'Room upgrade', description: '', cost: '', category: 'Stay',
+  condition: '', limit: '5/day', validFrom: '', validTo: '', season: 'all',
+  pmsCheck: true, status: 'active',
+};
 
 const MOCK_TIMELINE: TimelinePoint[] = [
   { id: 't1', days: 7,  messageType: 'Informational',    channel: 'email'    },
@@ -57,11 +78,23 @@ const MOCK_TIMELINE: TimelinePoint[] = [
   { id: 't3', days: 1,  messageType: 'Reminder',         channel: 'whatsapp' },
 ];
 
-const WHATSAPP_TEMPLATES = [
-  { name: 'pre_arrival_welcome',  lang: 'EN', category: 'utility',     status: 'approved', updated: 'Apr 18, 2026' },
-  { name: 'upsell_room_upgrade',  lang: 'EN', category: 'marketing',   status: 'approved', updated: 'Apr 12, 2026' },
-  { name: 'post_stay_review',     lang: 'EN', category: 'utility',     status: 'approved', updated: 'Apr 10, 2026' },
-  { name: 'pre_arrival_de',       lang: 'DE', category: 'utility',     status: 'pending',  updated: 'Apr 21, 2026' },
+const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
+  { name: 'pre_arrival_welcome',  lang: 'EN', category: 'utility',     status: 'approved', updated: 'Apr 18, 2026', header: 'Welcome to {{property_name}}', body: 'Hi {{1}}, your check-in on {{2}} is confirmed. Reply if you need anything.', footer: 'AVOX Concierge', cta: 'View booking' },
+  { name: 'upsell_room_upgrade',  lang: 'EN', category: 'marketing',   status: 'approved', updated: 'Apr 12, 2026', header: 'A little extra for your stay',    body: 'Hi {{1}}, want a Junior Suite upgrade for {{2}}? Limited rooms left.', footer: 'AVOX', cta: 'See upgrade' },
+  { name: 'post_stay_review',     lang: 'EN', category: 'utility',     status: 'approved', updated: 'Apr 10, 2026', header: 'How was your stay?',              body: 'Hi {{1}}, thanks for staying with us. We\'d love your feedback.',      footer: 'AVOX Reputation', cta: 'Leave review' },
+  { name: 'pre_arrival_de',       lang: 'DE', category: 'utility',     status: 'pending',  updated: 'Apr 21, 2026', header: 'Willkommen im {{property_name}}', body: 'Hallo {{1}}, dein Check-in am {{2}} ist bestätigt.',                   footer: 'AVOX', cta: 'Buchung ansehen' },
+];
+
+const EMPTY_TEMPLATE: WhatsAppTemplate = {
+  name: '', lang: 'EN', category: 'utility', status: 'pending', updated: '',
+  header: '', body: '', footer: '', cta: '',
+};
+
+const TEMPLATE_VARIABLES = [
+  { token: '{{1}}', mapsTo: 'guest_name'      },
+  { token: '{{2}}', mapsTo: 'check_in_date'   },
+  { token: '{{3}}', mapsTo: 'room_type'       },
+  { token: '{{4}}', mapsTo: 'reservation_id'  },
 ];
 
 const MASS_SERVICES = [
@@ -76,11 +109,54 @@ export function OffersPage() {
   const { addToast } = useApp();
   const engine = mockEngines.find(e => e.name.toLowerCase() === engineSlug);
 
+  const spec = engine ? getEngineSpec(engine.name) : null;
+
   const [offers, setOffers] = useState<Offer[]>(MOCK_OFFERS);
+  const [templates, setTemplates] = useState<WhatsAppTemplate[]>(WHATSAPP_TEMPLATES);
   const [timeline, setTimeline] = useState<TimelinePoint[]>(MOCK_TIMELINE);
-  const [showAddOffer, setShowAddOffer] = useState(false);
+  const [services, setServices] = useState(MASS_SERVICES);
   const [activeTab, setTab] = useState<'offers' | 'timeline' | 'templates' | 'services'>('offers');
-  const [channels, setChannels] = useState<string[]>(['whatsapp', 'email']);
+  const [channels, setChannels] = useState<string[]>(spec?.defaultChannels ?? ['whatsapp', 'email']);
+
+  /* Offer modal state */
+  const [offerDraft, setOfferDraft] = useState<Offer | null>(null);
+  const openNewOffer  = () => setOfferDraft({
+    ...EMPTY_OFFER,
+    type: spec?.offerTypes[0] ?? EMPTY_OFFER.type,
+  });
+  const openEditOffer = (o: Offer) => setOfferDraft({ ...o });
+  const saveOffer = () => {
+    if (!offerDraft) return;
+    if (!offerDraft.name.trim()) { addToast({ type: 'warning', title: 'Name required' }); return; }
+    if (offerDraft.id) {
+      setOffers(prev => prev.map(o => o.id === offerDraft.id ? offerDraft : o));
+      addToast({ type: 'success', title: 'Offer updated' });
+    } else {
+      const next = { ...offerDraft, id: `o${Date.now()}` };
+      setOffers(prev => [...prev, next]);
+      addToast({ type: 'success', title: 'Offer created' });
+    }
+    setOfferDraft(null);
+  };
+
+  /* Template modal state */
+  const [tplDraft, setTplDraft] = useState<WhatsAppTemplate | null>(null);
+  const openNewTemplate  = () => setTplDraft({ ...EMPTY_TEMPLATE });
+  const openEditTemplate = (t: WhatsAppTemplate) => setTplDraft({ ...t });
+  const saveTemplate = () => {
+    if (!tplDraft) return;
+    if (!tplDraft.name.trim()) { addToast({ type: 'warning', title: 'Template name required' }); return; }
+    const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const exists = templates.some(t => t.name === tplDraft.name);
+    if (exists) {
+      setTemplates(prev => prev.map(t => t.name === tplDraft.name ? { ...tplDraft, updated: today } : t));
+      addToast({ type: 'success', title: 'Template saved' });
+    } else {
+      setTemplates(prev => [...prev, { ...tplDraft, updated: today, status: 'pending' }]);
+      addToast({ type: 'success', title: 'Template created — pending approval' });
+    }
+    setTplDraft(null);
+  };
 
   if (!engine) return null;
   const color = ENGINE_COLORS[engine.name] ?? '#2355A7';
@@ -123,7 +199,7 @@ export function OffersPage() {
           <div className="flex items-center justify-between">
             <p className="text-[13px] font-semibold text-strong">{offers.length} offers configured</p>
             <button
-              onClick={() => setShowAddOffer(true)}
+              onClick={openNewOffer}
               className="flex items-center gap-1.5 h-9 px-4 rounded-xl text-[13px] font-semibold text-white transition-colors"
               style={{ background: color }}
             >
@@ -165,12 +241,22 @@ export function OffersPage() {
                       </button>
                     </td>
                     <td className="px-5 py-3.5">
-                      <button
-                        onClick={() => setOffers(prev => prev.filter(o => o.id !== offer.id))}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-faint hover:bg-surface-3 hover:text-brand-black transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1 justify-end">
+                        <button
+                          onClick={() => openEditOffer(offer)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-brand-blue transition-colors"
+                          title="Edit offer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setOffers(prev => prev.filter(o => o.id !== offer.id))}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-faint hover:bg-surface-3 hover:text-brand-black transition-colors"
+                          title="Delete offer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -324,9 +410,9 @@ export function OffersPage() {
       {activeTab === 'templates' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold text-strong">{WHATSAPP_TEMPLATES.length} templates</p>
+            <p className="text-[13px] font-semibold text-strong">{templates.length} templates</p>
             <button
-              onClick={() => addToast({ type: 'success', title: 'Template editor opening…' })}
+              onClick={openNewTemplate}
               className="flex items-center gap-1.5 h-9 px-4 rounded-xl text-[13px] font-semibold text-white transition-colors"
               style={{ background: color }}
             >
@@ -338,14 +424,14 @@ export function OffersPage() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-brand-border">
-                  {['Template name', 'Language', 'Category', 'Approval', 'Updated'].map(h => (
+                  {['Template name', 'Language', 'Category', 'Approval', 'Updated', ''].map(h => (
                     <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-subtle uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-soft">
-                {WHATSAPP_TEMPLATES.map(tpl => (
-                  <tr key={tpl.name} className="hover:bg-surface-2 transition-colors">
+                {templates.map(tpl => (
+                  <tr key={tpl.name} className="hover:bg-surface-2 transition-colors cursor-pointer" onClick={() => openEditTemplate(tpl)}>
                     <td className="px-5 py-3.5 text-[13px] font-mono text-strong">{tpl.name}</td>
                     <td className="px-5 py-3.5">
                       <span className="text-[11px] font-semibold text-muted bg-surface-3 px-2 py-0.5 rounded-md">{tpl.lang}</span>
@@ -356,12 +442,23 @@ export function OffersPage() {
                         'text-[10px] font-semibold px-2 py-0.5 rounded-full border',
                         tpl.status === 'approved'
                           ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light'
-                          : 'bg-surface-3 text-subtle border-brand-border',
+                          : tpl.status === 'rejected'
+                            ? 'bg-surface-3 text-brand-black border-brand-border'
+                            : 'bg-surface-3 text-subtle border-brand-border',
                       )}>
                         {tpl.status}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-[12px] text-subtle">{tpl.updated}</td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        onClick={e => { e.stopPropagation(); openEditTemplate(tpl); }}
+                        className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-brand-blue transition-colors"
+                        title="Edit template"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -374,7 +471,7 @@ export function OffersPage() {
       {activeTab === 'services' && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            {MASS_SERVICES.map(svc => (
+            {services.map(svc => (
               <div key={svc.name} className="bg-white rounded-2xl border border-brand-border p-5 flex items-center justify-between">
                 <div>
                   <p className="text-[14px] font-semibold text-strong">{svc.name}</p>
@@ -383,19 +480,15 @@ export function OffersPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  {svc.connected && (
-                    <div
-                      className="relative cursor-pointer"
-                      style={{ width: 40, height: 22 }}
-                    >
-                      <div className="w-full h-full rounded-full bg-brand-blue" />
-                      <span className="absolute top-0.5 right-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm" />
-                    </div>
-                  )}
-                  {!svc.connected && (
+                  {svc.connected ? (
+                    <Switch
+                      checked
+                      onChange={() => setServices(prev => prev.map(s => s.name === svc.name ? { ...s, connected: false } : s))}
+                    />
+                  ) : (
                     <button
-                      onClick={() => addToast({ type: 'info', title: `Connect ${svc.name}` })}
-                      className="h-8 px-3 rounded-lg text-[12px] font-medium text-brand-blue bg-brand-blue-50 hover:bg-brand-blue-50 transition-colors"
+                      onClick={() => setServices(prev => prev.map(s => s.name === svc.name ? { ...s, connected: true } : s))}
+                      className="h-8 px-3 rounded-lg text-[12px] font-medium text-brand-blue bg-brand-blue-50 border border-brand-blue-light hover:bg-white transition-colors"
                     >
                       Connect
                     </button>
@@ -411,6 +504,353 @@ export function OffersPage() {
             <Plus className="w-4 h-4" />
             Connect new service
           </button>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════
+         Offer Add/Edit modal
+      ═════════════════════════════════════════════════ */}
+      {offerDraft && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center" role="dialog" aria-modal="true">
+          <button className="absolute inset-0 bg-brand-black/30" onClick={() => setOfferDraft(null)} aria-label="Close" />
+          <div className="relative w-[640px] max-w-[calc(100vw-32px)] bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden flex flex-col max-h-[88vh]">
+            <div className="px-6 pt-5 pb-4 border-b border-brand-border flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] mb-1">
+                  {offerDraft.id ? 'Edit offer' : 'New offer'}
+                </p>
+                <h3 className="text-[16px] font-semibold text-strong">
+                  {offerDraft.id ? offerDraft.name || 'Untitled offer' : 'Configure a new offer'}
+                </h3>
+              </div>
+              <button onClick={() => setOfferDraft(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+              {/* Name + type */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Name</p>
+                  <input
+                    value={offerDraft.name}
+                    onChange={e => setOfferDraft({ ...offerDraft, name: e.target.value })}
+                    placeholder="e.g. Spa Sunday Package"
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Type</p>
+                  <div className="relative">
+                    <select
+                      value={offerDraft.type}
+                      onChange={e => setOfferDraft({ ...offerDraft, type: e.target.value })}
+                      className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                    >
+                      {(spec?.offerTypes ?? []).map(t => <option key={t}>{t}</option>)}
+                    </select>
+                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Description for guest</p>
+                <textarea
+                  value={offerDraft.description}
+                  onChange={e => setOfferDraft({ ...offerDraft, description: e.target.value })}
+                  rows={2}
+                  placeholder="One-line pitch the engine will paraphrase…"
+                  className="w-full px-3 py-2.5 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong resize-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                />
+              </div>
+
+              {/* Cost + category + limit */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Cost (€)</p>
+                  <input
+                    type="number"
+                    value={offerDraft.cost}
+                    onChange={e => setOfferDraft({ ...offerDraft, cost: e.target.value })}
+                    placeholder="0"
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Category</p>
+                  <input
+                    value={offerDraft.category}
+                    onChange={e => setOfferDraft({ ...offerDraft, category: e.target.value })}
+                    placeholder="Stay, F&B, Wellness…"
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Daily limit</p>
+                  <input
+                    value={offerDraft.limit}
+                    onChange={e => setOfferDraft({ ...offerDraft, limit: e.target.value })}
+                    placeholder="5/day"
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Validity dates + season */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Valid from</p>
+                  <input
+                    type="date"
+                    value={offerDraft.validFrom}
+                    onChange={e => setOfferDraft({ ...offerDraft, validFrom: e.target.value })}
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Valid to</p>
+                  <input
+                    type="date"
+                    value={offerDraft.validTo}
+                    onChange={e => setOfferDraft({ ...offerDraft, validTo: e.target.value })}
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Season</p>
+                  <div className="relative">
+                    <select
+                      value={offerDraft.season}
+                      onChange={e => setOfferDraft({ ...offerDraft, season: e.target.value as Offer['season'] })}
+                      className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                    >
+                      <option value="all">All year</option>
+                      <option value="high">High season</option>
+                      <option value="low">Low season</option>
+                    </select>
+                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Targeting condition */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Targeting condition</p>
+                <input
+                  value={offerDraft.condition}
+                  onChange={e => setOfferDraft({ ...offerDraft, condition: e.target.value })}
+                  placeholder="Tag: Honeymoon, or Stay >= 3 nights…"
+                  className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                />
+              </div>
+
+              {/* PMS check toggle */}
+              <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-brand-border bg-surface-2 p-3">
+                <Switch
+                  checked={offerDraft.pmsCheck}
+                  onChange={v => setOfferDraft({ ...offerDraft, pmsCheck: v })}
+                />
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-strong">Check availability via PMS</p>
+                  <p className="text-[11px] text-subtle mt-0.5 leading-relaxed">
+                    Engine confirms inventory in Cloudbeds before pitching this offer.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <div className="px-6 py-4 border-t border-brand-border flex items-center justify-end gap-2 flex-shrink-0">
+              <button
+                onClick={() => setOfferDraft(null)}
+                className="h-9 px-4 rounded-xl border border-brand-border text-[13px] font-medium text-muted hover:bg-surface-3 transition-colors"
+              >Cancel</button>
+              <button
+                onClick={saveOffer}
+                className="h-9 px-5 rounded-xl bg-brand-blue text-white text-[13px] font-semibold hover:bg-brand-blue-hover transition-colors"
+              >{offerDraft.id ? 'Save changes' : 'Create offer'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════
+         WhatsApp Template editor (with live preview)
+      ═════════════════════════════════════════════════ */}
+      {tplDraft && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center" role="dialog" aria-modal="true">
+          <button className="absolute inset-0 bg-brand-black/30" onClick={() => setTplDraft(null)} aria-label="Close" />
+          <div className="relative w-[860px] max-w-[calc(100vw-32px)] bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden flex flex-col max-h-[88vh]">
+            <div className="px-6 pt-5 pb-4 border-b border-brand-border flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] mb-1">
+                  {tplDraft.updated ? 'Edit template' : 'New template'}
+                </p>
+                <h3 className="text-[16px] font-semibold text-strong">
+                  {tplDraft.name || 'Untitled template'}
+                </h3>
+              </div>
+              <button onClick={() => setTplDraft(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto grid grid-cols-[1fr_320px]">
+              {/* Editor */}
+              <div className="px-6 py-5 space-y-4 border-r border-brand-border">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Name</p>
+                    <input
+                      value={tplDraft.name}
+                      onChange={e => setTplDraft({ ...tplDraft, name: e.target.value.replace(/\s+/g, '_').toLowerCase() })}
+                      placeholder="snake_case_name"
+                      className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Language</p>
+                    <div className="relative">
+                      <select
+                        value={tplDraft.lang}
+                        onChange={e => setTplDraft({ ...tplDraft, lang: e.target.value })}
+                        className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                      >
+                        {['EN', 'DE', 'FR', 'ES', 'IT', 'RU'].map(l => <option key={l}>{l}</option>)}
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Category</p>
+                  <div className="flex gap-2">
+                    {(['marketing', 'utility', 'authentication'] as const).map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setTplDraft({ ...tplDraft, category: c })}
+                        className={cn(
+                          'h-8 px-3 rounded-lg text-[11px] font-semibold border transition-colors capitalize',
+                          tplDraft.category === c
+                            ? 'bg-brand-blue text-white border-brand-blue'
+                            : 'bg-white text-muted border-brand-border hover:border-brand-blue-light hover:text-brand-blue',
+                        )}
+                      >{c}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Header</p>
+                  <input
+                    value={tplDraft.header}
+                    onChange={e => setTplDraft({ ...tplDraft, header: e.target.value })}
+                    placeholder="Welcome to {{property_name}}"
+                    className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Body</p>
+                  <textarea
+                    value={tplDraft.body}
+                    onChange={e => setTplDraft({ ...tplDraft, body: e.target.value })}
+                    rows={4}
+                    placeholder="Hi {{1}}, your check-in on {{2}} is confirmed."
+                    className="w-full px-3 py-2.5 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong resize-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Footer (optional)</p>
+                    <input
+                      value={tplDraft.footer}
+                      onChange={e => setTplDraft({ ...tplDraft, footer: e.target.value })}
+                      placeholder="AVOX Concierge"
+                      className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Button (CTA)</p>
+                    <input
+                      value={tplDraft.cta}
+                      onChange={e => setTplDraft({ ...tplDraft, cta: e.target.value })}
+                      placeholder="View booking"
+                      className="w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Variable mapping */}
+                <div className="rounded-xl border border-brand-border bg-surface-2 p-3.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-2.5">
+                    Variable mapping
+                  </p>
+                  <div className="space-y-1.5">
+                    {TEMPLATE_VARIABLES.map(v => (
+                      <div key={v.token} className="flex items-center justify-between text-[12px]">
+                        <span
+                          className="text-brand-blue font-semibold"
+                          style={{ fontFamily: "'Azeret Mono', monospace" }}
+                        >{v.token}</span>
+                        <span className="text-subtle">→</span>
+                        <span
+                          className="text-muted font-medium"
+                          style={{ fontFamily: "'Azeret Mono', monospace" }}
+                        >{v.mapsTo}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="bg-surface-2 px-5 py-5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-3">
+                  WhatsApp preview
+                </p>
+                <div className="rounded-2xl bg-[#E5DDD5] p-3 min-h-[280px]">
+                  <div className="bg-[#DCF8C6] rounded-2xl rounded-tr-sm shadow-sm p-3 max-w-[90%]">
+                    {tplDraft.header && (
+                      <p className="text-[12px] font-bold text-brand-black mb-1.5">{tplDraft.header}</p>
+                    )}
+                    <p className="text-[12px] text-brand-black whitespace-pre-line leading-relaxed">
+                      {tplDraft.body || <span className="text-subtle italic">Body preview…</span>}
+                    </p>
+                    {tplDraft.footer && (
+                      <p className="text-[10px] text-strong/60 mt-2">{tplDraft.footer}</p>
+                    )}
+                    <p className="text-[9px] text-strong/50 text-right mt-1.5 tabular-nums">14:32 ✓✓</p>
+                  </div>
+                  {tplDraft.cta && (
+                    <button className="mt-2 w-[90%] h-8 rounded-2xl bg-white text-[12px] font-semibold text-[#075E54] border border-brand-border flex items-center justify-center gap-1.5">
+                      <MessageSquare className="w-3 h-3" />
+                      {tplDraft.cta}
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-subtle mt-3 leading-relaxed">
+                  Variables show as raw <code className="font-mono text-brand-blue">{'{{N}}'}</code> placeholders here.
+                  At runtime they are substituted with the values mapped above.
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-brand-border flex items-center justify-end gap-2 flex-shrink-0">
+              <button
+                onClick={() => setTplDraft(null)}
+                className="h-9 px-4 rounded-xl border border-brand-border text-[13px] font-medium text-muted hover:bg-surface-3 transition-colors"
+              >Cancel</button>
+              <button
+                onClick={saveTemplate}
+                className="h-9 px-5 rounded-xl bg-brand-blue text-white text-[13px] font-semibold hover:bg-brand-blue-hover transition-colors"
+              >{tplDraft.updated ? 'Save changes' : 'Submit for approval'}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

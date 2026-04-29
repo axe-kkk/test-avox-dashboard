@@ -317,9 +317,10 @@ function Bubble({
             </span>
           </div>
 
-          {/* Note body — subtle yellow */}
+          {/* Note body — subtle yellow. min-w prevents short notes
+              from collapsing under the absolute-positioned timestamp. */}
           <div
-            className="relative rounded-2xl rounded-tr-sm px-4 pt-3 pb-7"
+            className="relative rounded-2xl rounded-tr-sm px-4 pt-3 pb-7 min-w-[148px]"
             style={{ backgroundColor: '#FFFBEB', border: '1px solid #F5E2A0' }}
           >
             <p className="text-[10px] leading-relaxed" style={{ color: '#3D2E00' }}>
@@ -366,10 +367,12 @@ function Bubble({
           )}
         </div>
 
-        {/* Bubble body */}
+        {/* Bubble body — min-w guarantees short messages don't collapse below
+            the timestamp width, otherwise the absolute-positioned timestamp
+            overlaps the text. */}
         <div
           className={cn(
-            'relative rounded-2xl px-4 pt-3 pb-7 transition-colors',
+            'relative rounded-2xl px-4 pt-3 pb-7 transition-colors min-w-[148px]',
             isGuest
               ? cn(
                   'border rounded-tl-sm',
@@ -1184,7 +1187,7 @@ export function InboxPage() {
                   <div className="relative">
                     <AlertTriangle className="w-4 h-4 text-brand-black" />
                     {urgentCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-brand-blue text-white text-[9px] font-bold flex items-center justify-center tabular-nums">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-blue text-white text-[10px] font-medium flex items-center justify-center leading-none tabular-nums">
                         {urgentCount}
                       </span>
                     )}

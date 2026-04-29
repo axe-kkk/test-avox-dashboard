@@ -3,12 +3,8 @@ import { useParams } from 'react-router-dom';
 import { Send, RefreshCw, Zap, User, Bot, ChevronDown, AlertTriangle } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockGuests } from '../../data/mock/guests';
-import { cn, formatDateTime } from '../../utils';
-
-const ENGINE_COLORS: Record<string, string> = {
-  Conversion: '#2355A7', Reservation: '#2355A7', Upsell: '#2355A7',
-  Arrival: '#2355A7', Concierge: '#2355A7', Recovery: '#2355A7', Reputation: '#2355A7',
-};
+import { cn } from '../../utils';
+import { getEngineSpec } from './lib/engineSpec';
 
 interface ChatMessage {
   id: string;
@@ -71,39 +67,32 @@ export function PlaygroundPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [selectedDebug, setSelectedDebug] = useState<string | null>(null);
 
-  /* Guest profile state */
   const [guestName, setGuestName] = useState('Test Guest');
-  const [checkIn, setCheckIn] = useState('2026-05-10');
-  const [checkOut, setCheckOut] = useState('2026-05-13');
-  const [roomType, setRoomType] = useState('Deluxe King');
-  const [visits, setVisits] = useState('1');
-  const [channel, setChannel] = useState('whatsapp');
+  const [checkIn,   setCheckIn]   = useState('2026-05-10');
+  const [checkOut,  setCheckOut]  = useState('2026-05-13');
+  const [visits,    setVisits]    = useState('1');
+  const [channel,   setChannel]   = useState('whatsapp');
   const [selectedGuestId, setSelectedGuestId] = useState('');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef   = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
   if (!engine) return null;
-  const color = ENGINE_COLORS[engine.name] ?? '#2355A7';
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const userMsg: ChatMessage = {
-      id: `m${Date.now()}`,
-      role: 'guest',
-      text: input,
-      ts: new Date(),
-    };
+  const sendMessage = (override?: string) => {
+    const text = override ?? input;
+    if (!text.trim()) return;
+    const userMsg: ChatMessage = { id: `m${Date.now()}`, role: 'guest', text, ts: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
     setTimeout(() => {
-      const resp = getAutoReply(input);
+      const resp = getAutoReply(text);
       const agentMsg: ChatMessage = {
         id: `m${Date.now() + 1}`,
         role: 'agent',
@@ -125,12 +114,12 @@ export function PlaygroundPage() {
   };
 
   const autoFillGuest = (guestId: string) => {
-    const g = mockGuests.find(g => g.id === guestId);
+    const g = mockGuests.find(gg => gg.id === guestId);
     if (!g) return;
     setGuestName(g.name);
     setChannel(g.preferredChannel);
     if (g.upcomingStayAt) setCheckIn(g.upcomingStayAt);
-    if (g.lastStayAt) setCheckOut(g.lastStayAt);
+    if (g.lastStayAt)     setCheckOut(g.lastStayAt);
     setVisits(String(g.totalVisits));
     setSelectedGuestId(guestId);
   };
@@ -141,42 +130,53 @@ export function PlaygroundPage() {
     <div className="h-full flex overflow-hidden">
 
       {/* ── Left: Debug panel ── */}
-      <div className="w-[300px] flex-shrink-0 border-r border-[#EDEEF1] bg-white flex flex-col overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#EDEEF1] flex-shrink-0">
-          <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider">Debug Panel</p>
-          <p className="text-[10px] text-[#A0A6B0] mt-0.5">Select a response to inspect</p>
+      <div className="w-[300px] flex-shrink-0 border-r border-brand-border bg-white flex flex-col overflow-hidden">
+        <div className="px-4 py-3 border-b border-brand-border flex-shrink-0">
+          <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider">Debug Panel</p>
+          <p className="text-[10px] text-faint mt-0.5">Select a response to inspect</p>
         </div>
 
         {debugMsg?.debug ? (
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div>
-              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Intent</p>
-              <div className="bg-[#F9F9F9] rounded-xl border border-[#EDEEF1] p-3">
-                <p className="text-[12px] font-mono font-semibold text-[#3D4550]">{debugMsg.debug.intent}</p>
+              <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-2">Intent</p>
+              <div className="bg-surface-2 rounded-xl border border-brand-border p-3">
+                <p
+                  className="text-[12px] font-semibold text-strong"
+                  style={{ fontFamily: "'Azeret Mono', monospace" }}
+                >{debugMsg.debug.intent}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 h-1.5 bg-[#EDEEF1] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${debugMsg.debug.confidence * 100}%`, background: color }} />
+                  <div className="flex-1 h-1.5 bg-brand-border rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-brand-blue"
+                      style={{ width: `${debugMsg.debug.confidence * 100}%` }}
+                    />
                   </div>
-                  <span className="text-[11px] font-semibold tabular-nums" style={{ color }}>{(debugMsg.debug.confidence * 100).toFixed(0)}%</span>
+                  <span className="text-[11px] font-semibold text-brand-blue tabular-nums">
+                    {(debugMsg.debug.confidence * 100).toFixed(0)}%
+                  </span>
                 </div>
-                <p className="text-[10px] text-[#A0A6B0] mt-1">confidence</p>
+                <p className="text-[10px] text-subtle mt-1">confidence</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Knowledge Source</p>
-              <div className="bg-[#F9F9F9] rounded-xl border border-[#EDEEF1] p-3">
-                <p className="text-[12px] text-[#3D4550]">{debugMsg.debug.source}</p>
+              <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-2">Knowledge Source</p>
+              <div className="bg-surface-2 rounded-xl border border-brand-border p-3">
+                <p className="text-[12px] text-strong">{debugMsg.debug.source}</p>
               </div>
             </div>
 
             {debugMsg.debug.integrations.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Integrations Called</p>
+                <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-2">Integrations Called</p>
                 <div className="space-y-1.5">
                   {debugMsg.debug.integrations.map(int => (
-                    <div key={int} className="bg-[#EEF2FC] border border-[#BED4F6] rounded-lg px-3 py-2">
-                      <p className="text-[11px] font-mono text-[#2355A7]">{int}</p>
+                    <div key={int} className="bg-brand-blue-50 border border-brand-blue-light rounded-lg px-3 py-2">
+                      <p
+                        className="text-[11px] text-brand-blue"
+                        style={{ fontFamily: "'Azeret Mono', monospace" }}
+                      >{int}</p>
                     </div>
                   ))}
                 </div>
@@ -184,46 +184,49 @@ export function PlaygroundPage() {
             )}
 
             <div>
-              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Routing Decision</p>
-              <div className="bg-[#F9F9F9] rounded-xl border border-[#EDEEF1] p-3">
-                <p className="text-[12px] text-[#3D4550]">{debugMsg.debug.routing}</p>
+              <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-2">Routing Decision</p>
+              <div className="bg-surface-2 rounded-xl border border-brand-border p-3">
+                <p className="text-[12px] text-strong">{debugMsg.debug.routing}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-2">Cost</p>
-              <div className="bg-[#FEF9C3] border border-[#FDE68A] rounded-xl p-3">
-                <p className="text-[18px] font-bold tabular-nums text-[#D97706]" style={{ fontFamily: "'Azeret Mono', monospace" }}>
-                  {debugMsg.debug.connects.toFixed(1)}
+              <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-2">Cost</p>
+              <div className="bg-surface-2 border border-brand-border rounded-xl p-3">
+                <p
+                  className="text-[18px] font-semibold tabular-nums text-strong leading-none"
+                  style={{ fontFamily: "'Azeret Mono', monospace" }}
+                >{debugMsg.debug.connects.toFixed(1)}</p>
+                <p className="text-[10px] text-subtle mt-1">CONNECTS (estimated)</p>
+                <p className="text-[10px] text-faint mt-2 leading-relaxed">
+                  Test sessions do not deduct CONNECTS.
                 </p>
-                <p className="text-[10px] text-[#D97706] mt-0.5">CONNECTS (estimated)</p>
-                <p className="text-[9px] text-[#A0A6B0] mt-1">Test sessions do not deduct CONNECTS</p>
               </div>
             </div>
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
-              <div className="w-10 h-10 rounded-2xl bg-[#F6F7F9] flex items-center justify-center mx-auto mb-3">
-                <Zap className="w-5 h-5 text-[#C4C8CF]" />
+              <div className="w-10 h-10 rounded-2xl bg-surface-3 border border-brand-border flex items-center justify-center mx-auto mb-3">
+                <Zap className="w-5 h-5 text-faint" />
               </div>
-              <p className="text-[12px] text-[#8B9299]">Send a message to see debug info</p>
+              <p className="text-[12px] text-subtle">Send a message to see debug info</p>
             </div>
           </div>
         )}
 
         {/* Quick actions */}
-        <div className="px-4 py-3 border-t border-[#EDEEF1] space-y-2 flex-shrink-0">
+        <div className="px-4 py-3 border-t border-brand-border space-y-2 flex-shrink-0">
           <button
             onClick={() => { setMessages([]); setSelectedDebug(null); }}
-            className="w-full flex items-center gap-2 h-8 px-3 rounded-lg border border-[#EDEEF1] text-[12px] font-medium text-[#5C6370] hover:bg-[#F6F7F9] transition-colors"
+            className="w-full flex items-center gap-2 h-8 px-3 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Clear chat
           </button>
           <button
-            onClick={() => sendMessage()}
-            className="w-full flex items-center gap-2 h-8 px-3 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] text-[12px] font-medium text-[#D97706] hover:bg-[#FEF9C3] transition-colors"
+            onClick={() => sendMessage('The noise is unacceptable, I need help now.')}
+            className="w-full flex items-center gap-2 h-8 px-3 rounded-lg border border-brand-border bg-surface-2 text-[12px] font-medium text-strong hover:bg-white transition-colors"
           >
             <AlertTriangle className="w-3.5 h-3.5" />
             Simulate escalation
@@ -232,55 +235,55 @@ export function PlaygroundPage() {
       </div>
 
       {/* ── Center: Chat ── */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#F7F8FA]">
+      <div className="flex-1 flex flex-col overflow-hidden bg-surface-2">
 
         {/* Guest profile panel */}
-        <div className="flex-shrink-0 bg-white border-b border-[#EDEEF1] px-5 py-3">
+        <div className="flex-shrink-0 bg-white border-b border-brand-border px-5 py-3">
           <div className="flex items-center gap-4 flex-wrap">
-            <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-wider flex-shrink-0">Test Profile</p>
+            <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider flex-shrink-0">Test Profile</p>
 
             <div className="flex items-center gap-2">
               <div className="relative">
                 <select
                   value={selectedGuestId}
                   onChange={e => autoFillGuest(e.target.value)}
-                  className="h-7 pl-2.5 pr-7 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[11px] text-[#5C6370] appearance-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                  className="h-7 pl-2.5 pr-7 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                 >
                   <option value="">Select real guest…</option>
                   {mockGuests.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#A0A6B0] pointer-events-none" />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-faint pointer-events-none" />
               </div>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               {[
-                { label: 'Name',    value: guestName,   set: setGuestName,   type: 'text',   w: 'w-[130px]' },
-                { label: 'Check-in', value: checkIn,    set: setCheckIn,     type: 'date',   w: 'w-[130px]' },
-                { label: 'Check-out', value: checkOut,  set: setCheckOut,    type: 'date',   w: 'w-[130px]' },
-                { label: 'Visits',  value: visits,      set: setVisits,      type: 'number', w: 'w-16'      },
+                { label: 'Name',     value: guestName, set: setGuestName, type: 'text',   w: 'w-[130px]' },
+                { label: 'Check-in', value: checkIn,   set: setCheckIn,   type: 'date',   w: 'w-[130px]' },
+                { label: 'Check-out',value: checkOut,  set: setCheckOut,  type: 'date',   w: 'w-[130px]' },
+                { label: 'Visits',   value: visits,    set: setVisits,    type: 'number', w: 'w-16'      },
               ].map(f => (
                 <div key={f.label} className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-[#A0A6B0] flex-shrink-0">{f.label}</span>
+                  <span className="text-[10px] text-subtle flex-shrink-0">{f.label}</span>
                   <input
                     type={f.type}
                     value={f.value}
                     onChange={e => f.set(e.target.value)}
-                    className={cn('h-7 px-2 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[11px] text-[#3D4550] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white', f.w)}
+                    className={cn('h-7 px-2 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white', f.w)}
                   />
                 </div>
               ))}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-[#A0A6B0]">Channel</span>
+                <span className="text-[10px] text-subtle">Channel</span>
                 <div className="relative">
                   <select
                     value={channel}
                     onChange={e => setChannel(e.target.value)}
-                    className="h-7 pl-2.5 pr-7 rounded-lg border border-[#EDEEF1] bg-[#F6F7F9] text-[11px] appearance-none focus:outline-none focus:ring-2 focus:ring-[#BED4F6]"
+                    className="h-7 pl-2.5 pr-7 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                   >
                     {['whatsapp','email','sms','messenger','instagram','telegram'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#A0A6B0] pointer-events-none" />
+                  <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-faint pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -290,20 +293,20 @@ export function PlaygroundPage() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-4 opacity-60">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-[18px] font-bold" style={{ background: color }}>
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-brand-blue text-white flex items-center justify-center text-[16px] font-semibold">
                 {engine.name.slice(0, 2).toUpperCase()}
               </div>
               <div className="text-center">
-                <p className="text-[14px] font-semibold text-[#3D4550]">{engine.name} Engine Playground</p>
-                <p className="text-[12px] text-[#8B9299] mt-1">Type a message below to test the engine</p>
+                <p className="text-[14px] font-semibold text-strong">{engine.name} Engine Playground</p>
+                <p className="text-[12px] text-subtle mt-1">Type a message below to test the engine</p>
               </div>
               <div className="flex flex-wrap justify-center gap-2 max-w-[400px]">
-                {['Hi, I need to book a room', 'Can I get an upgrade?', 'I want to book the spa', 'The noise is unacceptable'].map(suggestion => (
+                {getEngineSpec(engine.name).quickPrompts.map(suggestion => (
                   <button
                     key={suggestion}
                     onClick={() => { setInput(suggestion); setTimeout(() => inputRef.current?.focus(), 50); }}
-                    className="text-[12px] text-[#2355A7] bg-[#EEF2FC] px-3 py-1.5 rounded-full hover:bg-[#E3EBFA] transition-colors"
+                    className="text-[12px] text-brand-blue bg-brand-blue-50 border border-brand-blue-light px-3 py-1.5 rounded-full hover:bg-white transition-colors"
                   >
                     {suggestion}
                   </button>
@@ -319,25 +322,28 @@ export function PlaygroundPage() {
               onClick={() => msg.debug && setSelectedDebug(msg.id === selectedDebug ? null : msg.id)}
             >
               <div className={cn(
-                'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold',
-                msg.role === 'guest' ? 'bg-[#8B9299]' : '',
-              )} style={msg.role === 'agent' ? { background: color } : {}}>
+                'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white',
+                msg.role === 'guest' ? 'bg-strong' : 'bg-brand-blue',
+              )}>
                 {msg.role === 'guest' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
               </div>
               <div>
                 <div className={cn(
-                  'px-4 py-3 rounded-2xl text-[13px] leading-relaxed cursor-pointer transition-all',
+                  'px-4 py-3 rounded-2xl text-[13px] leading-relaxed cursor-pointer transition-colors',
                   msg.role === 'guest'
-                    ? 'bg-[#3D4550] text-white rounded-tr-sm'
-                    : cn('bg-white border text-[#3D4550] rounded-tl-sm', selectedDebug === msg.id ? 'border-[#2355A7] shadow-[0_0_0_2px_#BED4F6/30]' : 'border-[#EDEEF1]'),
+                    ? 'bg-strong text-white rounded-tr-sm'
+                    : cn(
+                        'bg-white border text-strong rounded-tl-sm',
+                        selectedDebug === msg.id ? 'border-brand-blue ring-2 ring-brand-blue-light/30' : 'border-brand-border',
+                      ),
                 )}>
                   {msg.text}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[10px] text-[#A0A6B0]">{msg.ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                  {msg.debug && (
-                    <span className="text-[9px] text-[#A0A6B0]">· Click to inspect</span>
-                  )}
+                  <p className="text-[10px] text-subtle">
+                    {msg.ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  {msg.debug && <span className="text-[9px] text-faint">· Click to inspect</span>}
                 </div>
               </div>
             </div>
@@ -345,14 +351,14 @@ export function PlaygroundPage() {
 
           {isTyping && (
             <div className="flex gap-3 max-w-[480px]">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-[10px]" style={{ background: color }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white bg-brand-blue">
                 <Bot className="w-3.5 h-3.5" />
               </div>
-              <div className="bg-white border border-[#EDEEF1] rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
-                {[0,1,2].map(i => (
+              <div className="bg-white border border-brand-border rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                {[0, 1, 2].map(i => (
                   <span
                     key={i}
-                    className="w-2 h-2 rounded-full bg-[#D1D5DB]"
+                    className="w-1.5 h-1.5 rounded-full bg-faint"
                     style={{ animation: `bounce 1s ${i * 0.15}s infinite` }}
                   />
                 ))}
@@ -363,7 +369,7 @@ export function PlaygroundPage() {
         </div>
 
         {/* Input */}
-        <div className="flex-shrink-0 bg-white border-t border-[#EDEEF1] px-5 py-4">
+        <div className="flex-shrink-0 bg-white border-t border-brand-border px-5 py-4">
           <div className="flex gap-3 items-end">
             <div className="flex-1 relative">
               <input
@@ -372,19 +378,18 @@ export function PlaygroundPage() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                 placeholder={`Message as guest (${guestName})…`}
-                className="w-full h-11 px-4 rounded-xl border border-[#EDEEF1] bg-[#F6F7F9] text-[13px] text-[#3D4550] placeholder:text-[#8B9299] focus:outline-none focus:ring-2 focus:ring-[#BED4F6] focus:bg-white transition"
+                className="w-full h-11 px-4 rounded-xl border border-brand-border bg-surface-3 text-[13px] text-strong placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
               />
             </div>
             <button
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={!input.trim() || isTyping}
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-white transition-all disabled:opacity-40"
-              style={{ background: color }}
+              className="w-11 h-11 rounded-xl flex items-center justify-center bg-brand-blue text-white hover:bg-brand-blue-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[10px] text-[#C4C8CF] mt-2 text-center">
+          <p className="text-[10px] text-subtle mt-2 text-center">
             Test sessions do not deduct CONNECTS · Responses use current engine configuration
           </p>
         </div>

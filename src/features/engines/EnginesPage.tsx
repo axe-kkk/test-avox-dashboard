@@ -1,4 +1,4 @@
-import { RefreshCw, Clock, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Clock, CheckCircle2, Cpu, Plus } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
 import { formatDateTime, cn } from '../../utils';
@@ -27,6 +27,30 @@ export function EnginesPage() {
     }, 0);
     return { ...stage, total };
   });
+
+  /* ── Empty state — shown when the workspace has no engines configured ── */
+  if (mockEngines.length === 0) {
+    return (
+      <div className="h-full overflow-auto bg-surface-2 flex items-center justify-center px-6">
+        <div className="max-w-[420px] text-center">
+          <div className="w-16 h-16 rounded-2xl bg-brand-blue-50 border border-brand-blue-light flex items-center justify-center mx-auto mb-5">
+            <Cpu className="w-7 h-7 text-brand-blue" />
+          </div>
+          <h2 className="text-[16px] font-semibold text-strong mb-2">
+            Set up your first AI Engine
+          </h2>
+          <p className="text-[12px] text-muted leading-relaxed mb-5">
+            Engines automate guest conversations across the journey — booking, arrival,
+            in-stay concierge, recovery, and more. Start with one and add the rest as you go.
+          </p>
+          <button className="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-brand-blue text-white text-[12px] font-semibold hover:bg-brand-blue-hover transition-colors">
+            <Plus className="w-3.5 h-3.5" />
+            Configure first engine
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full overflow-auto bg-surface-2">

@@ -1,21 +1,4 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { BarChart2, Activity } from 'lucide-react';
-
-function ComingSoonPage({ label }: { label: string }) {
-  const icon = label === 'Analytics' ? BarChart2 : Activity;
-  const Icon = icon;
-  return (
-    <div className="flex items-center justify-center h-full" style={{ background: 'var(--color-brand-bg, #F7F8FA)' }}>
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-[#EEF2FC] flex items-center justify-center mx-auto mb-4">
-          <Icon className="w-7 h-7 text-[#2355A7]" />
-        </div>
-        <p className="text-[12px] font-semibold text-[#3D4550] mb-1">{label}</p>
-        <p className="text-[10px] text-[#8B9299]">Coming soon</p>
-      </div>
-    </div>
-  );
-}
 import { AppLayout } from '../layouts/AppLayout';
 import { HomePage } from '../features/home/HomePage';
 import { InboxPage } from '../features/inbox/InboxPage';
@@ -29,6 +12,9 @@ import { KnowledgePage } from '../features/engines/KnowledgePage';
 import { EngineRoutingPage } from '../features/engines/EngineRoutingPage';
 import { IntegrationsPage } from '../features/engines/IntegrationsPage';
 import { PlaygroundPage } from '../features/engines/PlaygroundPage';
+import { EngineAnalyticsPage } from '../features/engines/EngineAnalyticsPage';
+import { EngineMonitorPage } from '../features/engines/EngineMonitorPage';
+import { EngineConfigPage } from '../features/engines/EngineConfigPage';
 import { SequencesPage } from '../features/sequences/SequencesPage';
 import { ChannelsPage } from '../features/channels/ChannelsPage';
 import { AnalyticsPage } from '../features/analytics/AnalyticsPage';
@@ -52,8 +38,9 @@ export function AppRouter() {
             <Route path="routing" element={<EngineRoutingPage />} />
             <Route path="integrations" element={<IntegrationsPage />} />
             <Route path="playground" element={<PlaygroundPage />} />
-            <Route path="analytics" element={<ComingSoonPage label="Analytics" />} />
-            <Route path="monitor"   element={<ComingSoonPage label="Monitor Agent" />} />
+            <Route path="analytics"  element={<EngineAnalyticsPage />} />
+            <Route path="monitor"    element={<EngineMonitorPage />} />
+            <Route path="config"     element={<EngineConfigPage />} />
           </Route>
           <Route path="/sequences" element={<SequencesPage />} />
           <Route path="/channels" element={<ChannelsPage />} />
