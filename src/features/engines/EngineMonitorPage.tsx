@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Activity, Pause, Play, AlertTriangle, CheckCircle2, ArrowRight,
@@ -183,7 +183,6 @@ export function EngineMonitorPage() {
             <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.12em]">{s.label}</p>
             <p
               className={cn('text-[18px] font-semibold tabular-nums leading-none mt-1.5', s.accent)}
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >{s.value}</p>
           </div>
         ))}

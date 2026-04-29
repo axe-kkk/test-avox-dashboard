@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Plus, Trash2, GripVertical, Star } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
@@ -313,7 +313,6 @@ export function ReputationConfigPage() {
                 ))}
                 <span
                   className="ml-2 text-[12px] font-semibold text-brand-blue tabular-nums"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
                 >≤ {negThreshold}/5</span>
               </div>
             </div>

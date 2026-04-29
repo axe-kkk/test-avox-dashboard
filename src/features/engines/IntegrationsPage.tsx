@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, X, ChevronDown, Settings2, Trash2 } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
@@ -239,7 +239,6 @@ export function IntegrationsPage() {
                       <div key={tool.id} className="flex items-center justify-between">
                         <span
                           className="text-[12px] text-strong"
-                          style={{ fontFamily: "'Azeret Mono', monospace" }}
                         >{tool.name}</span>
                         <Switch
                           size="sm"
@@ -290,13 +289,11 @@ export function IntegrationsPage() {
                 action.method === 'GET'  ? 'bg-brand-blue-50 text-brand-blue border border-brand-blue-light' :
                 action.method === 'POST' ? 'bg-surface-3 text-strong border border-brand-border'             :
                                            'bg-surface-3 text-muted border border-brand-border',
-              )}
-              style={{ fontFamily: "'Azeret Mono', monospace" }}>{action.method}</span>
+              )}>{action.method}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-strong">{action.name}</p>
                 <p
                   className="text-[11px] text-subtle truncate"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
                 >{action.url}</p>
               </div>
               <button
@@ -480,7 +477,6 @@ export function IntegrationsPage() {
                       value={apiDraft.method}
                       onChange={e => setApiDraft({ ...apiDraft, method: e.target.value as ApiAction['method'] })}
                       className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[13px] font-semibold text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                      style={{ fontFamily: "'Azeret Mono', monospace" }}
                     >
                       <option>GET</option>
                       <option>POST</option>

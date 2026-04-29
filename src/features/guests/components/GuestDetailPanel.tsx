@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   X, ArrowLeft, ChevronRight, Star,
   User, BedDouble, MessageSquare, TrendingUp, Tag, Activity,
@@ -76,14 +76,12 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
           <span className="text-muted">
             <span
               className="font-semibold text-strong tabular-nums"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >{guest.totalVisits}</span>
             <span className="text-subtle"> visits</span>
           </span>
           <span className="w-px h-3 bg-brand-border" />
           <span
             className="font-semibold text-brand-blue tabular-nums"
-            style={{ fontFamily: "'Azeret Mono', monospace" }}
           >{formatCurrency(guest.lifetimeValue)}</span>
           {guest.satisfactionScore && (
             <>
@@ -267,7 +265,6 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
                 <p className="text-[10px] font-semibold text-brand-blue uppercase tracking-wider mb-1">Lifetime Value</p>
                 <p
                   className="text-[22px] font-semibold text-brand-blue tabular-nums leading-none"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
                 >{formatCurrency(guest.lifetimeValue)}</p>
                 <p className="text-[11px] text-muted mt-1">
                   {guest.totalVisits} visits · avg {formatCurrency(guest.totalVisits > 0 ? Math.round(guest.lifetimeValue / guest.totalVisits) : 0)} / stay

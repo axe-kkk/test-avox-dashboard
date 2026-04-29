@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, ChevronDown, Check, X, Edit2, MessageSquare } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
@@ -795,12 +795,10 @@ export function OffersPage() {
                       <div key={v.token} className="flex items-center justify-between text-[12px]">
                         <span
                           className="text-brand-blue font-semibold"
-                          style={{ fontFamily: "'Azeret Mono', monospace" }}
                         >{v.token}</span>
                         <span className="text-subtle">→</span>
                         <span
                           className="text-muted font-medium"
-                          style={{ fontFamily: "'Azeret Mono', monospace" }}
                         >{v.mapsTo}</span>
                       </div>
                     ))}

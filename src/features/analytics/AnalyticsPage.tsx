@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Download, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -52,7 +52,6 @@ function MetricCard({ label, value, change, formatter = (v: number) => v.toLocal
       <p className="text-[11px] text-[#8B9299] uppercase tracking-wider font-medium">{label}</p>
       <p
         className="text-[26px] font-semibold text-[#0E1013] tabular-nums leading-none mt-1 mb-2"
-        style={{ fontFamily: "'Azeret Mono', monospace" }}
       >{formatter(value)}</p>
       <div className="flex items-center gap-1 mt-1.5">
         {positive ? <TrendingUp className="w-3 h-3 text-[#2355A7]" /> : <TrendingDown className="w-3 h-3 text-[#5C6370]" />}
@@ -80,7 +79,6 @@ export function AnalyticsPage() {
             </p>
             <h1
               className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >
               Analytics
             </h1>
@@ -186,7 +184,7 @@ export function AnalyticsPage() {
               </div>
               <div className="mt-4 pt-4 border-t border-[#EDEEF1] flex justify-between text-xs">
                 <span className="text-[#5C6370]">Average Score</span>
-                <span className="font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>4.51 / 5</span>
+                <span className="font-semibold text-[#0E1013] tabular-nums">4.51 / 5</span>
               </div>
             </Card>
 
@@ -203,11 +201,11 @@ export function AnalyticsPage() {
                 </ResponsiveContainer>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-[28px] font-semibold text-[#0E1013] tabular-nums leading-none" style={{ fontFamily: "'Azeret Mono', monospace" }}>89%</p>
+                    <p className="text-[28px] font-semibold text-[#0E1013] tabular-nums leading-none">89%</p>
                     <p className="text-[12px] text-[#8B9299] mt-0.5">Resolved by AI</p>
                   </div>
                   <div>
-                    <p className="text-[18px] font-semibold text-[#8B9299] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>11%</p>
+                    <p className="text-[18px] font-semibold text-[#8B9299] tabular-nums">11%</p>
                     <p className="text-xs text-[#8B9299]">Human handoff</p>
                   </div>
                   <div className="text-xs text-[#5C6370] space-y-1">

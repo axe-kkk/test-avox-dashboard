@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Send, RefreshCw, Zap, User, Bot, ChevronDown, AlertTriangle } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
@@ -143,7 +143,6 @@ export function PlaygroundPage() {
               <div className="bg-surface-2 rounded-xl border border-brand-border p-3">
                 <p
                   className="text-[12px] font-semibold text-strong"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
                 >{debugMsg.debug.intent}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1 h-1.5 bg-brand-border rounded-full overflow-hidden">
@@ -175,7 +174,6 @@ export function PlaygroundPage() {
                     <div key={int} className="bg-brand-blue-50 border border-brand-blue-light rounded-lg px-3 py-2">
                       <p
                         className="text-[11px] text-brand-blue"
-                        style={{ fontFamily: "'Azeret Mono', monospace" }}
                       >{int}</p>
                     </div>
                   ))}
@@ -195,7 +193,6 @@ export function PlaygroundPage() {
               <div className="bg-surface-2 border border-brand-border rounded-xl p-3">
                 <p
                   className="text-[18px] font-semibold tabular-nums text-strong leading-none"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
                 >{debugMsg.debug.connects.toFixed(1)}</p>
                 <p className="text-[10px] text-subtle mt-1">CONNECTS (estimated)</p>
                 <p className="text-[10px] text-faint mt-2 leading-relaxed">

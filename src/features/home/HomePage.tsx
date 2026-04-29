@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   TrendingUp, TrendingDown, AlertTriangle, Bot,
   DollarSign, MessageSquare,
@@ -64,7 +64,6 @@ export function HomePage() {
             </p>
             <h1
               className="text-[44px] font-semibold text-[#0E1013] leading-[1.02] tracking-tight"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >
               Operations
             </h1>
@@ -80,7 +79,6 @@ export function HomePage() {
                 <div key={s.label}>
                   <p
                     className="text-[18px] font-semibold text-[#0E1013] tabular-nums leading-none"
-                    style={{ fontFamily: "'Azeret Mono', monospace" }}
                   >
                     {s.value}
                   </p>
@@ -103,7 +101,7 @@ export function HomePage() {
               ].map(row => (
                 <div key={row.k} className="flex items-center justify-between">
                   <span className="text-[12px] text-[#5C6370]">{row.k}</span>
-                  <span className="text-[12px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+                  <span className="text-[12px] font-semibold text-[#0E1013]">
                     {row.v}
                   </span>
                 </div>
@@ -134,7 +132,6 @@ export function HomePage() {
               </div>
               <p
                 className="text-[38px] font-semibold text-[#0E1013] tabular-nums leading-none mb-3"
-                style={{ fontFamily: "'Azeret Mono', monospace" }}
               >
                 {card.format(card.value)}
               </p>
@@ -186,18 +183,18 @@ export function HomePage() {
                     </div>
                   </td>
                   <td className="px-3 py-3">
-                    <span className="text-[15px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+                    <span className="text-[15px] font-semibold text-[#0E1013] tabular-nums">
                       {engine.actionsToday}
                     </span>
                   </td>
                   <td className="px-3 py-3">
-                    <p className="text-[15px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+                    <p className="text-[15px] font-semibold text-[#0E1013] tabular-nums">
                       {engine.mainKpi.value}
                     </p>
                     <p className="text-[10px] text-[#8B9299] mt-0.5">{engine.mainKpi.label}</p>
                   </td>
                   <td className="px-3 py-3">
-                    <span className="text-[15px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>
+                    <span className="text-[15px] font-semibold text-[#0E1013] tabular-nums">
                       {(engine.resolutionRate * 100).toFixed(0)}%
                     </span>
                   </td>

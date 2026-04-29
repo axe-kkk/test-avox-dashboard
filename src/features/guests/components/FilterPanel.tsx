@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+﻿import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 import { Star, ChevronLeft } from 'lucide-react';
 import { cn } from '../../../utils';
 import { mockUsers } from '../../../data/mock/users';
@@ -82,7 +82,6 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
           <div className="flex items-baseline gap-2">
             <span
               className="text-[26px] font-bold text-strong leading-none tabular-nums"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >{count}</span>
             <span className="text-[11px] text-subtle">of {total} guests</span>
           </div>

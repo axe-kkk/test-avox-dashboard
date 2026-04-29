@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Plus, Play, Pause, ChevronRight, Clock, Users, CheckCircle, ArrowRight, Mail, MessageSquare, GitBranch, Zap } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -127,7 +127,6 @@ export function SequencesPage() {
         <div className="px-6 py-3.5 flex items-center gap-3 flex-shrink-0 bg-white" style={{ borderBottom: '1px solid #EDEEF1' }}>
           <h1
             className="text-[18px] font-semibold text-[#0E1013] flex-1 tracking-tight"
-            style={{ fontFamily: "'Azeret Mono', monospace" }}
           >Sequences</h1>
           <Button
             size="sm"
@@ -149,7 +148,6 @@ export function SequencesPage() {
             <div key={s.label} className="flex items-baseline gap-2">
               <span
                 className="text-[15px] font-semibold text-[#0E1013] tabular-nums"
-                style={{ fontFamily: "'Azeret Mono', monospace" }}
               >{s.value}</span>
               <span className="text-[11px] text-[#8B9299]">{s.label}</span>
             </div>
@@ -201,15 +199,15 @@ export function SequencesPage() {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-3">
                 <p className="text-[10px] text-[#8B9299] uppercase tracking-wider mb-0.5">Enrolled</p>
-                <p className="text-[18px] font-semibold text-[#0E1013] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{selectedSeq.enrolledGuests}</p>
+                <p className="text-[18px] font-semibold text-[#0E1013] tabular-nums leading-tight">{selectedSeq.enrolledGuests}</p>
               </div>
               <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-3">
                 <p className="text-[10px] text-[#8B9299] uppercase tracking-wider mb-0.5">Completion</p>
-                <p className="text-[18px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{(selectedSeq.completionRate * 100).toFixed(0)}%</p>
+                <p className="text-[18px] font-semibold text-[#0E1013] leading-tight">{(selectedSeq.completionRate * 100).toFixed(0)}%</p>
               </div>
               <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-xl p-3">
                 <p className="text-[10px] text-[#8B9299] uppercase tracking-wider mb-0.5">Steps</p>
-                <p className="text-[18px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{selectedSeq.steps.length}</p>
+                <p className="text-[18px] font-semibold text-[#0E1013] leading-tight">{selectedSeq.steps.length}</p>
               </div>
             </div>
           </div>

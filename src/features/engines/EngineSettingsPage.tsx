@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Sparkles, ChevronDown, ChevronRight, X, Check, Copy, Database, Plug, RefreshCw } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronRight, X, Check } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
@@ -449,46 +449,6 @@ export function EngineSettingsPage() {
         </div>
       </FieldGroup>
 
-      {/* ── Context Variables — copy-paste tokens for the system prompt ── */}
-      <FieldGroup title="Context Variables">
-        <p className="text-[11px] text-subtle -mt-2">
-          Click to copy. These placeholders are replaced with real guest data at runtime.
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { token: '{{guest_name}}',     desc: 'Guest first or full name'                  },
-            { token: '{{check_in_date}}',  desc: 'Formatted check-in date (e.g. 14 May)'    },
-            { token: '{{check_out_date}}', desc: 'Formatted check-out date'                  },
-            { token: '{{room_type}}',      desc: 'Booked room category'                      },
-            { token: '{{room_number}}',    desc: 'Assigned room number (post check-in)'     },
-            { token: '{{reservation_id}}', desc: 'PMS reservation reference'                 },
-            { token: '{{guest_language}}', desc: 'ISO code of the guest preferred language' },
-            { token: '{{property_name}}',  desc: 'Property display name'                     },
-          ].map(v => (
-            <button
-              key={v.token}
-              type="button"
-              onClick={() => {
-                navigator.clipboard?.writeText(v.token);
-                addToast({ type: 'success', title: 'Copied', message: v.token });
-              }}
-              className="group flex items-center gap-3 rounded-xl border border-brand-border bg-white hover:bg-surface-2 hover:border-brand-blue-light transition-colors px-3 py-2.5 text-left"
-            >
-              <div className="min-w-0 flex-1">
-                <p
-                  className="text-[12px] font-semibold text-brand-blue truncate"
-                  style={{ fontFamily: "'Azeret Mono', monospace" }}
-                >{v.token}</p>
-                <p className="text-[10px] text-subtle truncate mt-0.5">{v.desc}</p>
-              </div>
-              <span className="w-7 h-7 rounded-lg flex items-center justify-center bg-surface-3 border border-brand-border text-subtle group-hover:bg-brand-blue group-hover:text-white group-hover:border-brand-blue transition-colors flex-shrink-0">
-                <Copy className="w-3.5 h-3.5" />
-              </span>
-            </button>
-          ))}
-        </div>
-      </FieldGroup>
-
       {/* ── Guest Data Access — collapsible per-category, per-field switch ── */}
       <FieldGroup title="Guest Data Access">
         <p className="text-[11px] text-subtle -mt-2">Control which data this engine can read or modify.</p>
@@ -567,52 +527,6 @@ export function EngineSettingsPage() {
               </div>
             );
           })}
-        </div>
-      </FieldGroup>
-
-      {/* ── PMS Sync Status — connection summary at the bottom ── */}
-      <FieldGroup title="PMS Sync Status">
-        <div className="rounded-2xl border border-brand-border bg-surface-2 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand-blue" />
-              <p className="text-[12px] font-semibold text-strong">Cloudbeds PMS</p>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-blue bg-brand-blue-50 border border-brand-blue-light px-1.5 py-0.5 rounded-md">
-                Connected
-              </span>
-            </div>
-            <button
-              onClick={() => addToast({ type: 'info', title: 'Resyncing PMS…' })}
-              className="h-7 px-2.5 flex items-center gap-1.5 rounded-lg border border-brand-border bg-white text-[11px] font-medium text-muted hover:bg-surface-3 hover:text-strong transition-colors"
-            >
-              <RefreshCw className="w-3 h-3" />
-              Resync now
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { icon: RefreshCw, label: 'Last sync',           value: '2 min ago'  },
-              { icon: Database,  label: 'Active reservations', value: '142'        },
-              { icon: Plug,      label: 'Check-ins today',     value: '38'         },
-            ].map(s => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} className="rounded-xl bg-white border border-brand-border p-3">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Icon className="w-3 h-3 text-faint" />
-                    <p className="text-[10px] uppercase tracking-wider text-subtle font-semibold">
-                      {s.label}
-                    </p>
-                  </div>
-                  <p
-                    className="text-[18px] font-semibold text-strong leading-none tabular-nums"
-                    style={{ fontFamily: "'Azeret Mono', monospace" }}
-                  >{s.value}</p>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </FieldGroup>
 

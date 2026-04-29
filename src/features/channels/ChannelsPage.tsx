@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Plus, Settings2, RefreshCw, ExternalLink, AlertTriangle, CheckCircle, XCircle, BarChart2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -62,15 +62,15 @@ function ChannelCard({ channel }: { channel: Channel }) {
         <div className="grid grid-cols-3 gap-3 mt-4">
           <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
             <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Messages (30d)</p>
-            <p className="text-[14px] font-semibold text-[#0E1013] tabular-nums leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{channel.messagesLast30d.toLocaleString()}</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] tabular-nums leading-tight">{channel.messagesLast30d.toLocaleString()}</p>
           </div>
           <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
             <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Avg Response</p>
-            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{channel.avgResponseTime}</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight">{channel.avgResponseTime}</p>
           </div>
           <div className="bg-[#F9F9F9] border border-[#EDEEF1] rounded-lg px-3 py-2">
             <p className="text-[10px] text-[#8B9299] uppercase tracking-wider">Conversion</p>
-            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>{(channel.conversionRate * 100).toFixed(0)}%</p>
+            <p className="text-[14px] font-semibold text-[#0E1013] leading-tight">{(channel.conversionRate * 100).toFixed(0)}%</p>
           </div>
         </div>
 
@@ -164,7 +164,6 @@ export function ChannelsPage() {
             </p>
             <h1
               className="text-[36px] font-semibold text-[#0E1013] leading-none tracking-tight"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >Channels</h1>
           </div>
           <Button
@@ -187,7 +186,7 @@ export function ChannelsPage() {
         ].map(s => (
           <Card key={s.label} className="p-4">
             <p className="text-xs text-[#8B9299] mb-1">{s.label}</p>
-            <p className="text-2xl font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{s.value}</p>
+            <p className="text-2xl font-semibold text-[#0E1013]">{s.value}</p>
           </Card>
         ))}
       </div>

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Search, Send, FileText, ArrowUpRight, ArrowLeft, CheckCircle, Phone, Mail, Plus, Star, Tag, ChevronDown, Filter,
   AlertTriangle, Settings2, Smile, Paperclip, Mic, Languages, MoreHorizontal, ArrowLeftRight, ChevronRight, X,
-  User, BedDouble, Database, Zap, Activity, TrendingUp, PhoneCall, ArrowDownUp, MailOpen, Combine, Keyboard,
+  User, BedDouble, Database, Zap, Activity, TrendingUp, PhoneCall, ArrowDownUp, MailOpen, Combine, Keyboard, Check, Building2,
 } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { ChannelIcon } from '../../components/ui/ChannelIcon';
@@ -100,12 +100,34 @@ const allReplyChannels: Conversation['channel'][] = [
 ];
 
 const deptOptions = [
-  { id: 'front_desk', label: 'Front Desk' },
-  { id: 'concierge', label: 'Concierge' },
-  { id: 'housekeeping', label: 'Housekeeping' },
-  { id: 'fnb', label: 'F&B' },
-  { id: 'engineering', label: 'Engineering' },
+  { id: 'front_desk',  label: 'Front Desk'  },
+  { id: 'concierge',   label: 'Concierge'   },
+  { id: 'housekeeping',label: 'Housekeeping' },
+  { id: 'fnb',         label: 'F&B'          },
+  { id: 'engineering', label: 'Engineering'  },
 ] as const;
+
+type DeptId = (typeof deptOptions)[number]['id'];
+
+function getConvDept(conv: Conversation): DeptId {
+  const tags = (conv.tags ?? []).join(' ').toLowerCase();
+  const msg   = conv.lastMessage.toLowerCase();
+  const engine = (conv.engineName ?? '').toLowerCase();
+  if (tags.includes('maintenance') || tags.includes('repair') || msg.includes('broken') ||
+      msg.includes('repair') || msg.includes('maintenance') || engine === 'recovery')
+    return 'engineering';
+  if (tags.includes('housekeep') || tags.includes('clean') || tags.includes('towel') ||
+      msg.includes('housekeep') || msg.includes('towel') || msg.includes('cleaning'))
+    return 'housekeeping';
+  if (tags.includes('restaurant') || tags.includes('dining') || tags.includes('food') ||
+      tags.includes('fnb') || msg.includes('restaurant') || msg.includes('breakfast') ||
+      msg.includes('dinner') || msg.includes('lunch') || msg.includes('wine') || msg.includes('bordeaux'))
+    return 'fnb';
+  if (engine === 'concierge' || tags.includes('concierge') || tags.includes('recommendation') ||
+      msg.includes('recommend') || msg.includes('taxi') || msg.includes('tour'))
+    return 'concierge';
+  return 'front_desk';
+}
 
 function languageLabel(code?: string) {
   if (!code) return '—';
@@ -139,8 +161,9 @@ function tagStyle(tag: string) {
 
 // ── Conversation row ────────────────────────────────────────────────────────
 
-function ConvRow({ conv, isActive, onClick }: {
+function ConvRow({ conv, isActive, onClick, listView = 'comfortable' }: {
   conv: Conversation; isActive: boolean; onClick: () => void;
+  listView?: 'compact' | 'comfortable' | 'detailed';
 }) {
   const lastChannel = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1]?.channel : conv.channel;
   const guest = mockGuests.find(g => g.id === conv.guestId);
@@ -157,52 +180,62 @@ function ConvRow({ conv, isActive, onClick }: {
     }
     return Array.from(set);
   }, [guest?.tags, conv.tags]);
+
+  const isCompact = listView === 'compact';
+  const isDetailed = listView === 'detailed';
+
   return (
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left px-4 pt-3.5 pb-3 border-b border-brand-border hover:bg-surface-2 transition-colors border-l-4',
+        'w-full text-left border-b border-brand-border hover:bg-surface-2 transition-colors border-l-4',
+        isCompact ? 'px-4 py-2' : 'px-4 pt-3.5 pb-3',
         isActive ? 'bg-brand-blue-50 border-l-brand-blue' : 'border-l-transparent',
       )}
     >
-      <div className="flex items-start gap-2.5">
-        <Avatar
-          name={conv.guestName}
-          size="sm"
-          badge={<ChannelIcon channel={lastChannel} size="sm" className="text-brand-blue" />}
-        />
+      <div className={cn('flex gap-2.5', isCompact ? 'items-center' : 'items-start')}>
+        {!isCompact && (
+          <Avatar
+            name={conv.guestName}
+            size="lg"
+            badge={<ChannelIcon channel={lastChannel} size="sm" className="text-brand-blue" />}
+          />
+        )}
         <div className="flex-1 min-w-0">
-          {/* Name + time */}
-          <div className="flex items-center justify-between gap-2 mb-0.5">
+          {/* Name + time (always shown) */}
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
+              {isCompact && (
+                <ChannelIcon channel={lastChannel} size="sm" className="text-subtle flex-shrink-0" />
+              )}
               <span className={cn(
-                'text-[14px] truncate',
+                'truncate',
+                isCompact ? 'text-[12px]' : 'text-[14px]',
                 conv.unreadCount > 0 ? 'font-semibold text-muted' : 'font-medium text-muted',
               )}>
                 {conv.guestName}
               </span>
             </div>
-            {conv.unreadCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0" aria-label="Unread" />
-            )}
-          </div>
-
-          {/* Last message */}
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] text-muted truncate leading-relaxed min-w-0">
-              {conv.lastMessage}
-            </p>
-
             <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-[10px] text-subtle tabular-nums whitespace-nowrap">
                 {formatRelativeTime(conv.lastMessageAt)}
               </span>
+              {conv.unreadCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0" aria-label="Unread" />
+              )}
             </div>
           </div>
 
-          {/* Tags under preview */}
-          {rowTags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
+          {/* Last message — hidden in compact */}
+          {!isCompact && (
+            <p className="text-[10px] text-muted truncate leading-relaxed min-w-0 mt-0.5">
+              {conv.lastMessage}
+            </p>
+          )}
+
+          {/* Tags — only in detailed mode */}
+          {isDetailed && rowTags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {rowTags.map(t => {
                 const s = tagStyle(t);
                 const letter = t.trim().charAt(0).toUpperCase();
@@ -304,7 +337,7 @@ function Bubble({
     return (
       <div className="flex gap-2.5 my-2 flex-row-reverse items-end">
         <div className="flex-shrink-0">
-          <Avatar name={msg.senderName} size="xs" />
+          <Avatar name={msg.senderName} size="lg" />
         </div>
         <div
           className="max-w-[70%] flex flex-col gap-1 items-end"
@@ -343,10 +376,10 @@ function Bubble({
       {/* Avatar */}
       <div className="flex-shrink-0">
         {isGuest
-          ? <Avatar name={msg.senderName} size="xs" />
+          ? <Avatar name={msg.senderName} size="lg" />
           : (
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold text-white"
               style={{ backgroundColor: '#2355A7' }}
             >
               AI
@@ -515,6 +548,8 @@ export function InboxPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [urgentOpen, setUrgentOpen] = useState(false);
   const [listSettingsOpen, setListSettingsOpen] = useState(false);
+  const [listView, setListView] = useState<'compact' | 'comfortable' | 'detailed'>('comfortable');
+  const [filterDept, setFilterDept] = useState<DeptId | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [mergeConvOpen, setMergeConvOpen] = useState(false);
   const [mergeConvQuery, setMergeConvQuery] = useState('');
@@ -605,21 +640,14 @@ export function InboxPage() {
   }, [conversations]);
 
   const urgentCount = urgentConversations.length;
-  const urgentByDept = useMemo(() => {
-    const counts: Record<(typeof deptOptions)[number]['id'], number> = deptOptions.reduce((acc, d) => {
+  const convsByDept = useMemo(() => {
+    const counts = deptOptions.reduce((acc, d) => {
       acc[d.id] = 0;
       return acc;
-    }, {} as Record<(typeof deptOptions)[number]['id'], number>);
-
-    // Lightweight heuristic: distribute by engine / tags
-    for (const c of urgentConversations) {
-      const tagStr = (c.tags ?? []).join(' ').toLowerCase();
-      if (tagStr.includes('maintenance') || c.engineName === 'Recovery') counts.engineering += 1;
-      else if (tagStr.includes('vip') || c.engineName === 'Concierge') counts.concierge += 1;
-      else counts.front_desk += 1;
-    }
+    }, {} as Record<DeptId, number>);
+    for (const c of conversations) counts[getConvDept(c)] += 1;
     return counts;
-  }, [urgentConversations]);
+  }, [conversations]);
 
   const clientChannels = useMemo(() => {
     // In the spec: enabled only if available for this client. For mock, we assume all connected channels are possible,
@@ -772,6 +800,8 @@ export function InboxPage() {
         if (!ok) return false;
       }
 
+      if (filterDept && getConvDept(c) !== filterDept) return false;
+
       switch (activeView) {
         case 'all': return true;
         case 'unread': return c.unreadCount > 0;
@@ -789,7 +819,7 @@ export function InboxPage() {
         default: return true;
       }
     });
-  }, [activeView, channelFilter, tagFilter, searchQuery, conversations]);
+  }, [activeView, channelFilter, tagFilter, searchQuery, conversations, filterDept]);
 
   const sortedConversations = useMemo(() => {
     const arr = [...filtered];
@@ -971,11 +1001,16 @@ export function InboxPage() {
             <div className="relative">
               <button
                 onClick={() => setViewsOpen(v => !v)}
-                className="h-8 px-3 rounded-lg bg-surface-3 border border-brand-border text-[12px] font-medium text-muted flex items-center gap-2 hover:bg-white transition-colors"
+                className={cn(
+                  'group h-10 px-3 rounded-lg border text-[12px] font-medium flex items-center gap-2 transition-colors',
+                  viewsOpen
+                    ? 'bg-brand-blue border-brand-blue text-white'
+                    : 'bg-surface-3 border-brand-border text-[#5C6370] hover:bg-brand-blue hover:border-brand-blue hover:text-white',
+                )}
               >
                 <span className="font-semibold uppercase tracking-[0.08em]">ALL</span>
-                <span className="text-subtle font-semibold tabular-nums">{counts.unread}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-subtle" />
+                <span className={cn('font-semibold tabular-nums', viewsOpen ? 'text-white/80' : 'text-[#8B9299] group-hover:text-white/80')}>{counts.unread}</span>
+                <ChevronDown className={cn('w-3.5 h-3.5', viewsOpen ? 'text-white/80' : 'text-[#8B9299] group-hover:text-white/80')} />
               </button>
 
               {viewsOpen && (
@@ -1027,7 +1062,12 @@ export function InboxPage() {
             <div className="relative">
               <button
                 onClick={() => setFiltersOpen(v => !v)}
-                className="h-8 w-8 rounded-lg bg-surface-3 border border-brand-border flex items-center justify-center text-muted hover:bg-white transition-colors"
+                className={cn(
+                  'h-10 w-10 rounded-lg border flex items-center justify-center transition-colors',
+                  filtersOpen
+                    ? 'bg-brand-blue border-brand-blue text-white'
+                    : 'bg-surface-3 border-brand-border text-[#5C6370] hover:bg-brand-blue hover:border-brand-blue hover:text-white',
+                )}
                 title="Filters"
               >
                 <Filter className="w-4 h-4" />
@@ -1123,17 +1163,17 @@ export function InboxPage() {
               <button
                 onClick={() => setSortOpen(v => !v)}
                 className={cn(
-                  'h-8 px-2.5 rounded-lg border text-[12px] font-medium flex items-center gap-1.5 transition-colors',
+                  'group h-10 px-2.5 rounded-lg border text-[12px] font-medium flex items-center gap-1.5 transition-colors',
                   sortOpen
-                    ? 'bg-brand-blue-50 border-brand-blue-light text-brand-blue'
-                    : 'bg-surface-3 border-brand-border text-muted hover:bg-white',
+                    ? 'bg-brand-blue border-brand-blue text-white'
+                    : 'bg-surface-3 border-brand-border text-[#5C6370] hover:bg-brand-blue hover:border-brand-blue hover:text-white',
                 )}
                 title="Sort"
                 aria-haspopup="menu"
                 aria-expanded={sortOpen}
               >
                 <ArrowDownUp className="w-3.5 h-3.5" />
-                <ChevronDown className="w-3 h-3 text-subtle" />
+                <ChevronDown className={cn('w-3 h-3', sortOpen ? 'text-white/80' : 'text-[#8B9299] group-hover:text-white/80')} />
               </button>
               {sortOpen && (
                 <div role="menu" className="absolute left-0 mt-2 w-[180px] bg-white border border-brand-border rounded-xl shadow-panel z-50 p-1.5">
@@ -1159,7 +1199,7 @@ export function InboxPage() {
 
             <button
               onClick={() => { setNewConvOpen(true); setNewConvMessage(''); }}
-              className="ml-auto h-8 w-8 rounded-lg bg-brand-blue-50 border border-brand-blue-light flex items-center justify-center text-brand-blue hover:bg-[#E3EBFA] transition-colors"
+              className="ml-auto h-10 w-10 rounded-lg bg-brand-blue-50 border border-brand-blue-light flex items-center justify-center text-brand-blue hover:bg-[#E3EBFA] transition-colors"
               title="Add conversation"
             >
               <Plus className="w-4 h-4" />
@@ -1175,71 +1215,111 @@ export function InboxPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               aria-label="Search conversations"
-              className="w-full pl-9 pr-3 py-1.5 text-[12px] bg-surface-3 rounded-lg border border-brand-border placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
+              className="w-full h-10 pl-9 pr-3 text-[12px] bg-surface-3 rounded-lg border border-brand-border placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
             />
             <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <div className="relative">
                 <button
-                  onClick={() => setUrgentOpen(v => !v)}
-                  className="w-8 h-7 rounded-md hover:bg-white transition-colors flex items-center justify-center"
-                  title="Urgent"
+                  onClick={() => { setUrgentOpen(v => !v); setListSettingsOpen(false); }}
+                  className={cn(
+                    'w-10 h-10 rounded-lg transition-colors flex items-center justify-center',
+                    urgentOpen
+                      ? 'bg-brand-blue text-white'
+                      : filterDept
+                        ? 'text-brand-blue hover:bg-brand-blue hover:text-white'
+                        : 'text-[#8B9299] hover:bg-brand-blue hover:text-white',
+                  )}
+                  title="Filter by department"
                 >
                   <div className="relative">
-                    <AlertTriangle className="w-4 h-4 text-brand-black" />
-                    {urgentCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-blue text-white text-[10px] font-medium flex items-center justify-center leading-none tabular-nums">
-                        {urgentCount}
-                      </span>
+                    <Building2 className="w-4 h-4" />
+                    {filterDept && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-brand-blue" />
                     )}
                   </div>
                 </button>
                 {urgentOpen && (
-                  <div className="absolute right-0 mt-2 w-[260px] bg-white border border-brand-border rounded-xl shadow-panel z-[300] p-2">
+                  <div className="absolute right-0 mt-2 w-[220px] bg-white border border-brand-border rounded-xl shadow-panel z-[300] p-2">
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">
                       Departments
                     </p>
-                    {deptOptions.map(d => (
-                      <button
-                        key={d.id}
-                        onClick={() => {
-                          setUrgentOpen(false);
-                          setParams(prev => { prev.set('view', 'urgent'); return prev; });
-                          addToast({ type: 'info', title: d.label, message: `${urgentByDept[d.id]} open items` });
-                        }}
-                        className="w-full px-2.5 py-2 rounded-lg hover:bg-surface-3 transition-colors flex items-center justify-between text-[12px]"
-                      >
-                        <span className="font-medium text-brand-black">{d.label}</span>
-                        <span className="font-semibold text-subtle tabular-nums">{urgentByDept[d.id]}</span>
-                      </button>
-                    ))}
+                    {/* All */}
+                    <button
+                      onClick={() => { setFilterDept(null); setUrgentOpen(false); }}
+                      className={cn(
+                        'w-full px-2.5 py-2 rounded-lg transition-colors flex items-center justify-between text-[12px]',
+                        !filterDept ? 'bg-brand-blue-50 text-brand-blue' : 'hover:bg-surface-3 text-brand-black',
+                      )}
+                    >
+                      <span className="font-medium">All</span>
+                      <div className="flex items-center gap-2">
+                        <span className={cn('font-semibold tabular-nums', !filterDept ? 'text-brand-blue' : 'text-subtle')}>
+                          {conversations.length}
+                        </span>
+                        {!filterDept && <Check className="w-3 h-3" />}
+                      </div>
+                    </button>
+                    {deptOptions.map(d => {
+                      const isActive = filterDept === d.id;
+                      return (
+                        <button
+                          key={d.id}
+                          onClick={() => { setFilterDept(isActive ? null : d.id); setUrgentOpen(false); }}
+                          className={cn(
+                            'w-full px-2.5 py-2 rounded-lg transition-colors flex items-center justify-between text-[12px]',
+                            isActive ? 'bg-brand-blue-50 text-brand-blue' : 'hover:bg-surface-3 text-brand-black',
+                          )}
+                        >
+                          <span className="font-medium">{d.label}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={cn('font-semibold tabular-nums', isActive ? 'text-brand-blue' : 'text-subtle')}>
+                              {convsByDept[d.id]}
+                            </span>
+                            {isActive && <Check className="w-3 h-3" />}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
 
               <div className="relative">
                 <button
-                  onClick={() => setListSettingsOpen(v => !v)}
-                  className="w-8 h-7 rounded-md hover:bg-white transition-colors flex items-center justify-center"
+                  onClick={() => { setListSettingsOpen(v => !v); setUrgentOpen(false); }}
+                  className={cn(
+                    'w-10 h-10 rounded-lg transition-colors flex items-center justify-center',
+                    listSettingsOpen
+                      ? 'bg-brand-blue text-white'
+                      : 'text-[#8B9299] hover:bg-brand-blue hover:text-white',
+                  )}
                   title="List settings"
                 >
-                  <Settings2 className="w-4 h-4 text-subtle" />
+                  <Settings2 className="w-4 h-4" />
                 </button>
                 {listSettingsOpen && (
                   <div className="absolute right-0 mt-2 w-[220px] bg-white border border-brand-border rounded-xl shadow-panel z-[300] p-2">
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">
                       List view
                     </p>
-                    {[
-                      { id: 'compact', label: 'Compact' },
-                      { id: 'comfortable', label: 'Comfortable' },
-                      { id: 'detailed', label: 'Detailed' },
-                    ].map(opt => (
+                    {([
+                      { id: 'compact',     label: 'Compact',     desc: 'Name + time only'          },
+                      { id: 'comfortable', label: 'Comfortable', desc: 'Name + preview'             },
+                      { id: 'detailed',    label: 'Detailed',    desc: 'With tags'                  },
+                    ] as const).map(opt => (
                       <button
                         key={opt.id}
-                        onClick={() => { setListSettingsOpen(false); addToast({ type: 'info', title: 'List view', message: opt.label }); }}
-                        className="w-full px-2.5 py-2 rounded-lg hover:bg-surface-3 transition-colors text-left text-[12px] text-brand-black font-medium"
+                        onClick={() => { setListView(opt.id); setListSettingsOpen(false); }}
+                        className={cn(
+                          'w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg transition-colors text-left',
+                          listView === opt.id ? 'bg-brand-blue-50 text-brand-blue' : 'hover:bg-surface-3 text-brand-black',
+                        )}
                       >
-                        {opt.label}
+                        <div>
+                          <p className="text-[12px] font-medium">{opt.label}</p>
+                          <p className="text-[10px] text-subtle">{opt.desc}</p>
+                        </div>
+                        {listView === opt.id && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -1257,6 +1337,7 @@ export function InboxPage() {
               conv={conv}
               isActive={conv.id === activeConv?.id}
               onClick={() => handleConvOpen(conv)}
+              listView={listView}
             />
           ))}
           {sortedConversations.length === 0 && (
@@ -1295,7 +1376,7 @@ export function InboxPage() {
               <div className="px-6 pt-5 pb-4 border-b border-brand-border flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em] mb-1">Compose</p>
-                  <h3 className="text-[16px] font-semibold text-muted" style={{ fontFamily: "'Azeret Mono', monospace" }}>New conversation</h3>
+                  <h3 className="text-[16px] font-semibold text-muted">New conversation</h3>
                 </div>
                 <button
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors text-[18px] leading-none mt-0.5"
@@ -1677,7 +1758,7 @@ export function InboxPage() {
                   type="button"
                   onClick={() => setSendChannelOpen(v => !v)}
                   className={cn(
-                    'flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium transition-colors border',
+                    'flex items-center gap-1.5 h-10 px-3 rounded-full text-[12px] font-medium transition-colors border',
                     sendChannelOpen
                       ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light'
                       : 'bg-surface-3 text-muted border-brand-border hover:text-brand-black hover:bg-white',
@@ -1724,7 +1805,7 @@ export function InboxPage() {
                 type="button"
                 onClick={() => setIsInternal(v => !v)}
                 className={cn(
-                  'flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium transition-colors',
+                  'flex items-center gap-1.5 h-10 px-3 rounded-full text-[12px] font-medium transition-colors',
                   isInternal
                     ? 'bg-surface-3 text-brand-black border border-brand-border'
                     : 'text-subtle hover:text-muted hover:bg-surface-3',
@@ -1742,7 +1823,7 @@ export function InboxPage() {
                 onClick={() => setTranslatorEnabled(v => !v)}
                 title={isInternal ? 'Translator is disabled for internal notes' : 'Live translation'}
                 className={cn(
-                  'flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium transition-colors',
+                  'flex items-center gap-1.5 h-10 px-3 rounded-full text-[12px] font-medium transition-colors',
                   isInternal && 'opacity-35 cursor-not-allowed',
                   translatorEnabled && !isInternal
                     ? 'bg-brand-blue-50 text-brand-blue border border-brand-blue-light'
@@ -1763,7 +1844,7 @@ export function InboxPage() {
                   <button
                     type="button"
                     onClick={() => { setMyLangOpen(v => !v); setReplyLangOpen(false); }}
-                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white border border-brand-border text-[11px] font-semibold text-brand-black hover:border-brand-blue-light transition-colors"
+                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white border border-brand-border text-[11px] font-semibold text-muted hover:border-brand-blue-light transition-colors"
                   >
                     {languageLabel(myLang)}
                     <ChevronDown className="w-3 h-3 text-subtle" />
@@ -1778,7 +1859,7 @@ export function InboxPage() {
                           onClick={() => { setMyLang(l as any); setMyLangOpen(false); }}
                           className={cn(
                             'w-full px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors',
-                            myLang === l ? 'bg-brand-blue-50 text-brand-black' : 'text-muted hover:bg-surface-3',
+                            myLang === l ? 'bg-brand-blue-50 text-brand-blue' : 'text-muted hover:bg-surface-3',
                           )}
                         >
                           <span className="font-medium">{languageLabel(l)}</span>
@@ -1797,7 +1878,7 @@ export function InboxPage() {
                   <button
                     type="button"
                     onClick={() => { setReplyLangOpen(v => !v); setMyLangOpen(false); }}
-                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white border border-brand-border text-[11px] font-semibold text-brand-black hover:border-brand-blue-light transition-colors"
+                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white border border-brand-border text-[11px] font-semibold text-muted hover:border-brand-blue-light transition-colors"
                   >
                     {languageLabel(replyLang)}
                     <ChevronDown className="w-3 h-3 text-subtle" />
@@ -1812,7 +1893,7 @@ export function InboxPage() {
                           onClick={() => { setReplyLang(l as any); setReplyLangOpen(false); }}
                           className={cn(
                             'w-full px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors',
-                            replyLang === l ? 'bg-brand-blue-50 text-brand-black' : 'text-muted hover:bg-surface-3',
+                            replyLang === l ? 'bg-brand-blue-50 text-brand-blue' : 'text-muted hover:bg-surface-3',
                           )}
                         >
                           <span className="font-medium">{languageLabel(l)}</span>
@@ -1971,19 +2052,19 @@ export function InboxPage() {
               <button
                 onClick={() => setTemplatesOpen(v => !v)}
                 className={cn(
-                  'flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[11px] font-medium transition-colors',
+                  'flex items-center gap-1.5 h-10 px-2.5 rounded-lg text-[11px] font-medium transition-colors',
                   templatesOpen ? 'bg-brand-blue text-white' : 'text-subtle hover:text-muted hover:bg-surface-3',
                 )}
               >
                 <FileText className="w-3.5 h-3.5" /> Templates
               </button>
-              <button className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
+              <button className="flex items-center gap-1.5 h-10 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
                 <Smile className="w-3.5 h-3.5" /> Emoji
               </button>
-              <button className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
+              <button className="flex items-center gap-1.5 h-10 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
                 <Paperclip className="w-3.5 h-3.5" /> Attach
               </button>
-              <button className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
+              <button className="flex items-center gap-1.5 h-10 px-2.5 rounded-lg text-[11px] font-medium text-subtle hover:text-muted hover:bg-surface-3 transition-colors">
                 <Mic className="w-3.5 h-3.5" /> Voice
               </button>
             </div>
@@ -1993,6 +2074,7 @@ export function InboxPage() {
               variant="primary"
               onClick={handleSend}
               disabled={!replyText.trim() || !activeConv}
+              className="h-10"
             >
               <Send className="w-3.5 h-3.5" /> Send
             </Button>
@@ -2021,11 +2103,11 @@ export function InboxPage() {
         {guest ? (
           <>
             {/* ── Guest identity block ── */}
-            <div className="px-4 pt-4 pb-3 border-b border-brand-border">
-              <div className="flex items-start justify-between gap-2">
+            <div className="px-4 py-3 border-b border-brand-border">
+              <div className="flex items-center justify-between gap-2">
                 {/* Avatar + name */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <Avatar name={guest.name} size="md" />
+                  <Avatar name={guest.name} size="lg" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <h3 className="text-[13px] font-semibold text-muted truncate leading-tight">{guest.name}</h3>
@@ -2033,14 +2115,18 @@ export function InboxPage() {
                         <span className="text-[9px] font-bold tracking-wider text-white bg-brand-blue px-1.5 py-0.5 rounded">VIP</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-subtle mt-0.5">{guest.nationality} · {guest.language.toUpperCase()}</p>
                   </div>
                 </div>
                 {/* ··· menu */}
                 <div className="relative flex-shrink-0">
                   <button
                     onClick={() => setProfileMenuOpen(v => !v)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-subtle hover:bg-surface-3 hover:text-muted transition-colors"
+                    className={cn(
+                      'w-10 h-10 rounded-lg border border-brand-border flex items-center justify-center transition-colors',
+                      profileMenuOpen
+                        ? 'bg-brand-blue border-brand-blue text-white'
+                        : 'bg-surface-3 text-[#5C6370] hover:bg-brand-blue hover:border-brand-blue hover:text-white',
+                    )}
                     title="More"
                   >
                     <MoreHorizontal className="w-4 h-4" />
@@ -2172,19 +2258,35 @@ export function InboxPage() {
 
             {/* ── Menu + sliding detail panel ── */}
             {(() => {
-              const menu = [
-                { id: 'info' as const,        label: 'User info',            icon: User },
-                { id: 'reservation' as const, label: 'Reservations',         icon: BedDouble },
-                { id: 'pms' as const,         label: 'PMS data',              icon: Database },
-                { id: 'actions' as const,     label: 'Quick actions',        icon: Activity },
-                { id: 'engines' as const,     label: 'Engines log',          icon: Zap },
-                { id: 'signals' as const,     label: 'Satisfaction signals', icon: TrendingUp },
-                { id: 'properties' as const,  label: 'User properties',      icon: Settings2 },
-                { id: 'calls' as const,       label: 'Calls',                icon: PhoneCall },
-                { id: 'tags_notes' as const,  label: 'Tags & notes',         icon: Tag },
+              const menuGroups = [
+                {
+                  label: 'Guest',
+                  items: [
+                    { id: 'info' as const,        label: 'User info',    icon: User     },
+                    { id: 'reservation' as const, label: 'Reservations', icon: BedDouble },
+                    { id: 'pms' as const,         label: 'PMS data',     icon: Database  },
+                  ],
+                },
+                {
+                  label: 'Activity',
+                  items: [
+                    { id: 'actions' as const, label: 'Quick actions',        icon: Activity   },
+                    { id: 'engines' as const, label: 'Engines log',          icon: Zap        },
+                    { id: 'signals' as const, label: 'Satisfaction signals', icon: TrendingUp },
+                  ],
+                },
+                {
+                  label: 'Details',
+                  items: [
+                    { id: 'properties' as const, label: 'User properties', icon: Settings2 },
+                    { id: 'calls' as const,      label: 'Calls',            icon: PhoneCall },
+                    { id: 'tags_notes' as const, label: 'Tags & notes',     icon: Tag       },
+                  ],
+                },
               ];
 
-              const activeMeta = menu.find(m => m.id === guestSidebarSection) ?? menu[0];
+              const allItems = menuGroups.flatMap(g => g.items);
+              const activeMeta = allItems.find(m => m.id === guestSidebarSection) ?? allItems[0];
               const openSection = (id: GuestSidebarSection) => {
                 setGuestSidebarSection(id);
                 setGuestSidebarOpen(true);
@@ -2193,24 +2295,20 @@ export function InboxPage() {
               return (
                 <>
                   <div className="flex-1 overflow-y-auto">
-                    <div className="p-2">
-                      <div className="rounded-2xl border border-brand-border bg-white overflow-hidden">
-                        {menu.map(({ id, label, icon: Icon }) => (
-                          <button
-                            key={id}
-                            onClick={() => openSection(id)}
-                            className="w-full px-3 py-2.5 flex items-center gap-2.5 hover:bg-surface-3 transition-colors border-b border-border-soft last:border-0"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-surface-3 border border-brand-border flex items-center justify-center flex-shrink-0">
-                              <Icon className="w-4 h-4 text-muted" />
-                            </div>
-                            <div className="flex-1 min-w-0 text-left">
-                              <p className="text-[12px] font-semibold text-muted truncate">{label}</p>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-faint flex-shrink-0" />
-                          </button>
-                        ))}
-                      </div>
+                    <div className="p-2 space-y-1">
+                      {allItems.map(({ id, label, icon: Icon }) => (
+                        <button
+                          key={id}
+                          onClick={() => openSection(id)}
+                          className="w-full px-3 py-2.5 flex items-center gap-3 rounded-xl hover:bg-surface-3 transition-colors"
+                        >
+                          <Icon className="w-5 h-5 text-muted flex-shrink-0" />
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="text-[12px] font-semibold text-muted truncate">{label}</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-faint flex-shrink-0" />
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -2222,7 +2320,7 @@ export function InboxPage() {
                     )}
                     aria-hidden={!guestSidebarOpen}
                   >
-                    <div className="px-3 py-3 border-b border-brand-border flex items-center gap-2">
+                    <div className="h-[49px] px-3 border-b border-brand-border flex items-center gap-2 flex-shrink-0">
                       <button
                         onClick={() => setGuestSidebarOpen(false)}
                         className="w-8 h-8 rounded-xl border border-brand-border bg-surface-2 flex items-center justify-center hover:bg-white transition-colors"
@@ -2231,8 +2329,8 @@ export function InboxPage() {
                         <ArrowLeft className="w-4 h-4 text-muted" />
                       </button>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-semibold text-muted truncate">{activeMeta.label}</p>
-                        <p className="text-[10px] text-subtle truncate">{guest.name}</p>
+                        <p className="text-[12px] font-semibold text-muted truncate leading-tight">{activeMeta.label}</p>
+                        <p className="text-[10px] text-subtle truncate leading-tight">{guest.name}</p>
                       </div>
                       <button
                         onClick={() => setGuestSidebarOpen(false)}
@@ -2319,11 +2417,11 @@ export function InboxPage() {
                           <div className="rounded-2xl border border-brand-border bg-white p-3">
                             <div className="flex items-center justify-between">
                               <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider">Past visits</p>
-                              <p className="text-[12px] font-semibold text-strong" style={{ fontFamily: "'Azeret Mono', monospace" }}>{guest.totalVisits}</p>
+                              <p className="text-[12px] font-semibold text-strong">{guest.totalVisits}</p>
                             </div>
                             <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-soft">
                               <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider">Total spend</p>
-                              <p className="text-[12px] font-semibold text-brand-blue" style={{ fontFamily: "'Azeret Mono', monospace" }}>{formatCurrency(guest.lifetimeValue)}</p>
+                              <p className="text-[12px] font-semibold text-brand-blue">{formatCurrency(guest.lifetimeValue)}</p>
                             </div>
                           </div>
 

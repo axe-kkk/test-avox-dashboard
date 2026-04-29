@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Plus, GripVertical, Trash2, AlertTriangle, Link, X, Edit2, ChevronDown,
@@ -280,7 +280,6 @@ export function EngineRoutingPage() {
             <label className="text-[12px] font-semibold text-muted">Confidence threshold</label>
             <span
               className="text-[13px] font-semibold text-brand-blue tabular-nums"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >{confidence}%</span>
           </div>
           <input

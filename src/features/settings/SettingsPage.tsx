@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Building2, Database, Users, Bell, CreditCard, Check, ChevronRight, Plus, Trash2, Mail, Shield } from 'lucide-react';
 import { Tabs } from '../../components/ui/Tabs';
 import { Button } from '../../components/ui/Button';
@@ -69,7 +69,7 @@ export function SettingsPage() {
         {/* Sidebar header */}
         <div className="px-5 py-4 bg-white" style={{ borderBottom: '1px solid #EDEEF1' }}>
           <p className="text-[11px] font-semibold text-[#8B9299] uppercase tracking-[0.22em] mb-1">System</p>
-          <p className="text-[17px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Settings</p>
+          <p className="text-[17px] font-semibold text-[#0E1013]">Settings</p>
         </div>
         <div className="flex-1 py-3">
         {[
@@ -107,7 +107,7 @@ export function SettingsPage() {
         {activeTab === 'property' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Property Settings</h2>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight">Property Settings</h2>
               <p className="text-[13px] text-[#8B9299] mt-0.5">Configure your property details and operational defaults.</p>
             </div>
             <Card>
@@ -179,7 +179,7 @@ export function SettingsPage() {
         {activeTab === 'pms' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>PMS Integration</h2>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight">PMS Integration</h2>
               <p className="text-[13px] text-[#8B9299] mt-0.5">Connect AVOX to your Property Management System for real-time data sync.</p>
             </div>
             <Card>
@@ -254,7 +254,7 @@ export function SettingsPage() {
           <div className="max-w-3xl space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Team Members</h2>
+                <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight">Team Members</h2>
                 <p className="text-[13px] text-[#8B9299] mt-0.5">{mockUsers.length} members · 2 roles</p>
               </div>
               {canTeam && (
@@ -336,7 +336,7 @@ export function SettingsPage() {
         {activeTab === 'notifications' && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Notifications</h2>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight">Notifications</h2>
               <p className="text-[13px] text-[#8B9299] mt-0.5">Configure alert rules, delivery channels, and escalation chains.</p>
             </div>
             <Card>
@@ -392,7 +392,7 @@ export function SettingsPage() {
         {activeTab === 'billing' && canBilling && (
           <div className="max-w-2xl space-y-6">
             <div>
-              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight" style={{ fontFamily: "'Azeret Mono', monospace" }}>Billing & Subscription</h2>
+              <h2 className="text-[18px] font-semibold text-[#0E1013] tracking-tight">Billing & Subscription</h2>
               <p className="text-[13px] text-[#8B9299] mt-0.5">Manage your plan, usage, and payment details.</p>
             </div>
 
@@ -400,11 +400,11 @@ export function SettingsPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-[10px] font-semibold text-[#8B9299] uppercase tracking-wider mb-1">Current Plan</p>
-                  <p className="text-[18px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Professional</p>
+                  <p className="text-[18px] font-semibold text-[#0E1013]">Professional</p>
                   <p className="text-[13px] text-[#8B9299] mt-0.5">7 AI Engines · Up to 500 conversations/day · 3 properties</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[24px] font-semibold text-[#0E1013] tabular-nums" style={{ fontFamily: "'Azeret Mono', monospace" }}>€1,290</p>
+                  <p className="text-[24px] font-semibold text-[#0E1013] tabular-nums">€1,290</p>
                   <p className="text-xs text-[#5C6370]">per month</p>
                   <Badge variant="blue" className="mt-1">Active</Badge>
                 </div>

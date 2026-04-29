@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   /* ── AVOX Brand Colors ─────────────────────────────────── */
@@ -32,7 +32,7 @@
 
   /* ── Typography ────────────────────────────────────────── */
   --font-family-sans:  'Roboto', system-ui, -apple-system, sans-serif;
-  --font-family-mono:  'Azeret Mono', 'Courier New', monospace;
+  --font-family-mono:  'Courier New', monospace;
 
   /* ── Font sizes (unified) ──────────────────────────────── */
   --font-size-14: 14px;
@@ -89,8 +89,8 @@ html, body { height: 100%; overflow: hidden; }
 ::-webkit-scrollbar-thumb:hover { background: #b8b5b8; }
 
 /* ── Utilities ─────────────────────────────────────────────── */
-.font-mono    { font-family: 'Azeret Mono', monospace; }
-.font-display { font-family: 'Azeret Mono', monospace; letter-spacing: -0.02em; }
+.font-mono    { font-family: monospace; }
+.font-display { font-family: monospace; letter-spacing: -0.02em; }
 .text-muted   { color: var(--color-text-muted); }
 .text-subtle  { color: var(--color-text-subtle); }
 .surface      { background: var(--color-surface); }

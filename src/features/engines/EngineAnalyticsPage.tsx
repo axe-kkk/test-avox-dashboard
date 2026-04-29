@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -138,7 +138,6 @@ export function EngineAnalyticsPage() {
                   'text-[20px] font-semibold tabular-nums leading-none',
                   kpi.accent ? 'text-brand-blue' : 'text-strong',
                 )}
-                style={{ fontFamily: "'Azeret Mono', monospace" }}
               >{kpi.value}</p>
               <div className="flex items-center gap-1 mt-2">
                 <TrendIcon className={cn('w-3 h-3', positive ? 'text-brand-blue' : 'text-brand-black')} />
@@ -251,7 +250,6 @@ export function EngineAnalyticsPage() {
                     <span className="text-muted flex-1 truncate">{r.label}</span>
                     <span
                       className="text-strong font-semibold tabular-nums"
-                      style={{ fontFamily: "'Azeret Mono', monospace" }}
                     >{pct}%</span>
                   </div>
                 );
@@ -287,7 +285,6 @@ export function EngineAnalyticsPage() {
                     <td className="px-5 py-2.5">
                       <span
                         className="text-[12px] text-strong font-semibold"
-                        style={{ fontFamily: "'Azeret Mono', monospace" }}
                       >{t.intent}</span>
                     </td>
                     <td className="px-5 py-2.5 text-right">

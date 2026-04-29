@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown } from 'lucide-react';
+﻿import { ChevronUp, ChevronDown } from 'lucide-react';
 import { cn, formatDate, formatDateTime, formatCurrency } from '../../../utils';
 import { Avatar } from '../../../components/ui/Avatar';
 import { mockUsers } from '../../../data/mock/users';
@@ -83,7 +83,6 @@ function renderCell(colId: ColId, guest: Guest) {
       return (
         <span
           className="text-[12px] font-semibold text-brand-blue tabular-nums"
-          style={{ fontFamily: "'Azeret Mono', monospace" }}
         >{formatCurrency(guest.lifetimeValue)}</span>
       );
     case 'language':

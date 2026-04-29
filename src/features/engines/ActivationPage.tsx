@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckCircle2, Circle, AlertCircle, Zap, Pause, X } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
@@ -67,59 +67,48 @@ export function ActivationPage() {
     <div className="max-w-[760px] mx-auto px-6 py-6 space-y-5">
 
       {/* ── Status indicator ── */}
-      <div className={cn('rounded-2xl border p-6', sc.bg, sc.border)}>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white border border-brand-border">
-              <span className={cn('w-5 h-5 rounded-full', sc.dot)} />
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider mb-1">Current Status</p>
-              <p
-                className={cn('text-[26px] font-semibold leading-none', sc.text)}
-                style={{ fontFamily: "'Azeret Mono', monospace" }}
-              >
-                {sc.label}
-              </p>
-              <p className="text-[12px] text-muted mt-1.5">{sc.desc}</p>
-            </div>
-          </div>
+      <div className={cn('rounded-xl border px-4 py-3 flex items-center justify-between gap-4', sc.bg, sc.border)}>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className={cn('w-2 h-2 rounded-full flex-shrink-0', sc.dot)} />
+          <span
+            className={cn('text-[13px] font-semibold flex-shrink-0', sc.text)}
+          >{sc.label}</span>
+          <span className="text-[11px] text-subtle truncate">— {sc.desc}</span>
+        </div>
 
-          {/* Toggle controls */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            {status !== 'active' && (
-              <button
-                disabled={!canActivate}
-                onClick={() => setStatus('active')}
-                className={cn(
-                  'flex items-center justify-center gap-2 px-4 h-9 rounded-xl text-[13px] font-semibold transition-colors',
-                  canActivate
-                    ? 'bg-brand-blue text-white hover:bg-brand-blue-hover'
-                    : 'bg-surface-3 text-faint cursor-not-allowed',
-                )}
-              >
-                <Zap className="w-4 h-4" />
-                Activate
-              </button>
-            )}
-            {status === 'active' && (
-              <button
-                onClick={() => setStatus('paused')}
-                className="flex items-center justify-center gap-2 px-4 h-9 rounded-xl text-[13px] font-semibold bg-white border border-brand-border text-strong hover:bg-surface-3 transition-colors"
-              >
-                <Pause className="w-4 h-4" />
-                Pause
-              </button>
-            )}
-            {status !== 'inactive' && (
-              <button
-                onClick={() => setShowDeactivateModal(true)}
-                className="flex items-center justify-center gap-2 px-4 h-9 rounded-xl text-[12px] font-medium text-subtle hover:text-strong hover:bg-white transition-colors"
-              >
-                Deactivate
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {status !== 'active' && (
+            <button
+              disabled={!canActivate}
+              onClick={() => setStatus('active')}
+              className={cn(
+                'flex items-center gap-1.5 px-3 h-7 rounded-lg text-[12px] font-semibold transition-colors',
+                canActivate
+                  ? 'bg-brand-blue text-white hover:bg-brand-blue-hover'
+                  : 'bg-surface-3 text-faint cursor-not-allowed border border-brand-border',
+              )}
+            >
+              <Zap className="w-3 h-3" />
+              Activate
+            </button>
+          )}
+          {status === 'active' && (
+            <button
+              onClick={() => setStatus('paused')}
+              className="flex items-center gap-1.5 px-3 h-7 rounded-lg text-[12px] font-semibold bg-white border border-brand-border text-strong hover:bg-surface-3 transition-colors"
+            >
+              <Pause className="w-3 h-3" />
+              Pause
+            </button>
+          )}
+          {status !== 'inactive' && (
+            <button
+              onClick={() => setShowDeactivateModal(true)}
+              className="px-3 h-7 rounded-lg text-[12px] font-medium text-subtle hover:text-strong hover:bg-white transition-colors"
+            >
+              Deactivate
+            </button>
+          )}
         </div>
       </div>
 
@@ -184,7 +173,6 @@ export function ActivationPage() {
               <p className="text-[10px] text-subtle uppercase tracking-wider mb-1.5">{stat.label}</p>
               <p
                 className="text-[22px] font-semibold text-brand-blue tabular-nums leading-none"
-                style={{ fontFamily: "'Azeret Mono', monospace" }}
               >{stat.value}</p>
             </div>
           ))}

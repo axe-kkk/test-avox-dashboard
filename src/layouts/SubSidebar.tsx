@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+﻿import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, TrendingUp, CalendarCheck, Sparkles, Plane,
   BellRing, Heart, Star, Cpu, ChevronRight,
@@ -116,7 +116,6 @@ function EnginesSection() {
       <div className="h-[56px] flex items-center justify-between px-4 border-b border-brand-border flex-shrink-0">
         <div
           className="text-[12px] font-semibold text-brand-black"
-          style={{ fontFamily: "'Azeret Mono', monospace" }}
         >
           AI Engines
         </div>
@@ -345,7 +344,7 @@ export function SubSidebar() {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
         <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-          <div className="text-[12px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>Inbox</div>
+          <div className="text-[12px] font-semibold text-[#0E1013]">Inbox</div>
         </div>
         <Section title="Inbox" items={inboxItems} />
       </aside>
@@ -369,7 +368,7 @@ export function SubSidebar() {
   return (
     <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
       <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-        <div className="text-[12px] font-semibold text-[#0E1013]" style={{ fontFamily: "'Azeret Mono', monospace" }}>{title}</div>
+        <div className="text-[12px] font-semibold text-[#0E1013]">{title}</div>
       </div>
       <Section title={title} items={items} />
     </aside>

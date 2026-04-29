@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+﻿import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Inbox, Users, Cpu, GitBranch,
   Radio, BarChart3, Settings, ChevronRight,
@@ -70,7 +70,6 @@ export function Sidebar() {
         {!sidebarCollapsed && (
           <span
             className="text-[12px] font-semibold tracking-[0.10em] text-[#0E1013]"
-            style={{ fontFamily: "'Azeret Mono', monospace" }}
           >
             AVOX
           </span>
@@ -99,17 +98,15 @@ export function Sidebar() {
                     to={item.path}
                     title={sidebarCollapsed ? item.label : undefined}
                     className={cn(
-                      'relative flex items-center h-9 rounded-lg transition-all duration-150 group',
-                      sidebarCollapsed ? 'justify-center' : 'gap-2.5 px-2.5',
+                      'relative flex items-center rounded-lg transition-all duration-150 group',
+                      sidebarCollapsed
+                        ? 'w-10 h-10 mx-auto justify-center'
+                        : 'h-10 w-full gap-2.5 px-2.5',
                       active
-                        ? 'bg-[#EEF2FC] text-[#0E1013]'
+                        ? 'bg-[#EEF2FC] text-[#2355A7]'
                         : 'text-[#5C6370] hover:text-[#0E1013] hover:bg-[#F6F7F9]',
                     )}
                   >
-                    {/* Active indicator */}
-                    {active && (
-                      <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#BED4F6] rounded-r-full" />
-                    )}
 
                     <Icon
                       className={cn(
@@ -136,14 +133,6 @@ export function Sidebar() {
                       </span>
                     )}
 
-                    {/* Tooltip — `hidden group-hover:block` keeps it out of layout when collapsed,
-                        otherwise its 80–130px width forces overflow-x on <nav> and the browser
-                        auto-promotes overflow-x to auto, drawing a horizontal scrollbar. */}
-                    {sidebarCollapsed && (
-                      <div className="pointer-events-none hidden group-hover:block absolute left-full ml-3 px-2.5 py-1.5 bg-[#0E1013]/90 text-white text-[12px] rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm">
-                        {item.label}
-                      </div>
-                    )}
                   </NavLink>
                 );
               })}

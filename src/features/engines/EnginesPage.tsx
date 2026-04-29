@@ -1,4 +1,4 @@
-import { RefreshCw, Clock, CheckCircle2, Cpu, Plus } from 'lucide-react';
+﻿import { RefreshCw, Clock, CheckCircle2, Cpu, Plus } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
 import { formatDateTime, cn } from '../../utils';
@@ -61,7 +61,6 @@ export function EnginesPage() {
           <div>
             <h1
               className="text-[14px] font-semibold text-strong"
-              style={{ fontFamily: "'Azeret Mono', monospace" }}
             >
               AI Engines
             </h1>
@@ -106,7 +105,6 @@ export function EnginesPage() {
                           'text-[20px] font-semibold tabular-nums leading-none',
                           isActive ? 'text-brand-blue' : 'text-faint',
                         )}
-                        style={{ fontFamily: "'Azeret Mono', monospace" }}
                       >
                         {stage.total}
                       </span>
