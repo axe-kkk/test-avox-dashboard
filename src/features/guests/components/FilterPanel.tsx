@@ -76,35 +76,34 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
   return (
     <div className="w-[260px] flex-shrink-0 border-r border-brand-border flex flex-col overflow-hidden bg-white">
 
-      {/* ── Header ───────────────────────────────────────── */}
-      <div className="px-4 pt-4 pb-3 border-b border-brand-border flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-baseline gap-2">
-            <span
-              className="text-[26px] font-bold text-strong leading-none tabular-nums"
-            >{count}</span>
-            <span className="text-[11px] text-subtle">of {total} guests</span>
-          </div>
-          <button
-            onClick={onClose}
-            title="Hide filters"
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+      {/* ── Header (matches Inbox sub-sidebar 56px) ──────── */}
+      <div className="h-[56px] px-4 flex items-center justify-between border-b border-brand-border flex-shrink-0">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[12px] font-semibold text-muted">Guests</span>
+          <span className="text-[10px] text-subtle tabular-nums">
+            {count}/{total}
+          </span>
         </div>
+        <button
+          onClick={onClose}
+          title="Hide filters"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      </div>
 
-        {/* Presets */}
+      {/* ── Presets + active reset ───────────────────────── */}
+      <div className="px-4 pt-3 pb-2 border-b border-border-soft flex-shrink-0">
         <FilterPresets filters={filters} onApply={onChange} />
 
-        {/* Active count + reset */}
         {activeCount > 0 && (
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="min-w-[16px] h-4 px-1 rounded-full bg-brand-blue text-white text-[10px] font-medium flex items-center justify-center leading-none flex-shrink-0 tabular-nums">
                 {activeCount}
               </span>
-              <span className="text-[10px] uppercase tracking-wider text-subtle font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-subtle font-semibold">
                 {activeCount === 1 ? '1 filter' : `${activeCount} filters`}
               </span>
             </div>
@@ -200,7 +199,7 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
                   type="date"
                   value={filters[field]}
                   onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-8 px-2 rounded-lg border border-brand-border bg-surface-2 text-[10px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
+                  className="w-full h-10 px-2.5 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
                 />
               </div>
             ))}
@@ -217,7 +216,7 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
                   placeholder={ph}
                   value={filters[field]}
                   onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-8 px-2.5 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-strong placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
+                  className="w-full h-10 px-2.5 rounded-lg border border-brand-border bg-surface-3 text-[12px] text-muted placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
                 />
               </div>
             ))}

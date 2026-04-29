@@ -17,3 +17,9 @@ export const ALL_COLS: { id: ColId; label: string; sortKey?: keyof Guest }[] = [
   { id: 'language',    label: 'Language',     sortKey: 'language'       },
   { id: 'source',      label: 'Source',       sortKey: 'source'         },
 ];
+
+/* Compact default — keeps Inbox-style breathing room. Other columns
+   stay opt-in via the Columns menu. */
+export const DEFAULT_COLS: ColId[] = [
+  'name', 'email', 'lastContact', 'nextStay', 'visits', 'ltv',
+];

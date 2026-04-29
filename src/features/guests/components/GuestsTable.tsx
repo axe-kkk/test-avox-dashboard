@@ -1,5 +1,5 @@
-﻿import { ChevronUp, ChevronDown } from 'lucide-react';
-import { cn, formatDate, formatDateTime, formatCurrency } from '../../../utils';
+﻿import { ChevronUp, ChevronDown, Star } from 'lucide-react';
+import { cn, formatDate, formatCurrency } from '../../../utils';
 import { Avatar } from '../../../components/ui/Avatar';
 import { mockUsers } from '../../../data/mock/users';
 import type { Guest } from '../../../types';
@@ -38,58 +38,49 @@ function renderCell(colId: ColId, guest: Guest) {
     case 'name':
       return (
         <div className="flex items-center gap-3 min-w-0">
-          <Avatar name={guest.name} size="sm" />
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <p className="text-[12px] font-medium text-strong truncate">{guest.name}</p>
-              {guest.tags.includes('VIP') && (
-                <span className="text-[9px] font-bold text-brand-blue bg-brand-blue-50 px-1.5 py-0.5 rounded tracking-wider flex-shrink-0">VIP</span>
-              )}
-            </div>
+          <Avatar name={guest.name} size="lg" />
+          <div className="min-w-0 flex items-center gap-1.5">
+            <p className="text-[13px] font-medium text-muted truncate">{guest.name}</p>
+            {guest.tags.includes('VIP') && (
+              <Star className="w-3 h-3 fill-brand-blue text-brand-blue flex-shrink-0" />
+            )}
           </div>
         </div>
       );
     case 'email':
       return <span className="text-[12px] text-muted truncate max-w-[180px] block">{guest.email}</span>;
     case 'phone':
-      return <span className="text-[12px] text-muted whitespace-nowrap">{guest.phone}</span>;
+      return <span className="text-[12px] text-muted whitespace-nowrap tabular-nums">{guest.phone}</span>;
     case 'assignedTo':
       return user ? (
         <div className="flex items-center gap-2">
           <Avatar name={user.name} size="xs" />
-          <div>
-            <p className="text-[12px] text-muted whitespace-nowrap">{user.name.split(' ')[0]}</p>
-            <p className="text-[10px] text-subtle">{user.department}</p>
-          </div>
+          <span className="text-[12px] text-muted whitespace-nowrap">{user.name.split(' ')[0]}</span>
         </div>
       ) : <span className="text-faint text-[12px]">—</span>;
     case 'lastContact':
-      return <span className="text-[12px] text-muted whitespace-nowrap">{formatDateTime(guest.lastInquiryAt)}</span>;
+      return <span className="text-[12px] text-muted whitespace-nowrap">{formatDate(guest.lastInquiryAt)}</span>;
     case 'lastStay':
       return guest.lastStayAt
         ? <span className="text-[12px] text-muted whitespace-nowrap">{formatDate(guest.lastStayAt)}</span>
         : <span className="text-faint text-[12px]">—</span>;
     case 'nextStay':
       return guest.upcomingStayAt
-        ? (
-          <span className="inline-flex items-center text-[12px] font-medium text-brand-blue bg-brand-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap">
-            {formatDate(guest.upcomingStayAt)}
-          </span>
-        )
+        ? <span className="text-[12px] font-medium text-muted whitespace-nowrap">{formatDate(guest.upcomingStayAt)}</span>
         : <span className="text-faint text-[12px]">—</span>;
     case 'visits':
-      return <span className="text-[12px] font-semibold text-strong tabular-nums">{guest.totalVisits}</span>;
+      return <span className="text-[12px] text-muted tabular-nums">{guest.totalVisits}</span>;
     case 'ltv':
       return (
-        <span
-          className="text-[12px] font-semibold text-brand-blue tabular-nums"
-        >{formatCurrency(guest.lifetimeValue)}</span>
+        <span className="text-[12px] font-medium text-muted tabular-nums">
+          {formatCurrency(guest.lifetimeValue)}
+        </span>
       );
     case 'language':
       return <span className="text-[12px] text-muted">{LANG_LABELS[guest.language] ?? guest.language.toUpperCase()}</span>;
     case 'source':
       return (
-        <span className="inline-flex items-center text-[11px] font-medium text-muted bg-surface-3 border border-brand-border px-2 py-0.5 rounded-md whitespace-nowrap capitalize">
+        <span className="text-[12px] text-muted whitespace-nowrap capitalize">
           {guest.source === 'booking.com' ? 'Booking.com' : guest.source.replace('_', ' ')}
         </span>
       );
@@ -129,7 +120,7 @@ export function GuestsTable({
                   )}
                 >
                   <span className={cn(
-                    'inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors',
+                    'inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors',
                     isActive ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
                   )}>
                     {col.label}
@@ -159,7 +150,7 @@ export function GuestsTable({
                 'cursor-pointer transition-colors border-b border-border-soft last:border-0',
                 selectedGuestId === guest.id
                   ? 'bg-brand-blue-50'
-                  : 'hover:bg-surface-3',
+                  : 'hover:bg-surface-2',
               )}
             >
               <td
@@ -182,8 +173,8 @@ export function GuestsTable({
       </table>
       {/* tiny footer info */}
       {rows.length > 0 && (
-        <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-subtle">
-          Showing <span className="font-semibold text-strong">{rows.length}</span> of {totalCount}
+        <div className="px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-subtle font-semibold">
+          Showing <span className="text-muted">{rows.length}</span> of {totalCount}
         </div>
       )}
     </div>

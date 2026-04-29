@@ -4,7 +4,7 @@ import type { Guest } from '../../types';
 import { useApp } from '../../app/AppContext';
 
 import { type Filters, DEFAULT_FILTERS, applyFilters, countFilters } from './lib/filters';
-import { ALL_COLS, type ColId } from './lib/columns';
+import { ALL_COLS, DEFAULT_COLS, type ColId } from './lib/columns';
 
 import { FilterPanel } from './components/FilterPanel';
 import { ActiveFilterChips } from './components/ActiveFilterChips';
@@ -20,7 +20,7 @@ export function GuestsPage() {
   const [search,        setSearch]        = useState('');
   const [sortCol,       setSortCol]       = useState<ColId>('lastContact');
   const [sortDir,       setSortDir]       = useState<'asc' | 'desc'>('desc');
-  const [visibleCols,   setVisibleCols]   = useState<Set<ColId>>(new Set(ALL_COLS.map(c => c.id)));
+  const [visibleCols,   setVisibleCols]   = useState<Set<ColId>>(new Set(DEFAULT_COLS));
   const [colsMenuOpen,  setColsMenuOpen]  = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set());

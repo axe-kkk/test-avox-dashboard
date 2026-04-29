@@ -40,7 +40,7 @@ export function FCheck({
       </span>
       <span className={cn(
         'text-[12px] transition-colors',
-        checked ? 'text-brand-blue font-medium' : 'text-muted group-hover:text-strong',
+        checked ? 'text-brand-blue font-medium' : 'text-muted group-hover:text-muted',
       )}>{children}</span>
     </button>
   );
@@ -66,13 +66,13 @@ export function FSection({
         <div className="flex items-center gap-2">
           {active && <span className="w-1.5 h-1.5 rounded-full bg-brand-blue flex-shrink-0" />}
           <span className={cn(
-            'text-[10px] font-semibold uppercase tracking-wider transition-colors',
-            active ? 'text-brand-blue' : 'text-subtle group-hover:text-strong',
+            'text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors',
+            active ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
           )}>{label}</span>
         </div>
         {open
-          ? <ChevronUp   className="w-3.5 h-3.5 text-faint group-hover:text-strong transition-colors flex-shrink-0" />
-          : <ChevronDown className="w-3.5 h-3.5 text-faint group-hover:text-strong transition-colors flex-shrink-0" />}
+          ? <ChevronUp   className="w-3.5 h-3.5 text-faint group-hover:text-muted transition-colors flex-shrink-0" />
+          : <ChevronDown className="w-3.5 h-3.5 text-faint group-hover:text-muted transition-colors flex-shrink-0" />}
       </button>
       {open && <div className="pb-4 space-y-3">{children}</div>}
     </div>
@@ -95,7 +95,7 @@ export function FDropdown({
       <button
         onClick={() => setOpen(v => !v)}
         className={cn(
-          'w-full h-9 px-3 rounded-xl border flex items-center justify-between gap-2 transition-colors',
+          'w-full h-10 px-3 rounded-lg border flex items-center justify-between gap-2 transition-colors',
           open
             ? 'bg-white border-brand-blue ring-2 ring-brand-blue-light/30'
             : has
@@ -133,7 +133,7 @@ export function FDropdown({
       </button>
 
       {open && (
-        <div className="mt-1.5 rounded-xl border border-brand-border bg-white overflow-hidden shadow-panel">
+        <div className="mt-1.5 rounded-lg border border-brand-border bg-white overflow-hidden shadow-panel">
           <div className="max-h-[196px] overflow-y-auto p-1.5">
             {children}
           </div>
@@ -177,7 +177,7 @@ export function FDropdownOption({
         </span>
       )}
       <div className="min-w-0">
-        <p className={cn('text-[12px] leading-tight', checked ? 'text-brand-blue font-medium' : 'text-strong')}>
+        <p className={cn('text-[12px] leading-tight', checked ? 'text-brand-blue font-medium' : 'text-muted')}>
           {children}
         </p>
         {sublabel && <p className="text-[10px] text-subtle mt-0.5">{sublabel}</p>}

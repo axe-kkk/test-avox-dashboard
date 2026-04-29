@@ -28,22 +28,22 @@ export function GuestsToolbar({
   colsMenuOpen, onColsMenuToggle, visibleCols, onToggleCol,
 }: Props) {
   return (
-    <div className="h-[52px] px-4 flex items-center gap-2 border-b border-brand-border flex-shrink-0 bg-white">
+    <div className="h-[56px] px-4 flex items-center gap-2 border-b border-brand-border flex-shrink-0 bg-white">
 
       {!filtersOpen && (
         <button
           onClick={e => { e.stopPropagation(); onToggleFilters(); }}
           className={cn(
-            'h-8 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
+            'h-10 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
             activeFilterCount > 0
-              ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light'
+              ? 'bg-brand-blue text-white border-brand-blue'
               : 'bg-surface-3 text-muted border-brand-border hover:bg-white hover:border-faint',
           )}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="min-w-[16px] h-4 px-1 rounded-full bg-brand-blue text-white text-[10px] font-medium flex items-center justify-center leading-none tabular-nums">
+            <span className="min-w-[16px] h-4 px-1 rounded-full bg-white text-brand-blue text-[10px] font-medium flex items-center justify-center leading-none tabular-nums">
               {activeFilterCount}
             </span>
           )}
@@ -57,7 +57,7 @@ export function GuestsToolbar({
           value={search}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Search by name or email…"
-          className="w-full h-8 pl-9 pr-3 rounded-lg border border-brand-border bg-surface-3 text-[12px] text-strong placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
+          className="w-full h-10 pl-9 pr-3 rounded-lg border border-brand-border bg-surface-3 text-[12px] text-muted placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
         />
       </div>
 
@@ -74,10 +74,12 @@ export function GuestsToolbar({
             onClick={onActionMenuToggle}
             disabled={selectedCount === 0}
             className={cn(
-              'h-8 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
-              selectedCount > 0
-                ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light hover:bg-brand-blue-light/40'
-                : 'bg-surface-3 text-faint border-brand-border cursor-not-allowed',
+              'h-10 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
+              actionMenuOpen && selectedCount > 0
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : selectedCount > 0
+                  ? 'bg-surface-3 text-muted border-brand-border hover:bg-white hover:border-faint'
+                  : 'bg-surface-3 text-faint border-brand-border cursor-not-allowed',
             )}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -90,7 +92,7 @@ export function GuestsToolbar({
                 <button
                   key={a}
                   onClick={() => onAction(a)}
-                  className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] text-strong hover:bg-surface-3 transition-colors"
+                  className="w-full text-left px-2.5 py-2 rounded-lg text-[12px] text-muted hover:bg-surface-3 transition-colors"
                 >{a}</button>
               ))}
             </div>
@@ -100,7 +102,7 @@ export function GuestsToolbar({
         {/* Export */}
         <button
           onClick={onExport}
-          className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium text-muted bg-surface-3 border border-brand-border hover:bg-white hover:border-faint transition-colors"
+          className="h-10 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium text-muted bg-surface-3 border border-brand-border hover:bg-white hover:border-faint transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
           Export
@@ -111,9 +113,9 @@ export function GuestsToolbar({
           <button
             onClick={onColsMenuToggle}
             className={cn(
-              'h-8 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
+              'h-10 px-3 flex items-center gap-1.5 rounded-lg text-[12px] font-medium border transition-colors',
               colsMenuOpen
-                ? 'bg-brand-blue-50 text-brand-blue border-brand-blue-light'
+                ? 'bg-brand-blue text-white border-brand-blue'
                 : 'bg-surface-3 text-muted border-brand-border hover:bg-white hover:border-faint',
             )}
           >
@@ -121,23 +123,24 @@ export function GuestsToolbar({
             Columns
           </button>
           {colsMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-[190px] bg-white border border-brand-border rounded-xl shadow-panel z-50 p-2">
-              <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em] px-1.5 mb-2">Visible columns</p>
-              {ALL_COLS.filter(c => c.id !== 'name').map(col => (
-                <button
-                  key={col.id}
-                  onClick={() => onToggleCol(col.id)}
-                  className="w-full flex items-center gap-2.5 px-1.5 py-1.5 rounded-lg hover:bg-surface-3 text-[12px] text-strong transition-colors"
-                >
-                  <div className={cn(
-                    'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors',
-                    visibleCols.has(col.id) ? 'bg-brand-blue border-brand-blue' : 'border-brand-border bg-white',
-                  )}>
-                    {visibleCols.has(col.id) && <span className="text-white text-[9px] leading-none">✓</span>}
-                  </div>
-                  {col.label}
-                </button>
-              ))}
+            <div className="absolute right-0 top-full mt-1 w-[200px] bg-white border border-brand-border rounded-xl shadow-panel z-50 p-1.5">
+              <p className="px-2 py-1.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Visible columns</p>
+              {ALL_COLS.filter(c => c.id !== 'name').map(col => {
+                const active = visibleCols.has(col.id);
+                return (
+                  <button
+                    key={col.id}
+                    onClick={() => onToggleCol(col.id)}
+                    className={cn(
+                      'w-full px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors',
+                      active ? 'bg-brand-blue-50 text-brand-blue' : 'text-muted hover:bg-surface-3',
+                    )}
+                  >
+                    <span className="font-medium">{col.label}</span>
+                    {active && <span className="text-brand-blue text-[10px]">✓</span>}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
