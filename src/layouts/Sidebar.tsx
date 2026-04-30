@@ -1,6 +1,6 @@
 ﻿import { NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Inbox, Users, Cpu, GitBranch,
+  LayoutDashboard, Inbox, Users, Cpu,
   Radio, BarChart3, Settings, ChevronRight,
 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
@@ -19,9 +19,8 @@ const navGroups = [
   {
     label: 'Automation',
     items: [
-      { path: '/engines',   icon: Cpu,       label: 'AI Engines' },
-      { path: '/sequences', icon: GitBranch, label: 'Sequences' },
-      { path: '/channels',  icon: Radio,     label: 'Channels' },
+      { path: '/engines',  icon: Cpu,   label: 'AI Engines' },
+      { path: '/channels', icon: Radio, label: 'Channels' },
     ],
   },
   {

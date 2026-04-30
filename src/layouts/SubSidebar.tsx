@@ -1,7 +1,8 @@
 ﻿import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, TrendingUp, CalendarCheck, Sparkles, Plane,
-  BellRing, Heart, Star, Cpu, ChevronRight,
+  BellRing, Heart, Star, Cpu, ChevronRight, LayoutDashboard,
+  Coins, Radio, Users, Briefcase, UserCog, Activity, FileBarChart, Settings,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { mockEngines } from '../data/mock/engines';
@@ -297,20 +298,123 @@ function EnginesSection() {
   );
 }
 
+/* ── Analytics section (TZ §7.1) ── */
+const ENGINE_ICON_BY_NAME: Record<string, typeof TrendingUp> = {
+  Conversion:  TrendingUp,
+  Reservation: CalendarCheck,
+  Upsell:      Sparkles,
+  Arrival:     Plane,
+  Concierge:   BellRing,
+  Recovery:    Heart,
+  Reputation:  Star,
+};
+
+const ANALYTICS_GROUPS: {
+  label: string;
+  items: { path: string; label: string; icon: typeof TrendingUp; exact?: boolean }[];
+}[] = [
+  {
+    label: 'Overview',
+    items: [
+      { path: '/analytics',          label: 'General dashboard', icon: LayoutDashboard, exact: true },
+      { path: '/analytics/connects', label: 'Connects',          icon: Coins },
+    ],
+  },
+  {
+    label: 'AI Engines',
+    items: [
+      { path: '/analytics/engines/conversion',  label: 'Conversion',  icon: TrendingUp },
+      { path: '/analytics/engines/reservation', label: 'Reservation', icon: CalendarCheck },
+      { path: '/analytics/engines/upsell',      label: 'Upsell',      icon: Sparkles },
+      { path: '/analytics/engines/arrival',     label: 'Arrival',     icon: Plane },
+      { path: '/analytics/engines/concierge',   label: 'Concierge',   icon: BellRing },
+      { path: '/analytics/engines/recovery',    label: 'Recovery',    icon: Heart },
+      { path: '/analytics/engines/reputation',  label: 'Reputation',  icon: Star },
+    ],
+  },
+  {
+    label: 'Channels',
+    items: [
+      { path: '/analytics/channels', label: 'Channel analytics', icon: Radio },
+    ],
+  },
+  {
+    label: 'Team',
+    items: [
+      { path: '/analytics/operators',   label: 'Operator productivity', icon: UserCog },
+      { path: '/analytics/departments', label: 'Departments',           icon: Briefcase },
+      { path: '/analytics/load',        label: 'Load',                  icon: Activity },
+    ],
+  },
+  {
+    label: 'Guests',
+    items: [
+      { path: '/analytics/guests', label: 'Guest insights', icon: Users },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { path: '/analytics/reports', label: 'Scheduled reports', icon: FileBarChart },
+    ],
+  },
+];
+
+function AnalyticsSection() {
+  const location = useLocation();
+
+  const isActive = (path: string, exact?: boolean) =>
+    exact ? location.pathname === path : location.pathname === path || location.pathname.startsWith(path + '/');
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="h-[56px] flex items-center px-4 border-b border-brand-border flex-shrink-0">
+        <span className="text-[13px] font-semibold text-muted">Analytics</span>
+      </div>
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
+        {ANALYTICS_GROUPS.map(group => (
+          <div key={group.label}>
+            <p className="px-2.5 mb-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map(item => {
+                const active = isActive(item.path, item.exact);
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.exact}
+                    className={cn(
+                      'flex items-center gap-2.5 h-10 px-2.5 rounded-lg transition-all duration-150 group',
+                      active
+                        ? 'bg-[#EEF2FC] text-[#2355A7]'
+                        : 'text-[#5C6370] hover:text-[#0E1013] hover:bg-[#F6F7F9]',
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        'w-4 h-4 flex-shrink-0 ml-0.5',
+                        active ? 'text-[#2355A7]' : 'text-[#8B9299] group-hover:text-[#5C6370]',
+                      )}
+                    />
+                    <span className={cn('text-[12px]', active ? 'font-semibold' : 'font-normal')}>
+                      {item.label}
+                    </span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
 /* ── Generic section resolver ── */
 function getSection(pathname: string): { title: string; items: SubItem[] } | null {
-  if (pathname.startsWith('/analytics')) {
-    return {
-      title: 'Analytics',
-      items: [
-        { label: 'Overview', path: '/analytics/overview', description: 'Operational snapshot.' },
-        { label: 'Reports',  path: '/analytics',          description: 'Performance & trends.'  },
-      ],
-    };
-  }
-  if (pathname.startsWith('/sequences')) {
-    return { title: 'Sequences', items: [{ label: 'Sequences', path: '/sequences' }] };
-  }
   if (pathname.startsWith('/channels')) {
     return { title: 'Channels', items: [{ label: 'Channels', path: '/channels' }] };
   }
@@ -356,6 +460,15 @@ export function SubSidebar() {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white flex flex-col overflow-hidden" style={{ borderRight: '1px solid #EDEEF1' }}>
         <EnginesSection />
+      </aside>
+    );
+  }
+
+  /* Analytics — custom renderer (TZ §7) */
+  if (location.pathname.startsWith('/analytics')) {
+    return (
+      <aside className="w-[260px] flex-shrink-0 bg-white flex flex-col overflow-hidden" style={{ borderRight: '1px solid #EDEEF1' }}>
+        <AnalyticsSection />
       </aside>
     );
   }

@@ -124,31 +124,6 @@ export interface Conversation {
   priority: 'low' | 'normal' | 'high' | 'urgent';
 }
 
-export interface SequenceStep {
-  id: string;
-  type: 'message' | 'wait' | 'condition' | 'action';
-  channel?: ChannelType;
-  template?: string;
-  waitDuration?: string;
-  condition?: string;
-  actionType?: string;
-  order: number;
-}
-
-export interface Sequence {
-  id: string;
-  name: string;
-  engineId: string;
-  engineName: EngineName;
-  status: 'active' | 'paused' | 'draft';
-  enrolledGuests: number;
-  completionRate: number;
-  lastLaunch: string;
-  steps: SequenceStep[];
-  trigger: string;
-  tags: string[];
-}
-
 export interface Channel {
   id: string;
   type: ChannelType;

@@ -15,10 +15,24 @@ import { PlaygroundPage } from '../features/engines/PlaygroundPage';
 import { EngineAnalyticsPage } from '../features/engines/EngineAnalyticsPage';
 import { EngineMonitorPage } from '../features/engines/EngineMonitorPage';
 import { EngineConfigPage } from '../features/engines/EngineConfigPage';
-import { SequencesPage } from '../features/sequences/SequencesPage';
 import { ChannelsPage } from '../features/channels/ChannelsPage';
-import { AnalyticsPage } from '../features/analytics/AnalyticsPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
+
+import { OverviewPage as AnalyticsOverviewPage } from '../features/analytics/pages/OverviewPage';
+import { ConnectsPage } from '../features/analytics/pages/ConnectsPage';
+import { ChannelsAnalyticsPage } from '../features/analytics/pages/ChannelsAnalyticsPage';
+import { OperatorsPage } from '../features/analytics/pages/OperatorsPage';
+import { DepartmentsPage } from '../features/analytics/pages/DepartmentsPage';
+import { LoadPage } from '../features/analytics/pages/LoadPage';
+import { GuestInsightsPage } from '../features/analytics/pages/GuestInsightsPage';
+import { ScheduledReportsPage } from '../features/analytics/pages/ScheduledReportsPage';
+import { ConversionEnginePage } from '../features/analytics/pages/engines/ConversionEnginePage';
+import { ReservationEnginePage } from '../features/analytics/pages/engines/ReservationEnginePage';
+import { UpsellEnginePage } from '../features/analytics/pages/engines/UpsellEnginePage';
+import { ArrivalEnginePage } from '../features/analytics/pages/engines/ArrivalEnginePage';
+import { ConciergeEnginePage } from '../features/analytics/pages/engines/ConciergeEnginePage';
+import { RecoveryEnginePage } from '../features/analytics/pages/engines/RecoveryEnginePage';
+import { ReputationEnginePage } from '../features/analytics/pages/engines/ReputationEnginePage';
 
 export function AppRouter() {
   return (
@@ -42,10 +56,26 @@ export function AppRouter() {
             <Route path="monitor"    element={<EngineMonitorPage />} />
             <Route path="config"     element={<EngineConfigPage />} />
           </Route>
-          <Route path="/sequences" element={<SequencesPage />} />
           <Route path="/channels" element={<ChannelsPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
+
+          {/* Analytics module — TZ §7 */}
+          <Route path="/analytics" element={<AnalyticsOverviewPage />} />
           <Route path="/analytics/overview" element={<HomePage />} />
+          <Route path="/analytics/connects" element={<ConnectsPage />} />
+          <Route path="/analytics/engines/conversion"  element={<ConversionEnginePage />} />
+          <Route path="/analytics/engines/reservation" element={<ReservationEnginePage />} />
+          <Route path="/analytics/engines/upsell"      element={<UpsellEnginePage />} />
+          <Route path="/analytics/engines/arrival"     element={<ArrivalEnginePage />} />
+          <Route path="/analytics/engines/concierge"   element={<ConciergeEnginePage />} />
+          <Route path="/analytics/engines/recovery"    element={<RecoveryEnginePage />} />
+          <Route path="/analytics/engines/reputation"  element={<ReputationEnginePage />} />
+          <Route path="/analytics/channels"   element={<ChannelsAnalyticsPage />} />
+          <Route path="/analytics/operators"  element={<OperatorsPage />} />
+          <Route path="/analytics/departments" element={<DepartmentsPage />} />
+          <Route path="/analytics/load"       element={<LoadPage />} />
+          <Route path="/analytics/guests"     element={<GuestInsightsPage />} />
+          <Route path="/analytics/reports"    element={<ScheduledReportsPage />} />
+
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
