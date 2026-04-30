@@ -2,7 +2,7 @@ import type { Guest } from '../../../types';
 import { GUEST_ASSIGNMENTS } from './constants';
 
 export interface Filters {
-  assignedUserId: string;
+  assignedUserIds: string[];
   hasSequence: boolean | null;
   hasPhone: boolean | null;
   hasEmail: boolean | null;
@@ -21,7 +21,7 @@ export interface Filters {
 }
 
 export const DEFAULT_FILTERS: Filters = {
-  assignedUserId: '', hasSequence: null, hasPhone: null, hasEmail: null,
+  assignedUserIds: [], hasSequence: null, hasPhone: null, hasEmail: null,
   languages: [], travelWith: [], clientStatus: [], hasReservation: null,
   visitFrom: '', visitTo: '', spendMin: '', spendMax: '',
   hasCalls: null, hasComplaints: null, ratingMin: 0, tags: [],
@@ -29,7 +29,7 @@ export const DEFAULT_FILTERS: Filters = {
 
 export function countFilters(f: Filters): number {
   let n = 0;
-  if (f.assignedUserId) n++;
+  if (f.assignedUserIds.length) n++;
   if (f.hasSequence !== null) n++;
   if (f.hasPhone !== null || f.hasEmail !== null) n++;
   if (f.languages.length) n++;
@@ -51,7 +51,7 @@ export function applyFilters(guests: Guest[], filters: Filters, search: string):
       const q = search.toLowerCase();
       if (!g.name.toLowerCase().includes(q) && !g.email.toLowerCase().includes(q)) return false;
     }
-    if (filters.assignedUserId && GUEST_ASSIGNMENTS[g.id] !== filters.assignedUserId) return false;
+    if (filters.assignedUserIds.length && !filters.assignedUserIds.includes(GUEST_ASSIGNMENTS[g.id] ?? '')) return false;
     if (filters.hasPhone === true && !g.phone) return false;
     if (filters.hasEmail === true && !g.email) return false;
     if (filters.languages.length && !filters.languages.includes(g.language)) return false;
@@ -92,7 +92,7 @@ export type FilterSectionId =
 
 export function activeSections(f: Filters): Record<FilterSectionId, boolean> {
   return {
-    assignment: !!f.assignedUserId,
+    assignment: f.assignedUserIds.length > 0,
     contact:    f.hasPhone !== null || f.hasEmail !== null,
     activity:   f.hasSequence !== null || f.hasReservation !== null
                 || f.hasCalls !== null || f.hasComplaints !== null,

@@ -86,3 +86,20 @@ export const statusColors: Record<ConversationStatus, string> = {
 export function getInitials(name: string): string {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
+
+/* ─── Tag palette — shared between Inbox conv-rows and Guests filter ── */
+export const TAG_PALETTE = [
+  { bg: '#FCE7F3', text: '#9D174D', border: '#FBCFE8' }, // pink
+  { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' }, // amber
+  { bg: '#DBEAFE', text: '#1D4ED8', border: '#BFDBFE' }, // blue
+  { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' }, // green
+  { bg: '#EDE9FE', text: '#5B21B6', border: '#DDD6FE' }, // violet
+  { bg: '#F3F4F6', text: '#374151', border: '#E5E7EB' }, // gray
+] as const;
+
+export function tagStyle(tag: string) {
+  const t = tag.trim();
+  const idx =
+    Math.abs(Array.from(t).reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)) % TAG_PALETTE.length;
+  return TAG_PALETTE[idx];
+}

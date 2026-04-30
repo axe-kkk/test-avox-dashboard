@@ -14,7 +14,7 @@ import { mockGuests } from '../../data/mock/guests';
 import { mockReservations } from '../../data/mock/reservations';
 import { mockUsers } from '../../data/mock/users';
 import { lookupTranslation } from '../../data/mock/translations';
-import { formatDateTime, formatRelativeTime, formatDate, formatCurrency, channelLabels, cn } from '../../utils';
+import { formatDateTime, formatRelativeTime, formatDate, formatCurrency, channelLabels, cn, tagStyle } from '../../utils';
 import type { Conversation } from '../../types';
 import { useApp } from '../../app/AppContext';
 import { usePopover } from '../../hooks/usePopover';
@@ -141,22 +141,6 @@ function languageLabel(code?: string) {
   if (c === 'pl') return 'Polish';
   if (c === 'ru') return 'Russian';
   return code.toUpperCase();
-}
-
-const TAG_PALETTE = [
-  { bg: '#FCE7F3', text: '#9D174D', border: '#FBCFE8' }, // pink
-  { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' }, // amber
-  { bg: '#DBEAFE', text: '#1D4ED8', border: '#BFDBFE' }, // blue
-  { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' }, // green
-  { bg: '#EDE9FE', text: '#5B21B6', border: '#DDD6FE' }, // violet
-  { bg: '#F3F4F6', text: '#374151', border: '#E5E7EB' }, // gray
-] as const;
-
-function tagStyle(tag: string) {
-  const t = tag.trim();
-  const idx =
-    Math.abs(Array.from(t).reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)) % TAG_PALETTE.length;
-  return TAG_PALETTE[idx];
 }
 
 // ── Conversation row ────────────────────────────────────────────────────────

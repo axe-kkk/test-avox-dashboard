@@ -1,7 +1,6 @@
-﻿import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 import { Star, ChevronLeft } from 'lucide-react';
 import { cn } from '../../../utils';
-import { mockUsers } from '../../../data/mock/users';
 import {
   type Filters,
   type FilterSectionId,
@@ -9,8 +8,9 @@ import {
   activeSections,
 } from '../lib/filters';
 import { LANG_LABELS, SUGGESTED_TAGS, TRAVEL_OPTIONS, STATUS_OPTIONS } from '../lib/constants';
-import { FChip, FCheck, FSection, FDropdown, FDropdownOption } from './FilterPrimitives';
-import { FilterPresets } from './FilterPresets';
+import {
+  FChip, FCheck, FSection, FDropdown, FDropdownOption, FManagerDropdown, FTagDropdown,
+} from './FilterPrimitives';
 
 interface Props {
   filters: Filters;
@@ -24,7 +24,7 @@ interface Props {
 /* Sections that should auto-open on first mount */
 const ALWAYS_OPEN: FilterSectionId[] = ['assignment', 'status'];
 
-export function FilterPanel({ filters, onChange, count, total, onReset, onClose }: Props) {
+export function FilterPanel({ filters, onChange, count, onReset, onClose }: Props) {
   const active = activeSections(filters);
   const activeCount = countFilters(filters);
 
@@ -78,12 +78,7 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
 
       {/* ── Header (matches Inbox sub-sidebar 56px) ──────── */}
       <div className="h-[56px] px-4 flex items-center justify-between border-b border-brand-border flex-shrink-0">
-        <div className="flex items-baseline gap-2">
-          <span className="text-[12px] font-semibold text-muted">Guests</span>
-          <span className="text-[10px] text-subtle tabular-nums">
-            {count}/{total}
-          </span>
-        </div>
+        <span className="text-[13px] font-semibold text-muted">Guests</span>
         <button
           onClick={onClose}
           title="Hide filters"
@@ -93,57 +88,42 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
         </button>
       </div>
 
-      {/* ── Presets + active reset ───────────────────────── */}
-      <div className="px-4 pt-3 pb-2 border-b border-border-soft flex-shrink-0">
-        <FilterPresets filters={filters} onApply={onChange} />
-
-        {activeCount > 0 && (
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="min-w-[16px] h-4 px-1 rounded-full bg-brand-blue text-white text-[10px] font-medium flex items-center justify-center leading-none flex-shrink-0 tabular-nums">
-                {activeCount}
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-subtle font-semibold">
-                {activeCount === 1 ? '1 filter' : `${activeCount} filters`}
-              </span>
-            </div>
-            <button
-              onClick={onReset}
-              className="text-[11px] font-semibold text-brand-blue hover:underline"
-            >Reset all</button>
-          </div>
-        )}
+      {/* ── Summary cards: matches & filters ─────────────── */}
+      <div className="p-3 flex gap-2 flex-shrink-0">
+        <div className="flex-1 min-w-0 rounded-xl border border-brand-border bg-surface-2 px-3 py-2.5">
+          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Guests</p>
+          <p className="text-[12px] mt-1 truncate">
+            <span className="font-semibold text-muted tabular-nums">{count}</span>
+            <span className="text-subtle"> match</span>
+          </p>
+        </div>
+        <div className="flex-1 min-w-0 rounded-xl border border-brand-border bg-surface-2 px-3 py-2.5">
+          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Filters</p>
+          <p className="text-[12px] mt-1 truncate">
+            <span className={cn('font-semibold tabular-nums', activeCount > 0 ? 'text-brand-blue' : 'text-muted')}>{activeCount}</span>
+            <span className="text-subtle"> applied</span>
+          </p>
+        </div>
       </div>
 
       {/* ── Scrollable filters ───────────────────────────── */}
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-1">
 
         {S('assignment', 'Assigned to',
-          <FDropdown
-            placeholder="Any manager"
-            selectedCount={filters.assignedUserId ? 1 : 0}
-            onClear={() => onChange({ ...filters, assignedUserId: '' })}
-          >
-            {mockUsers.map(u => {
-              const initials = u.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
-              return (
-                <FDropdownOption
-                  key={u.id}
-                  checked={filters.assignedUserId === u.id}
-                  onClick={() => onChange({
-                    ...filters,
-                    assignedUserId: filters.assignedUserId === u.id ? '' : u.id,
-                  })}
-                  avatar={initials}
-                  sublabel={u.department}
-                >{u.name}</FDropdownOption>
-              );
+          <FManagerDropdown
+            selectedUserIds={filters.assignedUserIds}
+            onToggle={id => onChange({
+              ...filters,
+              assignedUserIds: filters.assignedUserIds.includes(id)
+                ? filters.assignedUserIds.filter(x => x !== id)
+                : [...filters.assignedUserIds, id],
             })}
-          </FDropdown>,
+            onClear={() => onChange({ ...filters, assignedUserIds: [] })}
+          />,
         )}
 
         {S('status', 'Client status',
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.map(([v, l]) => (
               <FChip key={v} active={filters.clientStatus.includes(v)} onClick={() => multi('clientStatus', v)}>{l}</FChip>
             ))}
@@ -169,6 +149,7 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
         {S('language', 'Language',
           <FDropdown
             placeholder="Any language"
+            title="Languages"
             selectedCount={filters.languages.length}
             onClear={() => onChange({ ...filters, languages: [] })}
           >
@@ -177,13 +158,14 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
                 key={code}
                 checked={filters.languages.includes(code)}
                 onClick={() => multi('languages', code)}
+                sublabel={code.toUpperCase()}
               >{lbl}</FDropdownOption>
             ))}
           </FDropdown>,
         )}
 
         {S('travel', 'Travels with',
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {TRAVEL_OPTIONS.map(([v, l]) => (
               <FChip key={v} active={filters.travelWith.includes(v)} onClick={() => multi('travelWith', v)}>{l}</FChip>
             ))}
@@ -191,41 +173,56 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
         )}
 
         {S('visits', 'Past visits',
-          <div className="grid grid-cols-2 gap-2">
-            {([['From', 'visitFrom'], ['To', 'visitTo']] as const).map(([lbl, field]) => (
-              <div key={field}>
-                <p className="text-[10px] text-subtle mb-1.5">{lbl}</p>
-                <input
-                  type="date"
-                  value={filters[field]}
-                  onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-10 px-2.5 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
-                />
-              </div>
-            ))}
+          <div className="h-10 rounded-lg border border-brand-border bg-surface-3 flex divide-x divide-brand-border overflow-hidden focus-within:bg-white focus-within:border-brand-blue-light transition-colors">
+            <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
+              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">From</span>
+              <input
+                type="date"
+                value={filters.visitFrom}
+                onChange={e => onChange({ ...filters, visitFrom: e.target.value })}
+                className="w-full min-w-0 bg-transparent outline-none text-[12px] text-muted tabular-nums"
+              />
+            </label>
+            <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
+              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">To</span>
+              <input
+                type="date"
+                value={filters.visitTo}
+                onChange={e => onChange({ ...filters, visitTo: e.target.value })}
+                className="w-full min-w-0 bg-transparent outline-none text-[12px] text-muted tabular-nums"
+              />
+            </label>
           </div>,
         )}
 
         {S('finance', 'Total spend (€)',
-          <div className="grid grid-cols-2 gap-2">
-            {([['Min', 'spendMin', '0'], ['Max', 'spendMax', '∞']] as const).map(([lbl, field, ph]) => (
-              <div key={field}>
-                <p className="text-[10px] text-subtle mb-1.5">{lbl}</p>
-                <input
-                  type="number"
-                  placeholder={ph}
-                  value={filters[field]}
-                  onChange={e => onChange({ ...filters, [field]: e.target.value })}
-                  className="w-full h-10 px-2.5 rounded-lg border border-brand-border bg-surface-3 text-[12px] text-muted placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors"
-                />
-              </div>
-            ))}
+          <div className="h-10 rounded-lg border border-brand-border bg-surface-3 flex divide-x divide-brand-border overflow-hidden focus-within:bg-white focus-within:border-brand-blue-light transition-colors">
+            <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
+              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">Min</span>
+              <input
+                type="number"
+                placeholder="0"
+                value={filters.spendMin}
+                onChange={e => onChange({ ...filters, spendMin: e.target.value })}
+                className="w-full min-w-0 bg-transparent outline-none text-[13px] text-muted placeholder:text-faint tabular-nums"
+              />
+            </label>
+            <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
+              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">Max</span>
+              <input
+                type="number"
+                placeholder="∞"
+                value={filters.spendMax}
+                onChange={e => onChange({ ...filters, spendMax: e.target.value })}
+                className="w-full min-w-0 bg-transparent outline-none text-[13px] text-muted placeholder:text-faint tabular-nums"
+              />
+            </label>
           </div>,
         )}
 
         {S('rating', 'Guest rating',
           <div>
-            <p className="text-[10px] text-subtle mb-2">Minimum score</p>
+            <p className="text-[10px] font-medium text-subtle mb-2">Minimum score</p>
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map(s => (
                 <button
@@ -249,23 +246,28 @@ export function FilterPanel({ filters, onChange, count, total, onReset, onClose 
         )}
 
         {S('tags', 'Tags',
-          <FDropdown
-            placeholder="Any tag"
-            selectedCount={filters.tags.length}
+          <FTagDropdown
+            tags={SUGGESTED_TAGS}
+            selectedTags={filters.tags}
+            onToggle={t => multi('tags', t)}
             onClear={() => onChange({ ...filters, tags: [] })}
-          >
-            {SUGGESTED_TAGS.map(t => (
-              <FDropdownOption
-                key={t}
-                checked={filters.tags.includes(t)}
-                onClick={() => multi('tags', t)}
-              >{t}</FDropdownOption>
-            ))}
-          </FDropdown>,
+          />,
         )}
 
         <div className="h-4" />
       </div>
+
+      {/* ── Footer: Reset all (only when filters applied) ── */}
+      {activeCount > 0 && (
+        <div className="px-3 py-3 border-t border-brand-border flex-shrink-0 bg-white">
+          <button
+            onClick={onReset}
+            className="w-full h-10 rounded-lg border border-brand-border bg-surface-3 text-[12px] font-medium text-brand-blue hover:bg-white hover:border-brand-blue-light transition-colors"
+          >
+            Reset all filters
+          </button>
+        </div>
+      )}
     </div>
   );
 }

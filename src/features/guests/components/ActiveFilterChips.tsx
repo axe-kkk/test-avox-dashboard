@@ -8,12 +8,14 @@ interface Chip { id: string; label: string; clear: () => void }
 function buildChips(filters: Filters, set: (next: Filters) => void): Chip[] {
   const out: Chip[] = [];
 
-  if (filters.assignedUserId) {
-    const u = mockUsers.find(x => x.id === filters.assignedUserId);
+  if (filters.assignedUserIds.length) {
+    const names = filters.assignedUserIds
+      .map(id => mockUsers.find(x => x.id === id)?.name ?? id)
+      .join(', ');
     out.push({
-      id: 'assignedUserId',
-      label: `Manager: ${u?.name ?? filters.assignedUserId}`,
-      clear: () => set({ ...filters, assignedUserId: '' }),
+      id: 'assignedUserIds',
+      label: `Manager: ${names}`,
+      clear: () => set({ ...filters, assignedUserIds: [] }),
     });
   }
 
