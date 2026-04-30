@@ -120,7 +120,7 @@ export function GuestsTable({
                   )}
                 >
                   <span className={cn(
-                    'inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors',
+                    'inline-flex items-center gap-1 text-[11px] font-semibold transition-colors',
                     isActive ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
                   )}>
                     {col.label}
@@ -173,7 +173,7 @@ export function GuestsTable({
       </table>
       {/* tiny footer info */}
       {rows.length > 0 && (
-        <div className="px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-subtle font-semibold">
+        <div className="px-4 py-2 text-[11px] text-subtle font-semibold">
           Showing <span className="text-muted">{rows.length}</span> of {totalCount}
         </div>
       )}

@@ -124,7 +124,7 @@ export function GuestsToolbar({
           </button>
           {colsMenuOpen && (
             <div className="absolute right-0 top-full mt-1 w-[200px] bg-white border border-brand-border rounded-xl shadow-panel z-50 p-1.5">
-              <p className="px-2 py-1.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Visible columns</p>
+              <p className="px-2 py-1.5 text-[11px] font-semibold text-subtle">Visible columns</p>
               {ALL_COLS.filter(c => c.id !== 'name').map(col => {
                 const active = visibleCols.has(col.id);
                 return (

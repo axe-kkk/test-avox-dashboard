@@ -98,7 +98,7 @@ export function FilterField({
           className="bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden"
         >
           <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between gap-2">
-            <p className="text-[11px] font-semibold text-subtle uppercase tracking-[0.18em] truncate">{label}</p>
+            <p className="text-[11px] font-semibold text-subtle truncate">{label}</p>
             {onClear && active && (
               <button
                 type="button"
@@ -257,7 +257,7 @@ export function TagPickerPanel({
                   type="button"
                   onClick={() => onToggle(t)}
                   className={cn(
-                    'inline-flex items-center h-9 px-4 rounded-full border text-[12px] font-bold uppercase tracking-wider transition-all',
+                    'inline-flex items-center h-9 px-4 rounded-full border text-[12px] font-semibold transition-all',
                     'hover:scale-[1.04] active:scale-[0.98]',
                     active ? 'ring-2 ring-offset-2' : '',
                   )}
@@ -374,7 +374,7 @@ export function RangePanel({
   return (
     <div className="p-3 space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] w-12 flex-shrink-0">From</span>
+        <span className="text-[11px] font-semibold text-subtle w-12 flex-shrink-0">From</span>
         <input
           type={type}
           value={fromValue}
@@ -384,7 +384,7 @@ export function RangePanel({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] w-12 flex-shrink-0">To</span>
+        <span className="text-[11px] font-semibold text-subtle w-12 flex-shrink-0">To</span>
         <input
           type={type}
           value={toValue}

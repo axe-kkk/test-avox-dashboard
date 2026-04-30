@@ -132,7 +132,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
           {section === 'info' && (
             <>
               <div className="space-y-3">
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Contact</p>
+                <p className="text-[11px] font-semibold text-subtle">Contact</p>
                 <div className="rounded-xl border border-brand-border bg-surface-2 divide-y divide-border-soft">
                   <div className="flex items-center gap-3 px-3 py-2.5">
                     <Mail className="w-4 h-4 flex-shrink-0 text-subtle" />
@@ -156,7 +156,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
               </div>
 
               <div className="space-y-3">
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Profile</p>
+                <p className="text-[11px] font-semibold text-subtle">Profile</p>
                 <div className="rounded-xl border border-brand-border bg-surface-2 divide-y divide-border-soft">
                   {([
                     ['Nationality',       guest.nationality],
@@ -175,7 +175,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
 
               {guest.companions.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Travel party</p>
+                  <p className="text-[11px] font-semibold text-subtle">Travel party</p>
                   <div className="space-y-1.5">
                     {guest.companions.map(c => (
                       <div key={c} className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-brand-border bg-surface-2">
@@ -248,7 +248,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
           {section === 'revenue' && (
             <>
               <div className="rounded-2xl bg-brand-blue-50 border border-brand-blue-light p-3">
-                <p className="text-[10px] font-semibold text-brand-blue uppercase tracking-[0.18em] mb-1">Lifetime Value</p>
+                <p className="text-[11px] font-semibold text-brand-blue mb-1">Lifetime Value</p>
                 <p
                   className="text-[22px] font-semibold text-brand-blue tabular-nums leading-none"
                 >{formatCurrency(guest.lifetimeValue)}</p>
@@ -281,7 +281,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
           {section === 'tags_notes' && (
             <>
               <div className="space-y-2">
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Tags</p>
+                <p className="text-[11px] font-semibold text-subtle">Tags</p>
                 <div className="flex flex-wrap gap-1.5">
                   {guest.tags.length === 0 ? (
                     <p className="text-[12px] text-subtle">No tags yet.</p>
@@ -299,7 +299,7 @@ export function GuestDetailPanel({ guest, onClose }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Notes</p>
+                <p className="text-[11px] font-semibold text-subtle">Notes</p>
                 {guest.notes ? (
                   <p className="text-[12px] text-muted leading-relaxed bg-surface-2 rounded-2xl p-3 border border-brand-border whitespace-pre-line">
                     {guest.notes}

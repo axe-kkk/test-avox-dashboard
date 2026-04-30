@@ -91,14 +91,14 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
       {/* ── Summary cards: matches & filters ─────────────── */}
       <div className="p-3 flex gap-2 flex-shrink-0">
         <div className="flex-1 min-w-0 rounded-xl border border-brand-border bg-surface-2 px-3 py-2.5">
-          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Guests</p>
+          <p className="text-[11px] font-semibold text-subtle">Guests</p>
           <p className="text-[12px] mt-1 truncate">
             <span className="font-semibold text-muted tabular-nums">{count}</span>
             <span className="text-subtle"> match</span>
           </p>
         </div>
         <div className="flex-1 min-w-0 rounded-xl border border-brand-border bg-surface-2 px-3 py-2.5">
-          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.18em]">Filters</p>
+          <p className="text-[11px] font-semibold text-subtle">Filters</p>
           <p className="text-[12px] mt-1 truncate">
             <span className={cn('font-semibold tabular-nums', activeCount > 0 ? 'text-brand-blue' : 'text-muted')}>{activeCount}</span>
             <span className="text-subtle"> applied</span>
@@ -175,7 +175,7 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
         {S('visits', 'Past visits',
           <div className="h-10 rounded-lg border border-brand-border bg-surface-3 flex divide-x divide-brand-border overflow-hidden focus-within:bg-white focus-within:border-brand-blue-light transition-colors">
             <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
-              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">From</span>
+              <span className="text-[11px] font-semibold text-subtle flex-shrink-0">From</span>
               <input
                 type="date"
                 value={filters.visitFrom}
@@ -184,7 +184,7 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
               />
             </label>
             <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
-              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">To</span>
+              <span className="text-[11px] font-semibold text-subtle flex-shrink-0">To</span>
               <input
                 type="date"
                 value={filters.visitTo}
@@ -198,7 +198,7 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
         {S('finance', 'Total spend (€)',
           <div className="h-10 rounded-lg border border-brand-border bg-surface-3 flex divide-x divide-brand-border overflow-hidden focus-within:bg-white focus-within:border-brand-blue-light transition-colors">
             <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
-              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">Min</span>
+              <span className="text-[11px] font-semibold text-subtle flex-shrink-0">Min</span>
               <input
                 type="number"
                 placeholder="0"
@@ -208,7 +208,7 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
               />
             </label>
             <label className="flex-1 min-w-0 flex items-center gap-2 px-3 cursor-text">
-              <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em] flex-shrink-0">Max</span>
+              <span className="text-[11px] font-semibold text-subtle flex-shrink-0">Max</span>
               <input
                 type="number"
                 placeholder="∞"

@@ -42,7 +42,6 @@ export function DateRangePicker({ value, onChange }: Props) {
   const handlePick = (p: Period) => {
     if (p === 'custom') {
       setCustomOpen(true);
-      // Pre-fill with sensible defaults if empty
       if (!from || !to) {
         const today = new Date();
         const past = new Date(today);
@@ -128,7 +127,7 @@ export function DateRangePicker({ value, onChange }: Props) {
           </div>
           <div className="px-4 py-3 space-y-3">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-subtle mb-1.5">From</label>
+              <label className="block text-[11px] font-semibold text-subtle mb-1.5">From</label>
               <input
                 type="date"
                 value={from}
@@ -138,7 +137,7 @@ export function DateRangePicker({ value, onChange }: Props) {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-subtle mb-1.5">To</label>
+              <label className="block text-[11px] font-semibold text-subtle mb-1.5">To</label>
               <input
                 type="date"
                 value={to}

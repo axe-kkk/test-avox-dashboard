@@ -29,7 +29,7 @@ export function LoadPage() {
     return best;
   }, []);
 
-  // Single-hue progression — soft floor (0.06) so even small values are visible.
+  /* Single-hue progression — soft floor (0.06) so even small values are visible. */
   const cellBg = (v: number) => {
     if (v === 0) return '#F4F5F7';
     const r = Math.min(1, v / max);
@@ -60,7 +60,6 @@ export function LoadPage() {
         subtitle="Click a row to see the hourly breakdown for that day"
       >
         <div className="space-y-1.5">
-          {/* Hour-axis header */}
           <div
             className="grid gap-1"
             style={{ gridTemplateColumns: '48px repeat(24, minmax(0, 1fr))' }}
@@ -79,7 +78,6 @@ export function LoadPage() {
             ))}
           </div>
 
-          {/* Day rows */}
           {loadHeatmap.map(row => {
             const isSelected = selectedDay === row.day;
             return (
@@ -90,7 +88,7 @@ export function LoadPage() {
                 style={{ gridTemplateColumns: '48px repeat(24, minmax(0, 1fr))' }}
               >
                 <div className={cn(
-                  'text-[11px] font-semibold uppercase tracking-[0.12em] pr-3 text-right transition-colors',
+                  'text-[11px] font-semibold pr-3 text-right transition-colors',
                   isSelected ? 'text-brand-blue' : 'text-muted group-hover:text-strong',
                 )}>
                   {row.day}
@@ -114,7 +112,7 @@ export function LoadPage() {
         </div>
 
         <div className="flex items-center gap-3 mt-5 pt-4 border-t border-brand-border">
-          <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em]">Less</span>
+          <span className="text-[11px] font-semibold text-subtle">Less</span>
           <div className="flex items-center gap-1">
             {LEGEND_STEPS.map(r => (
               <span
@@ -126,7 +124,7 @@ export function LoadPage() {
               />
             ))}
           </div>
-          <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em]">More</span>
+          <span className="text-[11px] font-semibold text-subtle">More</span>
         </div>
       </SectionCard>
 
@@ -153,7 +151,7 @@ export function LoadPage() {
           <thead>
             <tr className="border-b border-brand-border">
               {['Hour', 'Total actions', 'AI', 'Operators', 'Avg queue', 'AI %'].map((h, i) => (
-                <th key={h} className={`py-2.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
+                <th key={h} className={`py-2.5 text-[11px] font-semibold text-subtle ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
               ))}
             </tr>
           </thead>

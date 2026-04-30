@@ -117,7 +117,7 @@ export function ActiveFilterChips({
 
   return (
     <div className="px-4 py-2 flex items-center gap-1.5 flex-wrap border-b border-border-soft bg-white">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-subtle mr-1">Filters</span>
+      <span className="text-[11px] font-semibold text-subtle mr-1">Filters</span>
       {chips.map(c => (
         <span
           key={c.id}

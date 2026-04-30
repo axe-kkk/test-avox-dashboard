@@ -14,7 +14,7 @@ export function ChannelsAnalyticsPage() {
 
   const totalActions = channelsAnalytics.reduce((s, c) => s + c.actions, 0);
 
-  // Build response-time bar data (parse times to seconds)
+  /* Parse response-time strings to seconds for the bar chart. */
   const responseTimeData = channelsAnalytics.map(c => {
     const m = c.avgResponse.match(/(\d+)m\s*(\d+)?s?/);
     const sOnly = c.avgResponse.match(/^(\d+)s$/);
@@ -34,7 +34,6 @@ export function ChannelsAnalyticsPage() {
       period={period}
       onPeriodChange={setPeriod}
     >
-      {/* KPIs — only connected channels with activity */}
       <div className="grid grid-cols-5 gap-3">
         <KpiCard label="Total actions" value={totalActions.toLocaleString()} delta={11} accent />
         {channelsAnalytics.slice(0, 4).map(c => (
@@ -91,9 +90,9 @@ export function ChannelsAnalyticsPage() {
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={revenueData} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F4F5F7" horizontal={false} />
-              <XAxis type="number" tick={axisTick} axisLine={false} tickLine={false} tickFormatter={v => `€${(v/1000).toFixed(0)}k`} />
+              <XAxis type="number" tick={axisTick} axisLine={false} tickLine={false} tickFormatter={v => `€${(Number(v)/1000).toFixed(0)}k`} />
               <YAxis dataKey="channel" type="category" tick={{ fontSize: 11, fill: '#5C6370' }} axisLine={false} tickLine={false} width={88} />
-              <Tooltip {...chartTooltipStyle} formatter={(v: number) => [formatCurrency(v), 'Revenue']} />
+              <Tooltip {...chartTooltipStyle} formatter={(v) => [formatCurrency(Number(v)), 'Revenue']} />
               <Bar dataKey="revenue" fill="#0E1013" radius={[0, 6, 6, 0]} barSize={14} />
             </BarChart>
           </ResponsiveContainer>
@@ -105,7 +104,7 @@ export function ChannelsAnalyticsPage() {
           <thead>
             <tr className="border-b border-brand-border">
               {['Channel', 'Actions', 'Conversations', 'Avg response', 'Revenue', 'Connects'].map((h, i) => (
-                <th key={h} className={`py-2.5 text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
+                <th key={h} className={`py-2.5 text-[11px] font-semibold text-subtle ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
               ))}
             </tr>
           </thead>

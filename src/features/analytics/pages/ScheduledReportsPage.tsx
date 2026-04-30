@@ -19,7 +19,6 @@ export function ScheduledReportsPage() {
   const [openModal, setOpenModal] = useState(false);
   const [reports, setReports] = useState(scheduledReports);
 
-  // form state
   const [name, setName] = useState('');
   const [frequency, setFrequency] = useState('Weekly');
   const [recipients, setRecipients] = useState<string>('');
@@ -76,7 +75,7 @@ export function ScheduledReportsPage() {
           <thead>
             <tr className="border-b border-brand-border">
               {['Name', 'Frequency', 'Recipients', 'Last sent', 'Status', ''].map(h => (
-                <th key={h} className="py-2.5 text-left text-[10px] font-semibold text-subtle uppercase tracking-[0.14em]">{h}</th>
+                <th key={h} className="py-2.5 text-left text-[11px] font-semibold text-subtle">{h}</th>
               ))}
             </tr>
           </thead>
@@ -121,7 +120,6 @@ export function ScheduledReportsPage() {
         </table>
       </SectionCard>
 
-      {/* Create modal */}
       {openModal && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center" role="dialog" aria-modal="true">
           <button className="absolute inset-0 bg-[#0E1013]/30" onClick={() => setOpenModal(false)} aria-label="Close" />
@@ -134,7 +132,7 @@ export function ScheduledReportsPage() {
             </div>
             <div className="px-6 py-5 overflow-y-auto space-y-4 flex-1">
               <div>
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-1.5">Name</p>
+                <p className="text-[11px] font-semibold text-subtle mb-1.5">Name</p>
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
@@ -144,7 +142,7 @@ export function ScheduledReportsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-1.5">Frequency</p>
+                  <p className="text-[11px] font-semibold text-subtle mb-1.5">Frequency</p>
                   <select
                     value={frequency}
                     onChange={e => setFrequency(e.target.value)}
@@ -156,7 +154,7 @@ export function ScheduledReportsPage() {
                   </select>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-1.5">Time</p>
+                  <p className="text-[11px] font-semibold text-subtle mb-1.5">Time</p>
                   <input
                     type="time"
                     value={time}
@@ -166,17 +164,17 @@ export function ScheduledReportsPage() {
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-1.5">Recipients</p>
+                <p className="text-[11px] font-semibold text-subtle mb-1.5">Recipients</p>
                 <input
                   value={recipients}
                   onChange={e => setRecipients(e.target.value)}
                   placeholder="ceo@hotel.com, gm@hotel.com"
                   className="w-full h-9 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                 />
-                <p className="text-[10px] text-subtle mt-1.5">Comma-separated email addresses</p>
+                <p className="text-[11px] text-subtle mt-1.5">Comma-separated email addresses</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-2">Sections to include</p>
+                <p className="text-[11px] font-semibold text-subtle mb-2">Sections to include</p>
                 <div className="grid grid-cols-2 gap-2">
                   {SECTIONS.map(s => (
                     <label
@@ -200,7 +198,7 @@ export function ScheduledReportsPage() {
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em] mb-1.5">Format</p>
+                <p className="text-[11px] font-semibold text-subtle mb-1.5">Format</p>
                 <div className="inline-flex bg-surface-3 rounded-lg p-1 border border-brand-border">
                   {(['PDF', 'CSV'] as const).map(f => (
                     <button

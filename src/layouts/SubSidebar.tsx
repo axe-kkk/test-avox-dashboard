@@ -1,8 +1,8 @@
-﻿import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, TrendingUp, CalendarCheck, Sparkles, Plane,
   BellRing, Heart, Star, Cpu, ChevronRight, LayoutDashboard,
-  Coins, Radio, Users, Briefcase, UserCog, Activity, FileBarChart, Settings,
+  Coins, Radio, Users, Briefcase, UserCog, Activity, FileBarChart,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { mockEngines } from '../data/mock/engines';
@@ -35,22 +35,19 @@ const statusLabel: Record<string, string> = {
   inactive: 'Inactive',
 };
 
-/* ── Engine sub-nav items.
-   `config` is engine-specific — its label changes per engine
-   (e.g. "Upgrade Rules" for Upsell, "Complaint Handling" for Recovery). */
 function getEngineSubNav(engineName: string): { id: string; label: string; badge?: string }[] {
   const spec = getEngineSpec(engineName);
   return [
-    { id: 'activation',   label: 'Activation'         },
-    { id: 'settings',     label: 'General Settings',  badge: '1 suggestion' },
-    { id: 'config',       label: spec.configLabel    },
-    { id: 'offers',       label: 'Offers / Actions'   },
-    { id: 'knowledge',    label: 'Knowledge Base'      },
-    { id: 'routing',      label: 'Routing'             },
+    { id: 'activation',   label: 'Activation' },
+    { id: 'settings',     label: 'General Settings', badge: '1 suggestion' },
+    { id: 'config',       label: spec.configLabel },
+    { id: 'offers',       label: 'Offers / Actions' },
+    { id: 'knowledge',    label: 'Knowledge Base' },
+    { id: 'routing',      label: 'Routing' },
     { id: 'integrations', label: 'Integrations & MCP' },
-    { id: 'playground',   label: 'Playground'          },
-    { id: 'analytics',    label: 'Analytics'           },
-    { id: 'monitor',      label: 'Monitor Agent'       },
+    { id: 'playground',   label: 'Playground' },
+    { id: 'analytics',    label: 'Analytics' },
+    { id: 'monitor',      label: 'Monitor Agent' },
   ];
 }
 
@@ -64,13 +61,13 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
   const activePath = `${location.pathname}${location.search}`;
   return (
     <div className="px-3 py-3">
-      <p className="px-2 mb-2 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">{title}</p>
+      <p className="px-2 mb-2 text-[11px] font-semibold text-subtle">{title}</p>
       <div className="space-y-0.5">
         {items.map((it, idx) => {
           if (it.type === 'divider') {
             return (
               <div key={`div-${idx}`} className="py-2">
-                <div className="h-px bg-[#EDEEF1]" />
+                <div className="h-px bg-brand-border" />
               </div>
             );
           }
@@ -84,12 +81,12 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
               to={it.path}
               className={cn(
                 'block rounded-lg px-3 py-2 transition-colors',
-                active ? 'bg-[#EEF2FC] text-[#0E1013]' : 'text-[#5C6370] hover:text-[#0E1013] hover:bg-[#F6F7F9]',
+                active ? 'bg-brand-blue-50 text-strong' : 'text-muted hover:text-strong hover:bg-surface-3',
               )}
             >
               <div className="text-[12px] font-medium">{it.label}</div>
               {it.description && (
-                <div className="text-[10px] text-[#8B9299] mt-0.5 leading-relaxed line-clamp-2">{it.description}</div>
+                <div className="text-[11px] text-subtle mt-0.5 leading-relaxed line-clamp-2">{it.description}</div>
               )}
             </NavLink>
           );
@@ -103,7 +100,7 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
 function EnginesSection() {
   const location = useLocation();
   const navigate = useNavigate();
-  const parts = location.pathname.split('/');         // ['', 'engines', slug?, sub?]
+  const parts = location.pathname.split('/');
   const activeSlug = parts[2] ?? '';
   const activeSub  = parts[3] ?? '';
   const isOverview = location.pathname === '/engines' || location.pathname === '/engines/';
@@ -113,21 +110,14 @@ function EnginesSection() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Section header (mirrors Inbox SubSidebar) ─────────────── */}
       <div className="h-[56px] flex items-center justify-between px-4 border-b border-brand-border flex-shrink-0">
-        <div
-          className="text-[12px] font-semibold text-brand-black"
-        >
-          AI Engines
-        </div>
+        <div className="text-[12px] font-semibold text-brand-black">AI Engines</div>
         <span className="text-[10px] text-subtle tabular-nums">
           {activeCount}/{mockEngines.length} active
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
-
-        {/* ── Main "All Engines" CTA — primary entry to /engines ───── */}
         <NavLink
           to="/engines"
           end
@@ -155,20 +145,16 @@ function EnginesSection() {
               />
             </div>
             <div className="min-w-0 flex-1">
-              <p
-                className={cn(
-                  'text-[12px] font-semibold leading-tight transition-colors',
-                  isOverview ? 'text-white' : 'text-brand-blue group-hover:text-white',
-                )}
-              >
+              <p className={cn(
+                'text-[12px] font-semibold leading-tight transition-colors',
+                isOverview ? 'text-white' : 'text-brand-blue group-hover:text-white',
+              )}>
                 All AI Engines
               </p>
-              <p
-                className={cn(
-                  'text-[10px] leading-tight mt-0.5 tabular-nums transition-colors',
-                  isOverview ? 'text-white/70' : 'text-brand-blue/70 group-hover:text-white/80',
-                )}
-              >
+              <p className={cn(
+                'text-[10px] leading-tight mt-0.5 tabular-nums transition-colors',
+                isOverview ? 'text-white/70' : 'text-brand-blue/70 group-hover:text-white/80',
+              )}>
                 Overview · {totalToday} actions today
               </p>
             </div>
@@ -181,12 +167,10 @@ function EnginesSection() {
           </div>
         </NavLink>
 
-        {/* ── Section label ─────────────────────────────────────── */}
         <div className="px-2 pt-1">
-          <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.16em]">Engines</p>
+          <p className="text-[11px] font-semibold text-subtle">Engines</p>
         </div>
 
-        {/* ── Engine list ───────────────────────────────────────── */}
         <div className="space-y-0.5">
           {mockEngines.map((engine: AIEngine) => {
             const slug = engine.name.toLowerCase();
@@ -195,23 +179,18 @@ function EnginesSection() {
 
             return (
               <div key={engine.id}>
-                {/* Engine row */}
                 <button
                   onClick={() => navigate(`/engines/${slug}`)}
                   className={cn(
                     'relative w-full flex items-center gap-2.5 rounded-lg pl-3 pr-2 py-2 transition-colors text-left group',
-                    isSelected
-                      ? 'bg-brand-blue-50'
-                      : 'hover:bg-surface-3',
+                    isSelected ? 'bg-brand-blue-50' : 'hover:bg-surface-3',
                   )}
                   title={engine.description}
                 >
-                  {/* Active left-accent bar (matches inbox row pattern) */}
                   {isSelected && (
                     <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-brand-blue rounded-r-full" />
                   )}
 
-                  {/* Engine identity icon */}
                   <Icon
                     className={cn(
                       'w-3.5 h-3.5 flex-shrink-0 transition-colors',
@@ -219,7 +198,6 @@ function EnginesSection() {
                     )}
                   />
 
-                  {/* Name + (when selected) inline status hint */}
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <span
                       className={cn(
@@ -229,15 +207,13 @@ function EnginesSection() {
                     >
                       {engine.name}
                     </span>
-                    {/* Show status text only when not active (i.e. needs attention) */}
                     {engine.status !== 'active' && (
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-subtle whitespace-nowrap">
+                      <span className="text-[9px] font-semibold text-subtle whitespace-nowrap">
                         · {statusLabel[engine.status] ?? engine.status}
                       </span>
                     )}
                   </div>
 
-                  {/* Status dot (monochrome) */}
                   <span
                     className={cn(
                       'w-1.5 h-1.5 rounded-full flex-shrink-0',
@@ -246,7 +222,6 @@ function EnginesSection() {
                     aria-label={statusLabel[engine.status]}
                   />
 
-                  {/* Action count pill */}
                   {engine.actionsToday > 0 && (
                     <span
                       className={cn(
@@ -261,7 +236,6 @@ function EnginesSection() {
                   )}
                 </button>
 
-                {/* Sub-nav — slides in when this engine is selected */}
                 {isSelected && (
                   <div className="mt-0.5 ml-4 pl-3 border-l-2 border-brand-blue-light space-y-0.5 pb-2">
                     {getEngineSubNav(engine.name).map(item => {
@@ -299,16 +273,6 @@ function EnginesSection() {
 }
 
 /* ── Analytics section (TZ §7.1) ── */
-const ENGINE_ICON_BY_NAME: Record<string, typeof TrendingUp> = {
-  Conversion:  TrendingUp,
-  Reservation: CalendarCheck,
-  Upsell:      Sparkles,
-  Arrival:     Plane,
-  Concierge:   BellRing,
-  Recovery:    Heart,
-  Reputation:  Star,
-};
-
 const ANALYTICS_GROUPS: {
   label: string;
   items: { path: string; label: string; icon: typeof TrendingUp; exact?: boolean }[];
@@ -374,7 +338,7 @@ function AnalyticsSection() {
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
         {ANALYTICS_GROUPS.map(group => (
           <div key={group.label}>
-            <p className="px-2.5 mb-1.5 text-[10px] font-semibold text-[#8B9299] uppercase tracking-[0.16em]">
+            <p className="px-2.5 mb-1.5 text-[11px] font-semibold text-subtle">
               {group.label}
             </p>
             <div className="space-y-0.5">
@@ -389,14 +353,14 @@ function AnalyticsSection() {
                     className={cn(
                       'flex items-center gap-2.5 h-10 px-2.5 rounded-lg transition-all duration-150 group',
                       active
-                        ? 'bg-[#EEF2FC] text-[#2355A7]'
-                        : 'text-[#5C6370] hover:text-[#0E1013] hover:bg-[#F6F7F9]',
+                        ? 'bg-brand-blue-50 text-brand-blue'
+                        : 'text-muted hover:text-strong hover:bg-surface-3',
                     )}
                   >
                     <Icon
                       className={cn(
                         'w-4 h-4 flex-shrink-0 ml-0.5',
-                        active ? 'text-[#2355A7]' : 'text-[#8B9299] group-hover:text-[#5C6370]',
+                        active ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
                       )}
                     />
                     <span className={cn('text-[12px]', active ? 'font-semibold' : 'font-normal')}>
@@ -426,7 +390,6 @@ function getSection(pathname: string): { title: string; items: SubItem[] } | nul
 
 export function SubSidebar() {
   const location = useLocation();
-  const activePath = `${location.pathname}${location.search}`;
 
   /* Inbox sub-nav */
   if (location.pathname.startsWith('/inbox') || location.pathname === '/') {
@@ -448,14 +411,13 @@ export function SubSidebar() {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
         <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-          <div className="text-[12px] font-semibold text-[#0E1013]">Inbox</div>
+          <div className="text-[12px] font-semibold text-strong">Inbox</div>
         </div>
         <Section title="Inbox" items={inboxItems} />
       </aside>
     );
   }
 
-  /* Engines — custom renderer */
   if (location.pathname.startsWith('/engines')) {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white flex flex-col overflow-hidden" style={{ borderRight: '1px solid #EDEEF1' }}>
@@ -464,7 +426,6 @@ export function SubSidebar() {
     );
   }
 
-  /* Analytics — custom renderer (TZ §7) */
   if (location.pathname.startsWith('/analytics')) {
     return (
       <aside className="w-[260px] flex-shrink-0 bg-white flex flex-col overflow-hidden" style={{ borderRight: '1px solid #EDEEF1' }}>
@@ -473,7 +434,6 @@ export function SubSidebar() {
     );
   }
 
-  /* Other sections */
   const section = getSection(location.pathname);
   const title = section?.title ?? 'Workspace';
   const items = section?.items ?? [{ label: 'Inbox', path: '/inbox' }];
@@ -481,7 +441,7 @@ export function SubSidebar() {
   return (
     <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
       <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-        <div className="text-[12px] font-semibold text-[#0E1013]">{title}</div>
+        <div className="text-[12px] font-semibold text-strong">{title}</div>
       </div>
       <Section title={title} items={items} />
     </aside>

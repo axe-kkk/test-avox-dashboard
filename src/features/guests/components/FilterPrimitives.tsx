@@ -69,7 +69,7 @@ export function FSection({
         <div className="flex items-center gap-2">
           {active && <span className="w-1.5 h-1.5 rounded-full bg-brand-blue flex-shrink-0" />}
           <span className={cn(
-            'text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors',
+            'text-[11px] font-semibold transition-colors',
             active ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
           )}>{label}</span>
         </div>
@@ -181,7 +181,7 @@ export function FDropdown({
         >
           {title && (
             <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between gap-2">
-              <p className="text-[11px] font-semibold text-subtle uppercase tracking-[0.18em] truncate">{title}</p>
+              <p className="text-[11px] font-semibold text-subtle truncate">{title}</p>
               {has && onClear && (
                 <button
                   type="button"
@@ -388,7 +388,7 @@ export function FManagerDropdown({
             {/* Left: departments */}
             <div className="border-r border-brand-border">
               <div className="px-4 py-3 border-b border-brand-border">
-                <p className="text-[11px] font-semibold text-subtle uppercase tracking-[0.18em]">Departments</p>
+                <p className="text-[11px] font-semibold text-subtle">Departments</p>
               </div>
               <div className="overflow-y-auto p-2" style={{ maxHeight: MANAGER_LIST_H + 64 }}>
                 {departments.map(d => {
@@ -420,7 +420,7 @@ export function FManagerDropdown({
             {/* Right: people */}
             <div>
               <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between gap-2">
-                <p className="text-[11px] font-semibold text-subtle uppercase tracking-[0.18em] truncate">
+                <p className="text-[11px] font-semibold text-subtle truncate">
                   {dept ?? 'People'}
                 </p>
                 {has && (
@@ -599,7 +599,7 @@ export function FTagDropdown({
           className="bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden"
         >
           <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between gap-2">
-            <p className="text-[11px] font-semibold text-subtle uppercase tracking-[0.18em] truncate">Tags</p>
+            <p className="text-[11px] font-semibold text-subtle truncate">Tags</p>
             {has && (
               <button
                 type="button"
@@ -635,7 +635,7 @@ export function FTagDropdown({
                       type="button"
                       onClick={() => onToggle(t)}
                       className={cn(
-                        'inline-flex items-center h-9 px-4 rounded-full border text-[13px] font-bold uppercase tracking-wider transition-all',
+                        'inline-flex items-center h-9 px-4 rounded-full border text-[13px] font-semibold transition-all',
                         'hover:scale-[1.04] active:scale-[0.98]',
                         active ? 'ring-2 ring-offset-2' : '',
                       )}
