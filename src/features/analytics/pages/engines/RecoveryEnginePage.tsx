@@ -24,16 +24,20 @@ import {
   recoverySplit,
   recoveryLog,
 } from "../../lib/mockData";
-import { formatCurrency, cn } from "../../../../utils";
-const SEVERITY_BADGE: Record<string, string> = {
-  Low: "bg-surface-3 text-muted border-brand-border",
-  Medium: "bg-note-bg text-note-text border-note-border",
-  High: "bg-[#0E1013] text-white border-[#0E1013]",
+import { formatCurrency } from "../../../../utils";
+import { Badge } from "../../../../components/ui/Badge";
+
+type BadgeVariant = "blueSoft" | "blue" | "blueDeep";
+
+const SEVERITY_VARIANT: Record<string, BadgeVariant> = {
+  Low: "blueSoft",
+  Medium: "blue",
+  High: "blueDeep",
 };
-const STATUS_BADGE: Record<string, string> = {
-  Resolved: "bg-brand-blue-50 text-brand-blue border-brand-blue-light",
-  Escalated: "bg-[#0E1013] text-white border-[#0E1013]",
-  "In review": "bg-surface-3 text-muted border-brand-border",
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  Resolved: "blue",
+  Escalated: "blueDeep",
+  "In review": "blueSoft",
 };
 export function RecoveryEnginePage() {
   const [period, setPeriod] = useState<Period>("30d");
@@ -216,28 +220,12 @@ export function RecoveryEnginePage() {
                 </td>{" "}
                 <td className="py-2.5 text-[12px] text-muted">{r.category}</td>{" "}
                 <td className="py-2.5">
-                  {" "}
-                  <span
-                    className={cn(
-                      "inline-flex h-5 px-2 items-center rounded-full text-[10px] font-semibold border",
-                      SEVERITY_BADGE[r.severity],
-                    )}
-                  >
-                    {" "}
-                    {r.severity}{" "}
-                  </span>{" "}
+                  <Badge variant={SEVERITY_VARIANT[r.severity]}>
+                    {r.severity}
+                  </Badge>
                 </td>{" "}
                 <td className="py-2.5">
-                  {" "}
-                  <span
-                    className={cn(
-                      "inline-flex h-5 px-2 items-center rounded-full text-[10px] font-semibold border",
-                      STATUS_BADGE[r.status],
-                    )}
-                  >
-                    {" "}
-                    {r.status}{" "}
-                  </span>{" "}
+                  <Badge variant={STATUS_VARIANT[r.status]}>{r.status}</Badge>
                 </td>{" "}
                 <td className="py-2.5 text-[12px] text-strong tabular-nums font-semibold text-right">
                   {" "}

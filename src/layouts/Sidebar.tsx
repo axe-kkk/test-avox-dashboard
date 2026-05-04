@@ -20,7 +20,7 @@ const navGroups = [
     label: 'Automation',
     items: [
       { path: '/engines',  icon: Cpu,   label: 'AI Engines' },
-      { path: '/channels', icon: Radio, label: 'Channels' },
+      { path: '/channels', icon: Radio, label: 'Integrations' },
     ],
   },
   {

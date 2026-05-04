@@ -209,7 +209,7 @@ export function GuestInsightsPage() {
               {guestSatisfactionDist.map((d, i) => (
                 <Cell
                   key={d.score}
-                  fill={i < 2 ? "#2355A7" : i === 2 ? "#BED4F6" : "#0E1013"}
+                  fill={i < 2 ? "#2355A7" : i === 2 ? "#BED4F6" : "#163B6E"}
                 />
               ))}{" "}
             </Bar>{" "}

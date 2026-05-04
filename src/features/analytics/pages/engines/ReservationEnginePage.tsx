@@ -135,13 +135,13 @@ export function ReservationEnginePage() {
               dataKey="modification"
               name="Modification"
               stackId="a"
-              fill="#5C6370"
+              fill="#5B7FBF"
             />{" "}
             <Bar
               dataKey="cancellation"
               name="Cancellation"
               stackId="a"
-              fill="#0E1013"
+              fill="#163B6E"
             />{" "}
             <Bar
               dataKey="reminder"

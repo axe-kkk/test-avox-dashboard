@@ -140,7 +140,7 @@ export function LoadPage() {
             <YAxis yAxisId="right" orientation="right" tick={axisTick} axisLine={false} tickLine={false} width={32} tickFormatter={v => `${v}%`} />
             <Tooltip {...chartTooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 11, color: '#5C6370' }} iconSize={8} iconType="circle" />
-            <Bar yAxisId="left"  dataKey="total" name="Actions" fill="#C4C8CF" radius={[6, 6, 0, 0]} />
+            <Bar yAxisId="left"  dataKey="total" name="Actions" fill="#BED4F6" radius={[6, 6, 0, 0]} />
             <Line yAxisId="right" type="monotone" dataKey="aiRate" name="AI rate" stroke="#2355A7" strokeWidth={2.5} dot={{ fill: '#2355A7', r: 3 }} />
           </ComposedChart>
         </ResponsiveContainer>

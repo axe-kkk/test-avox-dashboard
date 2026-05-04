@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, ChevronDown, KeyRound } from 'lucide-react';
+import { Plus, Trash2, KeyRound } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
+import { Select } from '../../../components/ui/Select';
 import { useApp } from '../../../app/AppContext';
 
 interface CustomField {
@@ -185,19 +186,17 @@ Stay: {{check_in_time}} → {{check_out_time}}.`,
                     onChange={e => setCustomFields(prev => prev.map(x => x.id === f.id ? { ...x, label: e.target.value } : x))}
                     className="h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
                   />
-                  <div className="relative">
-                    <select
-                      value={f.type}
-                      onChange={e => setCustomFields(prev => prev.map(x => x.id === f.id ? { ...x, type: e.target.value as CustomField['type'] } : x))}
-                      className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      <option value="text">Text</option>
-                      <option value="choice">Choice</option>
-                      <option value="date">Date</option>
-                      <option value="number">Number</option>
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    className="w-full"
+                    value={f.type}
+                    onChange={v => setCustomFields(prev => prev.map(x => x.id === f.id ? { ...x, type: v as CustomField['type'] } : x))}
+                    options={[
+                      { value: 'text',   label: 'Text' },
+                      { value: 'choice', label: 'Choice' },
+                      { value: 'date',   label: 'Date' },
+                      { value: 'number', label: 'Number' },
+                    ]}
+                  />
                   <label className="flex items-center gap-2 cursor-pointer">
                     <Switch
                       size="sm"
@@ -317,18 +316,14 @@ Stay: {{check_in_time}} → {{check_out_time}}.`,
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Primary channel</p>
-                <div className="relative">
-                  <select
-                    value={primaryKeyChannel}
-                    onChange={e => setPrimaryKeyChannel(e.target.value)}
-                    className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                  >
-                    {(['whatsapp', 'sms', 'email'] as const).filter(c => keyChannels[c]).map(c => (
-                      <option key={c} value={c} className="capitalize">{c}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                </div>
+                <Select
+                  className="w-full"
+                  value={primaryKeyChannel}
+                  onChange={setPrimaryKeyChannel}
+                  options={(['whatsapp', 'sms', 'email'] as const)
+                    .filter(c => keyChannels[c])
+                    .map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))}
+                />
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Fallback after</p>
@@ -440,18 +435,16 @@ Stay: {{check_in_time}} → {{check_out_time}}.`,
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">When exceeded</p>
-                <div className="relative">
-                  <select
-                    value={reissueOverflow}
-                    onChange={e => setReissueOverflow(e.target.value as 'escalate' | 'refuse')}
-                    disabled={!allowReissue}
-                    className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light disabled:opacity-40"
-                  >
-                    <option value="escalate">Escalate to reception</option>
-                    <option value="refuse">Refuse with explanation</option>
-                  </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                </div>
+                <Select
+                  className="w-full"
+                  disabled={!allowReissue}
+                  value={reissueOverflow}
+                  onChange={v => setReissueOverflow(v as 'escalate' | 'refuse')}
+                  options={[
+                    { value: 'escalate', label: 'Escalate to reception' },
+                    { value: 'refuse',   label: 'Refuse with explanation' },
+                  ]}
+                />
               </div>
             </div>
           </div>

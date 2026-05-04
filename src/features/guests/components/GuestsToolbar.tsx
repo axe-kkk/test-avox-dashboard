@@ -133,7 +133,7 @@ export function GuestsToolbar({
                     onClick={() => onToggleCol(col.id)}
                     className={cn(
                       'w-full px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors',
-                      active ? 'bg-brand-blue-50 text-brand-blue' : 'text-muted hover:bg-surface-3',
+                      active ? 'text-brand-blue' : 'text-muted hover:bg-surface-3',
                     )}
                   >
                     <span className="font-medium">{col.label}</span>

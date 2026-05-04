@@ -78,7 +78,7 @@ export function FilterPanel({ filters, onChange, count, onReset, onClose }: Prop
 
       {/* ── Header (matches Inbox sub-sidebar 56px) ──────── */}
       <div className="h-[56px] px-4 flex items-center justify-between border-b border-brand-border flex-shrink-0">
-        <span className="text-[13px] font-semibold text-muted">Guests</span>
+        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.22em]">Guests</span>
         <button
           onClick={onClose}
           title="Hide filters"

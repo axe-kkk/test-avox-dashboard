@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, MapPin, ChevronDown, Search } from 'lucide-react';
+import { Plus, Trash2, MapPin, Search } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
+import { Select } from '../../../components/ui/Select';
 import { useApp } from '../../../app/AppContext';
 
 interface Place {
@@ -223,18 +224,17 @@ export function ConciergeConfigPage() {
                   <p className="text-[13px] font-semibold text-strong">{s.name}</p>
                   <p className="text-[11px] text-subtle">{s.desc} · {s.hours}</p>
                 </div>
-                <div className="relative">
-                  <select
-                    value={s.method}
-                    onChange={e => setServices(prev => prev.map(x => x.id === s.id ? { ...x, method: e.target.value as Service['method'] } : x))}
-                    className="w-full h-8 pl-2 pr-7 rounded-lg border border-brand-border bg-surface-2 text-[11px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                  >
-                    <option value="auto_pms">Auto via PMS</option>
-                    <option value="escalate">Escalate to reception</option>
-                    <option value="external_api">External API</option>
-                  </select>
-                  <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                </div>
+                <Select
+                  size="sm"
+                  className="w-full"
+                  value={s.method}
+                  onChange={v => setServices(prev => prev.map(x => x.id === s.id ? { ...x, method: v as Service['method'] } : x))}
+                  options={[
+                    { value: 'auto_pms',     label: 'Auto via PMS' },
+                    { value: 'escalate',     label: 'Escalate to reception' },
+                    { value: 'external_api', label: 'External API' },
+                  ]}
+                />
                 <div className="text-[12px] text-muted tabular-nums text-right">{s.price}</div>
                 <button
                   onClick={() => setServices(prev => prev.filter(x => x.id !== s.id))}
@@ -274,16 +274,12 @@ export function ConciergeConfigPage() {
                   placeholder="Guest N days without interaction…"
                   className="h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
                 />
-                <div className="relative">
-                  <select
-                    value={t.action}
-                    onChange={e => setTriggers(prev => prev.map(x => x.id === t.id ? { ...x, action: e.target.value } : x))}
-                    className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                  >
-                    {TRIGGER_ACTIONS.map(a => <option key={a}>{a}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                </div>
+                <Select
+                  className="w-full"
+                  value={t.action}
+                  onChange={v => setTriggers(prev => prev.map(x => x.id === t.id ? { ...x, action: v } : x))}
+                  options={TRIGGER_ACTIONS}
+                />
                 <button
                   onClick={() => setTriggers(prev => prev.filter(x => x.id !== t.id))}
                   className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-faint hover:bg-surface-3 hover:text-brand-black transition-colors"

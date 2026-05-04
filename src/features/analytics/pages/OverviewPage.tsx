@@ -12,6 +12,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import { Download } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
@@ -169,7 +170,7 @@ export function OverviewPage() {
               type="monotone"
               dataKey="escalated"
               name="Escalated"
-              stroke="#0E1013"
+              stroke="#163B6E"
               fill="transparent"
               strokeWidth={1.5}
               dot={false}
@@ -185,61 +186,56 @@ export function OverviewPage() {
           subtitle="With Connects spent on each"
         >
           {" "}
-          <ResponsiveContainer width="100%" height={240}>
-            {" "}
+          <ResponsiveContainer width="100%" height={260}>
             <BarChart
               data={overviewByEngine}
-              margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
+              margin={{ top: 24, right: 4, left: 4, bottom: 0 }}
+              barCategoryGap="22%"
             >
-              {" "}
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#F4F5F7"
-                vertical={false}
-              />{" "}
+              <CartesianGrid strokeDasharray="3 3" stroke="#F4F5F7" vertical={false} />
               <XAxis
                 dataKey="engine"
-                tick={axisTick}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
-                angle={-15}
-                textAnchor="end"
-                height={50}
-              />{" "}
-              <YAxis
-                tick={axisTick}
-                axisLine={false}
-                tickLine={false}
-                width={32}
-              />{" "}
+                tick={(props: { x: number; y: number; payload: { value: string } }) => {
+                  const { x, y, payload } = props;
+                  const entry = overviewByEngine.find(e => e.engine === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={0} y={14}
+                        textAnchor="middle"
+                        fill="#3D4550"
+                        fontSize={11}
+                        fontWeight={500}
+                      >{payload.value}</text>
+                      <text
+                        x={0} y={28}
+                        textAnchor="middle"
+                        fill="#8B9299"
+                        fontSize={10}
+                      >{entry?.connects.toLocaleString()} conn.</text>
+                    </g>
+                  );
+                }}
+                height={48}
+              />
+              <YAxis hide />
               <Tooltip
                 {...chartTooltipStyle}
-                formatter={(v, name) =>
-                  name === "connects"
-                    ? [`${Number(v).toLocaleString()} Conn.`, "Connects"]
-                    : [Number(v).toLocaleString(), "Actions"]
-                }
-              />{" "}
-              <Bar
-                dataKey="actions"
-                fill="#2355A7"
-                radius={[6, 6, 0, 0]}
-              />{" "}
-            </BarChart>{" "}
-          </ResponsiveContainer>{" "}
-          <div className="grid grid-cols-7 gap-1 mt-2 text-center">
-            {" "}
-            {overviewByEngine.map((e) => (
-              <div
-                key={e.engine}
-                className="text-[10px] text-subtle tabular-nums"
-              >
-                {" "}
-                {e.connects.toLocaleString()}{" "}
-              </div>
-            ))}{" "}
-          </div>{" "}
+                formatter={(v) => [Number(v).toLocaleString(), "Actions"]}
+              />
+              <Bar dataKey="actions" fill="#2355A7" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                <LabelList
+                  dataKey="actions"
+                  position="top"
+                  formatter={(v: number) => v.toLocaleString()}
+                  style={{ fontSize: 11, fontWeight: 600, fill: "#3D4550" }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </SectionCard>{" "}
         <SectionCard
           title="AI autonomous vs Escalated"

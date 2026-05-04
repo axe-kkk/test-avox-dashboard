@@ -119,7 +119,7 @@ export function DateRangePicker({ value, onChange }: Props) {
             <p className="text-[12px] font-semibold text-strong">Custom range</p>
             <button
               onClick={cancelCustom}
-              className="w-6 h-6 inline-flex items-center justify-center rounded-md text-subtle hover:text-strong hover:bg-surface-3 transition-colors"
+              className="w-10 h-10 inline-flex items-center justify-center rounded-lg text-subtle hover:text-strong hover:bg-surface-3 transition-colors"
               title="Back"
             >
               <X className="w-3.5 h-3.5" />
@@ -150,13 +150,13 @@ export function DateRangePicker({ value, onChange }: Props) {
           <div className="px-4 pb-3.5 pt-2 flex items-center justify-end gap-2 border-t border-brand-border">
             <button
               onClick={cancelCustom}
-              className="h-9 px-3.5 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 hover:text-strong transition-colors"
+              className="h-10 px-4 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 hover:text-strong transition-colors"
             >Cancel</button>
             <button
               onClick={applyCustom}
               disabled={!validRange}
               className={cn(
-                'h-9 px-4 rounded-lg text-[12px] font-semibold transition-colors',
+                'h-10 px-4 rounded-lg text-[12px] font-semibold transition-colors',
                 validRange
                   ? 'bg-brand-blue text-white hover:bg-brand-blue-hover'
                   : 'bg-surface-3 text-faint cursor-not-allowed',

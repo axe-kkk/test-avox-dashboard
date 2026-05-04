@@ -9,13 +9,15 @@ export function AppLayout() {
   const isInbox = location.pathname === '/' || location.pathname.startsWith('/inbox') || location.pathname.startsWith('/guests');
   const isEngines = location.pathname.startsWith('/engines');
   const isAnalytics = location.pathname.startsWith('/analytics');
+  const isChannels = location.pathname.startsWith('/channels');
+  const isSettings = location.pathname.startsWith('/settings');
 
   return (
     <div className="flex h-full overflow-hidden" style={{ backgroundColor: 'var(--color-brand-bg)' }}>
       <Sidebar />
       {!isInbox && <SubSidebar />}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {!isInbox && !isEngines && !isAnalytics && <Topbar />}
+        {!isInbox && !isEngines && !isAnalytics && !isChannels && !isSettings && <Topbar />}
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

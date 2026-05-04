@@ -65,10 +65,10 @@ export function ChannelsAnalyticsPage() {
             <Tooltip {...chartTooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 11, color: '#5C6370' }} iconSize={8} iconType="circle" />
             <Line type="monotone" dataKey="whatsapp"  name="WhatsApp"   stroke="#2355A7" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="webWidget" name="Web Widget" stroke="#0E1013" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="email"     name="Email"      stroke="#5C6370" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="webWidget" name="Web Widget" stroke="#163B6E" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="email"     name="Email"      stroke="#5B7FBF" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="sms"       name="SMS"        stroke="#BED4F6" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="telegram"  name="Telegram"   stroke="#C4C8CF" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="telegram"  name="Telegram"   stroke="#DCE6F8" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </SectionCard>
@@ -93,7 +93,7 @@ export function ChannelsAnalyticsPage() {
               <XAxis type="number" tick={axisTick} axisLine={false} tickLine={false} tickFormatter={v => `€${(Number(v)/1000).toFixed(0)}k`} />
               <YAxis dataKey="channel" type="category" tick={{ fontSize: 11, fill: '#5C6370' }} axisLine={false} tickLine={false} width={88} />
               <Tooltip {...chartTooltipStyle} formatter={(v) => [formatCurrency(Number(v)), 'Revenue']} />
-              <Bar dataKey="revenue" fill="#0E1013" radius={[0, 6, 6, 0]} barSize={14} />
+              <Bar dataKey="revenue" fill="#BED4F6" radius={[0, 6, 6, 0]} barSize={14} />
             </BarChart>
           </ResponsiveContainer>
         </SectionCard>

@@ -109,7 +109,7 @@ export function ScheduledReportsPage() {
                 <td className="py-3.5 text-right">
                   <button
                     onClick={() => togglePause(r.id)}
-                    className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 hover:text-strong transition-colors"
+                    className="h-10 px-4 inline-flex items-center gap-1.5 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 hover:text-strong transition-colors"
                   >
                     {r.status === 'active' ? <><Pause className="w-3.5 h-3.5" /> Pause</> : <><Play className="w-3.5 h-3.5" /> Resume</>}
                   </button>
@@ -126,7 +126,7 @@ export function ScheduledReportsPage() {
           <div className="relative w-[560px] max-w-[calc(100vw-32px)] max-h-[90vh] bg-white border border-brand-border rounded-2xl shadow-panel overflow-hidden flex flex-col">
             <div className="px-6 pt-5 pb-4 border-b border-brand-border flex items-center justify-between flex-shrink-0">
               <h3 className="text-[14px] font-semibold text-strong">Create scheduled report</h3>
-              <button onClick={() => setOpenModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors">
+              <button onClick={() => setOpenModal(false)} className="w-10 h-10 flex items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-muted transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -137,7 +137,7 @@ export function ScheduledReportsPage() {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Weekly executive digest"
-                  className="w-full h-9 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                  className="w-full h-10 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -146,7 +146,7 @@ export function ScheduledReportsPage() {
                   <select
                     value={frequency}
                     onChange={e => setFrequency(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                    className="w-full h-10 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                   >
                     <option>Daily</option>
                     <option>Weekly</option>
@@ -159,7 +159,7 @@ export function ScheduledReportsPage() {
                     type="time"
                     value={time}
                     onChange={e => setTime(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                    className="w-full h-10 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                   />
                 </div>
               </div>
@@ -169,7 +169,7 @@ export function ScheduledReportsPage() {
                   value={recipients}
                   onChange={e => setRecipients(e.target.value)}
                   placeholder="ceo@hotel.com, gm@hotel.com"
-                  className="w-full h-9 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+                  className="w-full h-10 px-3 rounded-lg border border-brand-border bg-white text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
                 />
                 <p className="text-[11px] text-subtle mt-1.5">Comma-separated email addresses</p>
               </div>
@@ -180,7 +180,7 @@ export function ScheduledReportsPage() {
                     <label
                       key={s}
                       className={cn(
-                        'flex items-center gap-2 h-9 px-3 rounded-lg border text-[12px] cursor-pointer transition-colors',
+                        'flex items-center gap-2 h-10 px-3 rounded-lg border text-[12px] cursor-pointer transition-colors',
                         selectedSections.has(s)
                           ? 'bg-brand-blue-50 border-brand-blue-light text-brand-blue font-semibold'
                           : 'bg-white border-brand-border text-muted hover:border-faint',
@@ -205,7 +205,7 @@ export function ScheduledReportsPage() {
                       key={f}
                       onClick={() => setFormat(f)}
                       className={cn(
-                        'h-7 px-3 rounded-md text-[11px] font-semibold transition-colors',
+                        'h-10 px-4 rounded-md text-[12px] font-semibold transition-colors',
                         format === f ? 'bg-white text-brand-blue shadow-soft' : 'text-muted hover:text-strong',
                       )}
                     >{f}</button>
@@ -216,11 +216,11 @@ export function ScheduledReportsPage() {
             <div className="px-6 py-4 border-t border-brand-border flex items-center justify-end gap-2 flex-shrink-0">
               <button
                 onClick={() => setOpenModal(false)}
-                className="h-9 px-4 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 transition-colors"
+                className="h-10 px-4 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 transition-colors"
               >Cancel</button>
               <button
                 onClick={create}
-                className="h-9 px-5 rounded-lg bg-brand-blue text-white text-[12px] font-semibold hover:bg-[#1f4b93] transition-colors"
+                className="h-10 px-5 rounded-lg bg-brand-blue text-white text-[12px] font-semibold hover:bg-[#1f4b93] transition-colors"
               >Schedule report</button>
             </div>
           </div>

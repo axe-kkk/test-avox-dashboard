@@ -31,12 +31,12 @@ import {
   connectsLog,
 } from "../lib/mockData";
 import type { EngineName } from "../../../types";
-const PER_PAGE = 12;
+const STEP = 12;
 export function ConnectsPage() {
   const [period, setPeriod] = useState<Period>("30d");
   const [engineFilter, setEngineFilter] = useState<EngineName | "all">("all");
   const [channelFilter, setChannelFilter] = useState<string>("all");
-  const [page, setPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(STEP);
   const dailyAvg = Math.round(
     connectsDaily.reduce((s, x) => s + x.connects, 0) / connectsDaily.length,
   );
@@ -49,8 +49,9 @@ export function ConnectsPage() {
       ),
     [engineFilter, channelFilter],
   );
-  const totalPages = Math.max(1, Math.ceil(filteredLog.length / PER_PAGE));
-  const pageRows = filteredLog.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const pageRows = filteredLog.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredLog.length;
+  const remaining = filteredLog.length - visibleCount;
   const sortedChannels = [...connectsByChannel].sort(
     (a, b) => b.value - a.value,
   );
@@ -208,69 +209,37 @@ export function ConnectsPage() {
           </SectionCard>
         );
       })}{" "}
-      {/* ── Chart 9: by channel — distinct visual treatment ──── */}{" "}
+      {/* ── Chart 9: by channel ──────────────────────────────── */}
       <SectionCard
         title="Connects by delivery channel"
         subtitle="Sorted descending"
-        className="bg-[#0E1013] text-white border-[#0E1013]"
       >
-        {" "}
         <ResponsiveContainer width="100%" height={260}>
-          {" "}
           <BarChart
             data={sortedChannels}
             margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
           >
-            {" "}
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.06)"
-              vertical={false}
-            />{" "}
-            <XAxis
-              dataKey="channel"
-              tick={{ fontSize: 10, fill: "#C4C8CF" }}
-              axisLine={false}
-              tickLine={false}
-            />{" "}
-            <YAxis
-              tick={{ fontSize: 10, fill: "#C4C8CF" }}
-              axisLine={false}
-              tickLine={false}
-              width={40}
-            />{" "}
+            <CartesianGrid strokeDasharray="3 3" stroke="#F4F5F7" vertical={false} />
+            <XAxis dataKey="channel" tick={{ fontSize: 11, fill: "#5C6370" }} axisLine={false} tickLine={false} />
+            <YAxis tick={axisTick} axisLine={false} tickLine={false} width={40} />
             <Tooltip
-              contentStyle={{
-                background: "#0E1013",
-                border: "1px solid #2A2D33",
-                borderRadius: 12,
-                fontSize: 11,
-                color: "#fff",
-              }}
-              cursor={{ fill: "rgba(255,255,255,0.04)" }}
+              {...chartTooltipStyle}
               formatter={(v) => [
                 `${Number(v).toLocaleString()} Conn.`,
                 "Spent",
               ]}
-            />{" "}
-            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-              {" "}
-              {sortedChannels.map((c, i) => (
-                <Cell
-                  key={c.channel}
-                  fill={
-                    i === 0
-                      ? "#BED4F6"
-                      : i < 3
-                        ? "#FFFFFF"
-                        : "rgba(255,255,255,0.36)"
-                  }
-                />
-              ))}{" "}
-            </Bar>{" "}
-          </BarChart>{" "}
-        </ResponsiveContainer>{" "}
-      </SectionCard>{" "}
+            />
+            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+              {sortedChannels.map((c, i) => {
+                // Step from deep navy → primary blue → light blue across rank.
+                const palette = ["#163B6E", "#2355A7", "#3F6FC2", "#5B7FBF", "#7E9CD0", "#9DB5DD", "#BED4F6", "#CFDDF1", "#DCE6F8"];
+                return <Cell key={c.channel} fill={palette[i] ?? "#DCE6F8"} />;
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </SectionCard>
+
       {/* ── Detailed log table ────────────────────────────────── */}{" "}
       <SectionCard
         title="Connects log"
@@ -289,7 +258,7 @@ export function ConnectsPage() {
               ]}
               onChange={(v) => {
                 setEngineFilter(v as EngineName | "all");
-                setPage(1);
+                setVisibleCount(STEP);
               }}
             />{" "}
             <Select
@@ -305,7 +274,7 @@ export function ConnectsPage() {
               ]}
               onChange={(v) => {
                 setChannelFilter(v);
-                setPage(1);
+                setVisibleCount(STEP);
               }}
             />{" "}
           </div>
@@ -361,33 +330,33 @@ export function ConnectsPage() {
             ))}{" "}
           </tbody>{" "}
         </table>{" "}
-        {/* Pagination */}{" "}
-        <div className="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
-          {" "}
-          <p className="text-[10px] text-subtle font-semibold">
-            {" "}
-            Page <span className="text-strong tabular-nums">
-              {page}
-            </span> of <span className="tabular-nums">{totalPages}</span>{" "}
-          </p>{" "}
-          <div className="flex items-center gap-1">
-            {" "}
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="h-8 px-3 rounded-lg border border-brand-border text-[12px] text-muted hover:bg-surface-3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Previous
-            </button>{" "}
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="h-8 px-3 rounded-lg border border-brand-border text-[12px] text-muted hover:bg-surface-3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-            </button>{" "}
-          </div>{" "}
-        </div>{" "}
+        {/* Show-more footer */}
+        {(hasMore || visibleCount > STEP) && (
+          <div className="mt-4 pt-4 border-t border-brand-border flex items-center justify-between gap-3">
+            <p className="text-[11px] text-subtle">
+              Showing{" "}
+              <span className="text-strong font-semibold tabular-nums">
+                {pageRows.length}
+              </span>{" "}
+              of{" "}
+              <span className="text-strong font-semibold tabular-nums">
+                {filteredLog.length}
+              </span>
+            </p>
+            {hasMore && (
+              <button
+                onClick={() =>
+                  setVisibleCount((v) =>
+                    Math.min(filteredLog.length, v + STEP),
+                  )
+                }
+                className="h-10 px-4 rounded-lg border border-brand-border text-[12px] font-medium text-muted hover:bg-surface-3 hover:text-strong hover:border-faint transition-colors"
+              >
+                Show {Math.min(STEP, remaining)} more
+              </button>
+            )}
+          </div>
+        )}
       </SectionCard>{" "}
     </AnalyticsShell>
   );

@@ -2,13 +2,14 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Activity, Pause, Play, AlertTriangle, CheckCircle2, ArrowRight,
-  Filter, ChevronDown, MessageSquare, UserCheck, Bell, Mail, Webhook,
+  Filter, MessageSquare, UserCheck, Bell, Mail, Webhook,
 } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockActivity } from '../../data/mock/activity';
 import { mockGuests } from '../../data/mock/guests';
 import { ChannelIcon } from '../../components/ui/ChannelIcon';
 import { Switch } from '../../components/ui/Switch';
+import { Select } from '../../components/ui/Select';
 import { cn, formatDateTime } from '../../utils';
 import { useApp } from '../../app/AppContext';
 import type { ActivityItem } from '../../types';
@@ -135,16 +136,16 @@ export function EngineMonitorPage() {
 
         <div className="flex items-center gap-2">
           <div className="relative">
-            <select
+            <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none z-10" />
+            <Select
+              triggerClassName="!pl-8 !bg-white"
               value={severity}
-              onChange={e => setSeverity(e.target.value as SeverityFilter)}
-              className="h-9 pl-8 pr-9 rounded-xl border border-brand-border bg-white text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-            >
-              <option value="all">All events</option>
-              <option value="errors">Errors only</option>
-            </select>
-            <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
+              onChange={v => setSeverity(v as SeverityFilter)}
+              options={[
+                { value: 'all',    label: 'All events' },
+                { value: 'errors', label: 'Errors only' },
+              ]}
+            />
           </div>
 
           <button
@@ -280,19 +281,19 @@ export function EngineMonitorPage() {
             <p className="text-[10px] font-semibold text-subtle uppercase tracking-[0.14em]">Error log</p>
             <p className="text-[12px] text-muted mt-0.5">API errors, delivery failures, low confidence, guardrails</p>
           </div>
-          <div className="relative">
-            <select
-              value={errorKindFilter}
-              onChange={e => setErrorKindFilter(e.target.value as ErrorKind | 'all')}
-              className="h-8 pl-3 pr-9 rounded-lg border border-brand-border bg-white text-[11px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-            >
-              <option value="all">All errors</option>
-              {(Object.keys(ERROR_KIND_LABEL) as ErrorKind[]).map(k => (
-                <option key={k} value={k}>{ERROR_KIND_LABEL[k]}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-          </div>
+          <Select
+            size="sm"
+            triggerClassName="!bg-white !text-[11px]"
+            value={errorKindFilter}
+            onChange={v => setErrorKindFilter(v as ErrorKind | 'all')}
+            options={[
+              { value: 'all', label: 'All errors' },
+              ...(Object.keys(ERROR_KIND_LABEL) as ErrorKind[]).map(k => ({
+                value: k,
+                label: ERROR_KIND_LABEL[k],
+              })),
+            ]}
+          />
         </div>
         <div className="divide-y divide-border-soft max-h-[280px] overflow-y-auto">
           {filteredErrors.length === 0 ? (

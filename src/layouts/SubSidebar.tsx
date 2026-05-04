@@ -3,11 +3,14 @@ import {
   LayoutGrid, TrendingUp, CalendarCheck, Sparkles, Plane,
   BellRing, Heart, Star, Cpu, ChevronRight, LayoutDashboard,
   Coins, Radio, Users, Briefcase, UserCog, Activity, FileBarChart,
+  Building2, KeyRound, MessageCircle, AtSign,
+  UserCircle, CreditCard, Bell,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { mockEngines } from '../data/mock/engines';
-import type { AIEngine } from '../types';
+import type { AIEngine, ChannelType } from '../types';
 import { getEngineSpec } from '../features/engines/lib/engineSpec';
+import { ChannelIcon } from '../components/ui/ChannelIcon';
 
 /* ── Engine status colours (inbox-style monochrome) ── */
 const statusDot: Record<string, string> = {
@@ -53,7 +56,7 @@ function getEngineSubNav(engineName: string): { id: string; label: string; badge
 
 /* ── Generic sub-item types ── */
 type SubItem =
-  | { type?: 'link'; label: string; path: string; description?: string }
+  | { type?: 'link'; label: string; path: string; description?: string; icon?: React.ReactNode }
   | { type: 'divider'; label?: string };
 
 function Section({ title, items }: { title: string; items: SubItem[] }) {
@@ -80,13 +83,25 @@ function Section({ title, items }: { title: string; items: SubItem[] }) {
               key={it.path}
               to={it.path}
               className={cn(
-                'block rounded-lg px-3 py-2 transition-colors',
-                active ? 'bg-brand-blue-50 text-strong' : 'text-muted hover:text-strong hover:bg-surface-3',
+                'group block rounded-lg px-3 py-2 transition-colors',
+                active ? 'bg-brand-blue-50 text-brand-blue' : 'text-muted hover:text-strong hover:bg-surface-3',
               )}
             >
-              <div className="text-[12px] font-medium">{it.label}</div>
+              <div className="flex items-center gap-2.5">
+                {it.icon && (
+                  <span className={cn(
+                    'flex items-center justify-center w-6 h-6 flex-shrink-0',
+                    active ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
+                  )}>
+                    {it.icon}
+                  </span>
+                )}
+                <span className={cn('text-[12px] truncate', active ? 'font-semibold' : 'font-normal')}>
+                  {it.label}
+                </span>
+              </div>
               {it.description && (
-                <div className="text-[11px] text-subtle mt-0.5 leading-relaxed line-clamp-2">{it.description}</div>
+                <div className="text-[11px] text-subtle mt-0.5 leading-relaxed line-clamp-2 ml-[34px]">{it.description}</div>
               )}
             </NavLink>
           );
@@ -111,7 +126,7 @@ function EnginesSection() {
   return (
     <div className="flex flex-col h-full">
       <div className="h-[56px] flex items-center justify-between px-4 border-b border-brand-border flex-shrink-0">
-        <div className="text-[12px] font-semibold text-brand-black">AI Engines</div>
+        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.22em]">AI Engines</span>
         <span className="text-[10px] text-subtle tabular-nums">
           {activeCount}/{mockEngines.length} active
         </span>
@@ -182,37 +197,33 @@ function EnginesSection() {
                 <button
                   onClick={() => navigate(`/engines/${slug}`)}
                   className={cn(
-                    'relative w-full flex items-center gap-2.5 rounded-lg pl-3 pr-2 py-2 transition-colors text-left group',
-                    isSelected ? 'bg-brand-blue-50' : 'hover:bg-surface-3',
+                    'group w-full flex items-center gap-2.5 h-10 px-2.5 rounded-lg transition-all duration-150 text-left',
+                    isSelected
+                      ? 'bg-brand-blue-50 text-brand-blue'
+                      : 'text-muted hover:text-strong hover:bg-surface-3',
                   )}
                   title={engine.description}
                 >
-                  {isSelected && (
-                    <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-brand-blue rounded-r-full" />
-                  )}
-
                   <Icon
                     className={cn(
-                      'w-3.5 h-3.5 flex-shrink-0 transition-colors',
+                      'w-4 h-4 ml-0.5 flex-shrink-0',
                       isSelected ? 'text-brand-blue' : 'text-subtle group-hover:text-muted',
                     )}
                   />
 
-                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                    <span
-                      className={cn(
-                        'text-[12px] truncate',
-                        isSelected ? 'font-semibold text-brand-blue' : 'font-medium text-muted group-hover:text-strong',
-                      )}
-                    >
-                      {engine.name}
-                    </span>
+                  <span
+                    className={cn(
+                      'text-[12px] flex-1 truncate',
+                      isSelected ? 'font-semibold' : 'font-normal',
+                    )}
+                  >
+                    {engine.name}
                     {engine.status !== 'active' && (
-                      <span className="text-[9px] font-semibold text-subtle whitespace-nowrap">
+                      <span className="ml-1 text-[10px] font-semibold text-subtle">
                         · {statusLabel[engine.status] ?? engine.status}
                       </span>
                     )}
-                  </div>
+                  </span>
 
                   <span
                     className={cn(
@@ -221,23 +232,10 @@ function EnginesSection() {
                     )}
                     aria-label={statusLabel[engine.status]}
                   />
-
-                  {engine.actionsToday > 0 && (
-                    <span
-                      className={cn(
-                        'text-[10px] font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0 tabular-nums min-w-[22px] text-center transition-colors',
-                        isSelected
-                          ? 'bg-white text-brand-blue border border-brand-blue-light'
-                          : 'bg-surface-3 text-subtle border border-brand-border group-hover:bg-white',
-                      )}
-                    >
-                      {engine.actionsToday}
-                    </span>
-                  )}
                 </button>
 
                 {isSelected && (
-                  <div className="mt-0.5 ml-4 pl-3 border-l-2 border-brand-blue-light space-y-0.5 pb-2">
+                  <div className="mt-0.5 mb-2 ml-4 pl-3 border-l-2 border-brand-blue-light space-y-0.5">
                     {getEngineSubNav(engine.name).map(item => {
                       const isSubActive = activeSub === item.id;
                       return (
@@ -246,13 +244,15 @@ function EnginesSection() {
                           to={`/engines/${slug}/${item.id}`}
                           end
                           className={cn(
-                            'flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors',
+                            'group flex items-center justify-between gap-2 h-9 px-2.5 rounded-lg transition-colors',
                             isSubActive
                               ? 'bg-brand-blue-50 text-brand-blue'
                               : 'text-muted hover:text-strong hover:bg-surface-3',
                           )}
                         >
-                          <span className="text-[12px] font-medium">{item.label}</span>
+                          <span className={cn('text-[12px]', isSubActive ? 'font-semibold' : 'font-normal')}>
+                            {item.label}
+                          </span>
                           {item.badge && (
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-brand-blue-50 text-brand-blue border border-brand-blue-light whitespace-nowrap flex-shrink-0">
                               {item.badge}
@@ -333,7 +333,7 @@ function AnalyticsSection() {
   return (
     <div className="flex flex-col h-full">
       <div className="h-[56px] flex items-center px-4 border-b border-brand-border flex-shrink-0">
-        <span className="text-[13px] font-semibold text-muted">Analytics</span>
+        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.22em]">Analytics</span>
       </div>
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
         {ANALYTICS_GROUPS.map(group => (
@@ -377,13 +377,42 @@ function AnalyticsSection() {
   );
 }
 
+function ch(channel: ChannelType) {
+  return <ChannelIcon channel={channel} size="lg" className="!text-current" />;
+}
+
+const INTEGRATION_ITEMS: SubItem[] = [
+  { label: 'Web Widget', path: '/channels?type=web_widget', icon: ch('web_widget') },
+  { label: 'WhatsApp',   path: '/channels?type=whatsapp',   icon: ch('whatsapp')   },
+  { label: 'SMS',        path: '/channels?type=sms',        icon: ch('sms')        },
+  { label: 'Telegram',   path: '/channels?type=telegram',   icon: ch('telegram')   },
+  { label: 'Viber',      path: '/channels?type=viber',      icon: ch('viber')      },
+  { label: 'Messenger',  path: '/channels?type=messenger',  icon: ch('messenger')  },
+  { label: 'Instagram',  path: '/channels?type=instagram',  icon: ch('instagram')  },
+  { label: 'Email',      path: '/channels?type=email',      icon: ch('email')      },
+  { label: 'RCS',        path: '/channels?type=rcs',        icon: <MessageCircle className="w-6 h-6" strokeWidth={1.7} /> },
+  { type: 'divider' },
+  { label: 'PMS',        path: '/channels?type=pms',        icon: <Building2 className="w-6 h-6" strokeWidth={1.7} />     },
+  { label: 'MCP',        path: '/channels?type=mcp',        icon: <Cpu className="w-6 h-6" strokeWidth={1.7} />           },
+  { label: 'API keys',   path: '/channels?type=api_keys',   icon: <KeyRound className="w-6 h-6" strokeWidth={1.7} />      },
+  { label: 'OTA Email',  path: '/channels?type=ota_email',  icon: <AtSign className="w-6 h-6" strokeWidth={1.7} />        },
+];
+
+const SETTINGS_ITEMS: SubItem[] = [
+  { label: 'Company Information', path: '/settings?section=company',       icon: <Building2   className="w-4 h-4" strokeWidth={1.7} /> },
+  { label: 'Profile',              path: '/settings?section=profile',       icon: <UserCircle  className="w-4 h-4" strokeWidth={1.7} /> },
+  { label: 'Team',                 path: '/settings?section=team',          icon: <Users       className="w-4 h-4" strokeWidth={1.7} /> },
+  { label: 'Billing',              path: '/settings?section=billing',       icon: <CreditCard  className="w-4 h-4" strokeWidth={1.7} /> },
+  { label: 'Notifications',        path: '/settings?section=notifications', icon: <Bell        className="w-4 h-4" strokeWidth={1.7} /> },
+];
+
 /* ── Generic section resolver ── */
 function getSection(pathname: string): { title: string; items: SubItem[] } | null {
   if (pathname.startsWith('/channels')) {
-    return { title: 'Channels', items: [{ label: 'Channels', path: '/channels' }] };
+    return { title: 'Integrations', items: INTEGRATION_ITEMS };
   }
   if (pathname.startsWith('/settings')) {
-    return { title: 'Settings', items: [{ label: 'Workspace', path: '/settings' }] };
+    return { title: 'Settings', items: SETTINGS_ITEMS };
   }
   return null;
 }
@@ -441,7 +470,7 @@ export function SubSidebar() {
   return (
     <aside className="w-[260px] flex-shrink-0 bg-white" style={{ borderRight: '1px solid #EDEEF1' }}>
       <div className="h-[56px] flex items-center px-4" style={{ borderBottom: '1px solid #EDEEF1' }}>
-        <div className="text-[12px] font-semibold text-strong">{title}</div>
+        <span className="text-[10px] font-semibold text-subtle uppercase tracking-[0.22em]">{title}</span>
       </div>
       <Section title={title} items={items} />
     </aside>

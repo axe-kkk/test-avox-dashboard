@@ -1,10 +1,11 @@
 ﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Trash2, ChevronDown, Check, X, Edit2, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, Check, X, Edit2, MessageSquare } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 import { Switch } from '../../components/ui/Switch';
+import { Select } from '../../components/ui/Select';
 import { getEngineSpec } from './lib/engineSpec';
 
 /* Inbox-style monochrome — every engine uses the brand-blue accent. */
@@ -352,29 +353,25 @@ export function OffersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] text-subtle mb-1">Type</p>
-                          <div className="relative">
-                            <select
-                              value={point.messageType}
-                              onChange={e => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, messageType: e.target.value } : p))}
-                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-brand-border bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                            >
-                              {['Informational', 'Reminder', 'Preferences', 'Upsell'].map(t => <option key={t}>{t}</option>)}
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                          </div>
+                          <Select
+                            size="sm"
+                            className="w-full"
+                            triggerClassName="!bg-white"
+                            value={point.messageType}
+                            onChange={v => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, messageType: v } : p))}
+                            options={['Informational', 'Reminder', 'Preferences', 'Upsell']}
+                          />
                         </div>
                         <div>
                           <p className="text-[10px] text-subtle mb-1">Channel</p>
-                          <div className="relative">
-                            <select
-                              value={point.channel}
-                              onChange={e => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, channel: e.target.value } : p))}
-                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-brand-border bg-white text-[12px] appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                            >
-                              {CHANNELS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                          </div>
+                          <Select
+                            size="sm"
+                            className="w-full"
+                            triggerClassName="!bg-white"
+                            value={point.channel}
+                            onChange={v => setTimeline(prev => prev.map(p => p.id === point.id ? { ...p, channel: v } : p))}
+                            options={CHANNELS.map(c => ({ value: c.id, label: c.label }))}
+                          />
                         </div>
                       </div>
                       <button
@@ -542,16 +539,13 @@ export function OffersPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Type</p>
-                  <div className="relative">
-                    <select
-                      value={offerDraft.type}
-                      onChange={e => setOfferDraft({ ...offerDraft, type: e.target.value })}
-                      className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      {(spec?.offerTypes ?? []).map(t => <option key={t}>{t}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    className="w-full"
+                    triggerClassName="!text-[13px]"
+                    value={offerDraft.type}
+                    onChange={v => setOfferDraft({ ...offerDraft, type: v })}
+                    options={spec?.offerTypes ?? []}
+                  />
                 </div>
               </div>
 
@@ -621,18 +615,17 @@ export function OffersPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Season</p>
-                  <div className="relative">
-                    <select
-                      value={offerDraft.season}
-                      onChange={e => setOfferDraft({ ...offerDraft, season: e.target.value as Offer['season'] })}
-                      className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      <option value="all">All year</option>
-                      <option value="high">High season</option>
-                      <option value="low">Low season</option>
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    className="w-full"
+                    triggerClassName="!text-[13px]"
+                    value={offerDraft.season}
+                    onChange={v => setOfferDraft({ ...offerDraft, season: v as Offer['season'] })}
+                    options={[
+                      { value: 'all',  label: 'All year' },
+                      { value: 'high', label: 'High season' },
+                      { value: 'low',  label: 'Low season' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -712,16 +705,13 @@ export function OffersPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Language</p>
-                    <div className="relative">
-                      <select
-                        value={tplDraft.lang}
-                        onChange={e => setTplDraft({ ...tplDraft, lang: e.target.value })}
-                        className="w-full h-9 pl-3 pr-9 appearance-none rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                      >
-                        {['EN', 'DE', 'FR', 'ES', 'IT', 'RU'].map(l => <option key={l}>{l}</option>)}
-                      </select>
-                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                    </div>
+                    <Select
+                      className="w-full"
+                      triggerClassName="!text-[13px]"
+                      value={tplDraft.lang}
+                      onChange={v => setTplDraft({ ...tplDraft, lang: v })}
+                      options={['EN', 'DE', 'FR', 'ES', 'IT', 'RU']}
+                    />
                   </div>
                 </div>
 

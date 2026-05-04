@@ -25,10 +25,14 @@ import {
   reputationLog,
 } from "../../lib/mockData";
 import { cn } from "../../../../utils";
-const STATUS_BADGE: Record<string, string> = {
-  auto: "bg-brand-blue-50 text-brand-blue border-brand-blue-light",
-  pending: "bg-note-bg text-note-text border-note-border",
-  done: "bg-surface-3 text-muted border-brand-border",
+import { Badge } from "../../../../components/ui/Badge";
+
+type BadgeVariant = "blueSoft" | "blue" | "blueDeep";
+
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  auto: "blue",
+  pending: "blueDeep",
+  done: "blueSoft",
 };
 export function ReputationEnginePage() {
   const [period, setPeriod] = useState<Period>("30d");
@@ -171,16 +175,12 @@ export function ReputationEnginePage() {
                 <td className="py-2.5 text-[12px] text-muted">{r.channel}</td>{" "}
                 <td className="py-2.5 text-[12px] text-muted">{r.platform}</td>{" "}
                 <td className="py-2.5">
-                  {" "}
-                  <span
-                    className={cn(
-                      "inline-flex h-5 px-2 items-center rounded-full text-[10px] font-semibold border capitalize",
-                      STATUS_BADGE[r.status],
-                    )}
+                  <Badge
+                    variant={STATUS_VARIANT[r.status]}
+                    className="capitalize"
                   >
-                    {" "}
-                    {r.status}{" "}
-                  </span>{" "}
+                    {r.status}
+                  </Badge>
                 </td>{" "}
               </tr>
             ))}{" "}

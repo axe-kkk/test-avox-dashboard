@@ -191,7 +191,7 @@ export function DepartmentsPage() {
               ].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-2.5 text-[10px] font-semibold text-subtle ${i === 0 ? "text-left" : "text-right"}`}
+                  className={`py-3 text-[11px] font-semibold text-subtle ${i === 0 ? "text-left" : "text-right"}`}
                 >
                   {h}
                 </th>
@@ -203,23 +203,23 @@ export function DepartmentsPage() {
             {visible.map((d) => (
               <tr key={d.id} className="hover:bg-surface-2 transition-colors">
                 {" "}
-                <td className="py-2.5 text-[12px] text-strong font-medium">
+                <td className="py-3 text-[13px] text-strong font-medium">
                   {d.name}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-strong tabular-nums text-right">
+                <td className="py-3 text-[13px] text-strong tabular-nums text-right">
                   {d.conversations.toLocaleString()}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-muted tabular-nums text-right">
+                <td className="py-3 text-[13px] text-muted tabular-nums text-right">
                   {d.response}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-muted tabular-nums text-right">
+                <td className="py-3 text-[13px] text-muted tabular-nums text-right">
                   {d.resolution}
                 </td>{" "}
-                <td className="py-2.5 text-right">
+                <td className="py-3 text-right">
                   {" "}
-                  <span className="inline-flex items-center gap-1 text-[12px] text-strong font-semibold tabular-nums">
+                  <span className="inline-flex items-center gap-1 text-[13px] text-strong font-semibold tabular-nums">
                     {" "}
-                    <Star className="w-3 h-3 fill-brand-blue text-brand-blue" />{" "}
+                    <Star className="w-3.5 h-3.5 fill-brand-blue text-brand-blue" />{" "}
                     {d.csat}{" "}
                   </span>{" "}
                 </td>{" "}

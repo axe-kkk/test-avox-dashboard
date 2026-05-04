@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
+import { Select } from '../../../components/ui/Select';
 import { useApp } from '../../../app/AppContext';
 
 interface UrlPattern {
@@ -207,19 +208,17 @@ export function ConversionConfigPage() {
               <span className="text-[12px] text-strong">Include an offer in the message</span>
             </label>
             {includeOffer && (
-              <div className="relative">
-                <select
-                  value={chosenOffer}
-                  onChange={e => setChosenOffer(e.target.value)}
-                  className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                >
-                  <option>Room Upgrade — Honeymoon</option>
-                  <option>Early Check-in 10 AM</option>
-                  <option>Spa Sunday Package</option>
-                  <option>Free Airport Transfer</option>
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-              </div>
+              <Select
+                value={chosenOffer}
+                onChange={setChosenOffer}
+                className="w-full"
+                options={[
+                  'Room Upgrade — Honeymoon',
+                  'Early Check-in 10 AM',
+                  'Spa Sunday Package',
+                  'Free Airport Transfer',
+                ]}
+              />
             )}
           </div>
 
@@ -324,16 +323,11 @@ export function ConversionConfigPage() {
           <div className="bg-white rounded-2xl border border-brand-border p-5 space-y-3">
             <p className="text-[13px] font-semibold text-strong">Currency</p>
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <select
-                  value={currency}
-                  onChange={e => setCurrency(e.target.value)}
-                  className="h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                >
-                  {['EUR', 'USD', 'GBP', 'CHF', 'JPY'].map(c => <option key={c}>{c}</option>)}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-              </div>
+              <Select
+                value={currency}
+                onChange={setCurrency}
+                options={['EUR', 'USD', 'GBP', 'CHF', 'JPY']}
+              />
               <label className="flex items-center gap-2 cursor-pointer">
                 <Switch size="sm" checked={autoCurrency} onChange={setAutoCurrency} />
                 <span className="text-[12px] text-strong">Auto-detect by guest location</span>

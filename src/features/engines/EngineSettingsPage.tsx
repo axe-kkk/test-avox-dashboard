@@ -5,6 +5,7 @@ import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 import { Switch } from '../../components/ui/Switch';
+import { Select } from '../../components/ui/Select';
 import { getEngineSpec } from './lib/engineSpec';
 
 /* AI-improved version returned by the mock "Improve with AI" action.
@@ -77,7 +78,6 @@ function FormRow({ label, hint, children }: { label: string; hint?: string; chil
 }
 
 const inputCls = 'w-full h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white transition-colors';
-const selectCls = `${inputCls} appearance-none pr-8 cursor-pointer`;
 
 /* Three-state pill switcher for access level (per field & per category) */
 function AccessPill({
@@ -322,24 +322,34 @@ export function EngineSettingsPage() {
       <FieldGroup title="Language & Tone">
         <div className="grid grid-cols-2 gap-5">
           <FormRow label="Primary language">
-            <div className="relative">
-              <select value={lang} onChange={e => setLang(e.target.value)} className={selectCls}>
-                {[['en','English'],['de','German'],['fr','French'],['es','Spanish'],['it','Italian'],['ar','Arabic'],['ja','Japanese'],['ru','Russian']].map(([v,l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-            </div>
+            <Select
+              value={lang}
+              onChange={setLang}
+              className="w-full"
+              options={[
+                { value: 'en', label: 'English' },
+                { value: 'de', label: 'German' },
+                { value: 'fr', label: 'French' },
+                { value: 'es', label: 'Spanish' },
+                { value: 'it', label: 'Italian' },
+                { value: 'ar', label: 'Arabic' },
+                { value: 'ja', label: 'Japanese' },
+                { value: 'ru', label: 'Russian' },
+              ]}
+            />
           </FormRow>
           <FormRow label="Communication tone">
-            <div className="relative">
-              <select value={tone} onChange={e => setTone(e.target.value)} className={selectCls}>
-                {[['professional','Professional'],['friendly','Friendly'],['casual','Casual'],['custom','Custom']].map(([v,l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-            </div>
+            <Select
+              value={tone}
+              onChange={setTone}
+              className="w-full"
+              options={[
+                { value: 'professional', label: 'Professional' },
+                { value: 'friendly',     label: 'Friendly' },
+                { value: 'casual',       label: 'Casual' },
+                { value: 'custom',       label: 'Custom' },
+              ]}
+            />
           </FormRow>
         </div>
 
@@ -374,14 +384,16 @@ export function EngineSettingsPage() {
             <input type="number" min={1} max={50} value={maxMessages} onChange={e => setMaxMessages(e.target.value)} className={inputCls} />
           </FormRow>
           <FormRow label="Fallback behavior">
-            <div className="relative">
-              <select value={fallback} onChange={e => setFallback(e.target.value)} className={selectCls}>
-                <option value="escalate">Escalate to operator</option>
-                <option value="default_msg">Default message</option>
-                <option value="faq">Suggest FAQ</option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-            </div>
+            <Select
+              value={fallback}
+              onChange={setFallback}
+              className="w-full"
+              options={[
+                { value: 'escalate',    label: 'Escalate to operator' },
+                { value: 'default_msg', label: 'Default message' },
+                { value: 'faq',         label: 'Suggest FAQ' },
+              ]}
+            />
           </FormRow>
         </div>
         <div>

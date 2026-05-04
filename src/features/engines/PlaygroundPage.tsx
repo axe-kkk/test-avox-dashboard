@@ -1,9 +1,10 @@
 ﻿import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Send, RefreshCw, Zap, User, Bot, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Send, RefreshCw, Zap, User, Bot, AlertTriangle } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { mockGuests } from '../../data/mock/guests';
 import { cn } from '../../utils';
+import { Select } from '../../components/ui/Select';
 import { getEngineSpec } from './lib/engineSpec';
 
 interface ChatMessage {
@@ -240,17 +241,16 @@ export function PlaygroundPage() {
             <p className="text-[10px] font-semibold text-subtle uppercase tracking-wider flex-shrink-0">Test Profile</p>
 
             <div className="flex items-center gap-2">
-              <div className="relative">
-                <select
-                  value={selectedGuestId}
-                  onChange={e => autoFillGuest(e.target.value)}
-                  className="h-7 pl-2.5 pr-7 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                >
-                  <option value="">Select real guest…</option>
-                  {mockGuests.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-faint pointer-events-none" />
-              </div>
+              <Select
+                size="sm"
+                placeholder="Select real guest…"
+                value={selectedGuestId}
+                onChange={autoFillGuest}
+                options={[
+                  { value: '', label: 'Select real guest…' },
+                  ...mockGuests.map(g => ({ value: g.id, label: g.name })),
+                ]}
+              />
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
@@ -272,16 +272,12 @@ export function PlaygroundPage() {
               ))}
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] text-subtle">Channel</span>
-                <div className="relative">
-                  <select
-                    value={channel}
-                    onChange={e => setChannel(e.target.value)}
-                    className="h-7 pl-2.5 pr-7 rounded-lg border border-brand-border bg-surface-3 text-[11px] text-muted appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                  >
-                    {['whatsapp','email','sms','messenger','instagram','telegram'].map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-faint pointer-events-none" />
-                </div>
+                <Select
+                  size="sm"
+                  value={channel}
+                  onChange={setChannel}
+                  options={['whatsapp','email','sms','messenger','instagram','telegram']}
+                />
               </div>
             </div>
           </div>

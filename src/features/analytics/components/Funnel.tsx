@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import { cn } from "../../../utils";
 interface Stage {
   stage: string;
   actions: number;
@@ -31,10 +30,7 @@ export function Funnel({ stages }: { stages: Stage[] }) {
               <div className="mt-3 mb-3 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                 {" "}
                 <div
-                  className={cn(
-                    "h-1.5 rounded-full",
-                    i === 0 ? "bg-brand-blue" : "bg-brand-blue-light",
-                  )}
+                  className="h-1.5 rounded-full bg-brand-blue"
                   style={{ width: `${widthRatio * 100}%` }}
                 />{" "}
               </div>{" "}

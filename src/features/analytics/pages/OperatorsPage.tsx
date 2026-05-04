@@ -121,7 +121,7 @@ export function OperatorsPage() {
               type="monotone"
               dataKey="direct"
               name="Direct"
-              stroke="#0E1013"
+              stroke="#163B6E"
               strokeWidth={2}
               dot={false}
             />{" "}
@@ -156,7 +156,7 @@ export function OperatorsPage() {
               ].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-2.5 text-[10px] font-semibold text-subtle ${i < 2 ? "text-left" : "text-right"}`}
+                  className={`py-3 text-[11px] font-semibold text-subtle ${i < 2 ? "text-left" : "text-right"}`}
                 >
                   {h}
                 </th>
@@ -168,23 +168,23 @@ export function OperatorsPage() {
             {visibleOps.map((o) => (
               <tr key={o.id} className="hover:bg-surface-2 transition-colors">
                 {" "}
-                <td className="py-2.5">
+                <td className="py-3">
                   {" "}
                   <div className="flex items-center gap-3">
                     {" "}
-                    <Avatar name={o.name} size="sm" />{" "}
-                    <span className="text-[12px] text-strong font-medium">
+                    <Avatar name={o.name} size="lg" />{" "}
+                    <span className="text-[13px] text-strong font-medium">
                       {o.name}
                     </span>{" "}
                   </div>{" "}
                 </td>{" "}
-                <td className="py-2.5">
+                <td className="py-3">
                   {" "}
                   <div className="inline-flex items-center gap-1.5">
                     {" "}
                     <span
                       className={cn(
-                        "w-1.5 h-1.5 rounded-full",
+                        "w-2 h-2 rounded-full",
                         o.status === "online"
                           ? "bg-brand-blue"
                           : "bg-[#C4C8CF]",
@@ -192,7 +192,7 @@ export function OperatorsPage() {
                     />{" "}
                     <span
                       className={cn(
-                        "text-[11px] capitalize",
+                        "text-[12px] capitalize",
                         o.status === "online"
                           ? "text-brand-blue font-semibold"
                           : "text-subtle",
@@ -203,23 +203,23 @@ export function OperatorsPage() {
                     </span>{" "}
                   </div>{" "}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-strong tabular-nums text-right">
+                <td className="py-3 text-[13px] text-strong tabular-nums text-right">
                   {o.handled.toLocaleString()}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-muted tabular-nums text-right">
+                <td className="py-3 text-[13px] text-muted tabular-nums text-right">
                   {o.open}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-muted tabular-nums text-right">
+                <td className="py-3 text-[13px] text-muted tabular-nums text-right">
                   {o.response}
                 </td>{" "}
-                <td className="py-2.5 text-[12px] text-muted tabular-nums text-right">
+                <td className="py-3 text-[13px] text-muted tabular-nums text-right">
                   {o.resolution}
                 </td>{" "}
-                <td className="py-2.5 text-right">
+                <td className="py-3 text-right">
                   {" "}
-                  <span className="inline-flex items-center gap-1 text-[12px] text-strong font-semibold tabular-nums">
+                  <span className="inline-flex items-center gap-1 text-[13px] text-strong font-semibold tabular-nums">
                     {" "}
-                    <Star className="w-3 h-3 fill-brand-blue text-brand-blue" />{" "}
+                    <Star className="w-3.5 h-3.5 fill-brand-blue text-brand-blue" />{" "}
                     {o.csat}{" "}
                   </span>{" "}
                 </td>{" "}

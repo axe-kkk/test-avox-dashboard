@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
+import { Select } from '../../../components/ui/Select';
 import { useApp } from '../../../app/AppContext';
 
 interface UpgradeRule {
@@ -64,42 +65,32 @@ export function UpsellConfigPage() {
             {rules.map(r => (
               <tr key={r.id} className="hover:bg-surface-2 transition-colors">
                 <td className="px-5 py-2.5">
-                  <div className="relative">
-                    <select
-                      value={r.source}
-                      onChange={e => setRules(prev => prev.map(x => x.id === r.id ? { ...x, source: e.target.value } : x))}
-                      className="h-8 pl-2 pr-7 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      {ROOM_TYPES.map(rt => <option key={rt}>{rt}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    size="sm"
+                    value={r.source}
+                    onChange={v => setRules(prev => prev.map(x => x.id === r.id ? { ...x, source: v } : x))}
+                    options={ROOM_TYPES}
+                  />
                 </td>
                 <td className="px-5 py-2.5">
-                  <div className="relative">
-                    <select
-                      value={r.target}
-                      onChange={e => setRules(prev => prev.map(x => x.id === r.id ? { ...x, target: e.target.value } : x))}
-                      className="h-8 pl-2 pr-7 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      {ROOM_TYPES.map(rt => <option key={rt}>{rt}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    size="sm"
+                    value={r.target}
+                    onChange={v => setRules(prev => prev.map(x => x.id === r.id ? { ...x, target: v } : x))}
+                    options={ROOM_TYPES}
+                  />
                 </td>
                 <td className="px-5 py-2.5">
-                  <div className="relative">
-                    <select
-                      value={r.priceMethod}
-                      onChange={e => setRules(prev => prev.map(x => x.id === r.id ? { ...x, priceMethod: e.target.value as UpgradeRule['priceMethod'] } : x))}
-                      className="h-8 pl-2 pr-7 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      <option value="fixed">Fixed amount</option>
-                      <option value="percent_diff">% of price diff</option>
-                      <option value="free">Free</option>
-                    </select>
-                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    size="sm"
+                    value={r.priceMethod}
+                    onChange={v => setRules(prev => prev.map(x => x.id === r.id ? { ...x, priceMethod: v as UpgradeRule['priceMethod'] } : x))}
+                    options={[
+                      { value: 'fixed',        label: 'Fixed amount' },
+                      { value: 'percent_diff', label: '% of price diff' },
+                      { value: 'free',         label: 'Free' },
+                    ]}
+                  />
                 </td>
                 <td className="px-5 py-2.5">
                   <div className="flex items-center gap-1.5">

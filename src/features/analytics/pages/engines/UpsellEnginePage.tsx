@@ -28,6 +28,8 @@ export function UpsellEnginePage() {
   const [period, setPeriod] = useState<Period>("30d");
   const totalRevenue = upsellOffers.reduce((s, o) => s + o.revenue, 0);
   const totalConn = upsellOffers.reduce((s, o) => s + o.connects, 0);
+  const totalSent = upsellOffers.reduce((s, o) => s + o.sent, 0);
+  const totalAccepted = upsellOffers.reduce((s, o) => s + o.accepted, 0);
   return (
     <AnalyticsShell
       eyebrow="AI Engine"
@@ -206,19 +208,27 @@ export function UpsellEnginePage() {
                 </tr>
               );
             })}{" "}
-            <tr className="border-t-2 border-brand-border bg-surface-2">
+            <tr className="border-t border-brand-border">
               {" "}
-              <td className="py-2.5 text-[12px] text-strong font-semibold">
+              <td className="pt-3 pb-1 text-[11px] uppercase tracking-wide text-subtle font-semibold">
                 Total
               </td>{" "}
-              <td colSpan={3} />{" "}
-              <td className="py-2.5 text-[12px] text-strong tabular-nums font-semibold text-right">
+              <td className="pt-3 pb-1 text-[12px] text-strong tabular-nums font-semibold text-right">
+                {totalSent.toLocaleString()}
+              </td>{" "}
+              <td className="pt-3 pb-1 text-[12px] text-strong tabular-nums font-semibold text-right">
+                {totalAccepted.toLocaleString()}
+              </td>{" "}
+              <td className="pt-3 pb-1 text-[12px] text-muted tabular-nums text-right">
+                {((totalAccepted / totalSent) * 100).toFixed(0)}%
+              </td>{" "}
+              <td className="pt-3 pb-1 text-[12px] text-strong tabular-nums font-semibold text-right">
                 {formatCurrency(totalRevenue)}
               </td>{" "}
-              <td className="py-2.5 text-[12px] text-strong tabular-nums font-semibold text-right">
+              <td className="pt-3 pb-1 text-[12px] text-strong tabular-nums font-semibold text-right">
                 {totalConn.toLocaleString()}
               </td>{" "}
-              <td className="py-2.5 text-[12px] text-brand-blue tabular-nums font-semibold text-right">
+              <td className="pt-3 pb-1 text-[12px] text-brand-blue tabular-nums font-semibold text-right">
                 {(totalRevenue / totalConn).toFixed(0)}×
               </td>{" "}
             </tr>{" "}

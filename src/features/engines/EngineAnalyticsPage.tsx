@@ -5,12 +5,13 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
 } from 'recharts';
 import {
-  TrendingUp, TrendingDown, Minus, ChevronDown, X, Plus,
+  TrendingUp, TrendingDown, Minus, X, Plus,
 } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { conversationsTrend } from '../../data/mock/analytics';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
+import { Select } from '../../components/ui/Select';
 import { getEngineSpec } from './lib/engineSpec';
 
 type Period = 'today' | '7d' | '30d' | '90d' | 'custom';
@@ -95,22 +96,18 @@ export function EngineAnalyticsPage() {
           <h2 className="text-[15px] font-semibold text-strong">Performance · {periodLabel}</h2>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <select
-              value={period}
-              onChange={e => {
-                const v = e.target.value as Period;
-                setPeriod(v);
-                if (v === 'custom') setShowCustom(true);
-              }}
-              className="h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-white text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-            >
-              {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
-                <option key={p} value={p}>{PERIOD_LABELS[p]}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-          </div>
+          <Select
+            triggerClassName="!bg-white"
+            value={period}
+            onChange={v => {
+              setPeriod(v as Period);
+              if (v === 'custom') setShowCustom(true);
+            }}
+            options={(Object.keys(PERIOD_LABELS) as Period[]).map(p => ({
+              value: p,
+              label: PERIOD_LABELS[p],
+            }))}
+          />
         </div>
       </div>
 

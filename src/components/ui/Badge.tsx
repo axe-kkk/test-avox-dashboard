@@ -2,15 +2,18 @@ import { cn } from '../../utils';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'blue' | 'dark';
+  variant?: 'default' | 'blue' | 'blueSoft' | 'blueDeep' | 'dark' | 'warning';
   size?: 'sm' | 'md';
   className?: string;
 }
 
 const variants = {
-  default: 'bg-[#F6F7F9] text-[#5C6370]',
-  blue:    'bg-[#BED4F6] text-[#2355A7]',
-  dark:    'bg-[#0E1013] text-white',
+  default:  'bg-[#F6F7F9] text-[#5C6370]',
+  blue:     'bg-[#BED4F6] text-[#2355A7]',
+  blueSoft: 'bg-[#EEF2FC] text-[#2355A7]',
+  blueDeep: 'bg-[#2355A7] text-white',
+  dark:     'bg-[#0E1013] text-white',
+  warning:  'bg-note-bg text-note-text',
 };
 
 export function Badge({

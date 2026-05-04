@@ -133,15 +133,15 @@ export function ConciergeEnginePage() {
               dataKey="rec"
               name="Recommendations"
               stackId="a"
-              fill="#5C6370"
+              fill="#5B7FBF"
             />{" "}
             <Bar dataKey="booking" name="Bookings" stackId="a" fill="#BED4F6" />{" "}
-            <Bar dataKey="instay" name="In-stay" stackId="a" fill="#C4C8CF" />{" "}
+            <Bar dataKey="instay" name="In-stay" stackId="a" fill="#DCE6F8" />{" "}
             <Bar
               dataKey="escalation"
               name="Escalations"
               stackId="a"
-              fill="#0E1013"
+              fill="#163B6E"
               radius={[6, 6, 0, 0]}
             />{" "}
           </BarChart>{" "}
@@ -234,7 +234,7 @@ export function ConciergeEnginePage() {
                       title: "Q&A draft created — review in Knowledge Base",
                     })
                   }
-                  className="h-7 px-2.5 inline-flex items-center gap-1 rounded-lg bg-brand-blue-50 border border-brand-blue-light text-brand-blue text-[11px] font-semibold hover:bg-white transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                  className="h-10 px-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-blue-50 border border-brand-blue-light text-brand-blue text-[12px] font-semibold hover:bg-white transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                 >
                   {" "}
                   <Plus className="w-3 h-3" /> Create Q&A{" "}

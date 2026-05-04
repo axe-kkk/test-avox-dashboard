@@ -2,6 +2,7 @@
 import { Plus, Trash2, GripVertical, Star } from 'lucide-react';
 import { cn } from '../../../utils';
 import { Switch } from '../../../components/ui/Switch';
+import { Select } from '../../../components/ui/Select';
 import { useApp } from '../../../app/AppContext';
 
 interface Platform {
@@ -144,16 +145,15 @@ export function ReputationConfigPage() {
                 onChange={e => setTiming({ ...timing, amount: e.target.value })}
                 className="w-16 h-8 px-2 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-center text-strong tabular-nums focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
               />
-              <div className="relative">
-                <select
-                  value={timing.unit}
-                  onChange={e => setTiming({ ...timing, unit: e.target.value as 'hours' | 'days' })}
-                  className="h-8 pl-3 pr-8 rounded-lg border border-brand-border bg-surface-2 text-[12px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                >
-                  <option value="hours">hours</option>
-                  <option value="days">days</option>
-                </select>
-              </div>
+              <Select
+                size="sm"
+                value={timing.unit}
+                onChange={v => setTiming({ ...timing, unit: v as 'hours' | 'days' })}
+                options={[
+                  { value: 'hours', label: 'hours' },
+                  { value: 'days',  label: 'days' },
+                ]}
+              />
               <span className="text-[12px] text-subtle">after check-out</span>
             </div>
           </div>
@@ -215,16 +215,16 @@ export function ReputationConfigPage() {
                       placeholder="Question text…"
                       className="h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
                     />
-                    <select
+                    <Select
                       value={q.type}
-                      onChange={e => setQuestions(prev => prev.map(x => x.id === q.id ? { ...x, type: e.target.value as Question['type'] } : x))}
-                      className="h-9 px-3 rounded-xl border border-brand-border bg-surface-2 text-[12px] text-strong focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      <option value="scale">Scale</option>
-                      <option value="text">Free text</option>
-                      <option value="choice">Multiple choice</option>
-                      <option value="yesno">Yes / No</option>
-                    </select>
+                      onChange={v => setQuestions(prev => prev.map(x => x.id === q.id ? { ...x, type: v as Question['type'] } : x))}
+                      options={[
+                        { value: 'scale',  label: 'Scale' },
+                        { value: 'text',   label: 'Free text' },
+                        { value: 'choice', label: 'Multiple choice' },
+                        { value: 'yesno',  label: 'Yes / No' },
+                      ]}
+                    />
                     <label className="flex items-center gap-2 cursor-pointer">
                       <Switch
                         size="sm"

@@ -1,12 +1,13 @@
 ﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Plus, GripVertical, Trash2, AlertTriangle, Link, X, Edit2, ChevronDown,
+  Plus, GripVertical, Trash2, AlertTriangle, Link, X, Edit2,
 } from 'lucide-react';
 import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 import { Switch } from '../../components/ui/Switch';
+import { Select } from '../../components/ui/Select';
 import { getEngineSpec } from './lib/engineSpec';
 
 type ConditionType = 'channel' | 'keyword' | 'tag' | 'intent';
@@ -302,16 +303,13 @@ export function EngineRoutingPage() {
         {/* Escalation department */}
         <div>
           <label className="block text-[12px] font-semibold text-muted mb-1.5">Escalation department</label>
-          <div className="relative">
-            <select
-              value={escDepartment}
-              onChange={e => setEscDepartment(e.target.value)}
-              className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
-            >
-              {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-          </div>
+          <Select
+            className="w-full"
+            triggerClassName="!text-[13px]"
+            value={escDepartment}
+            onChange={setEscDepartment}
+            options={DEPARTMENTS}
+          />
         </div>
       </div>
 
@@ -321,18 +319,16 @@ export function EngineRoutingPage() {
           <p className="text-[13px] font-semibold text-strong mb-0.5">Fallback behavior</p>
           <p className="text-[12px] text-subtle">What to do when no routing rule matches</p>
         </div>
-        <div className="relative">
-          <select
-            value={fallback}
-            onChange={e => setFallback(e.target.value)}
-            className="h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
-          >
-            <option value="handle">Handle with this engine</option>
-            <option value="escalate">Escalate to {escDepartment}</option>
-            <option value="ignore">Ignore</option>
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-        </div>
+        <Select
+          triggerClassName="!text-[13px]"
+          value={fallback}
+          onChange={setFallback}
+          options={[
+            { value: 'handle',   label: 'Handle with this engine' },
+            { value: 'escalate', label: `Escalate to ${escDepartment}` },
+            { value: 'ignore',   label: 'Ignore' },
+          ]}
+        />
       </div>
 
       {/* Save */}
@@ -435,18 +431,13 @@ export function EngineRoutingPage() {
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">
                     {ruleDraft.action === 'transfer' ? 'Transfer to' : 'Escalate to'}
                   </p>
-                  <div className="relative">
-                    <select
-                      value={ruleDraft.actionTarget}
-                      onChange={e => setRuleDraft({ ...ruleDraft, actionTarget: e.target.value })}
-                      className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[13px] text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light focus:bg-white"
-                    >
-                      {(ruleDraft.action === 'transfer' ? TRANSFER_TARGETS : DEPARTMENTS).map(t => (
-                        <option key={t}>{t}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    className="w-full"
+                    triggerClassName="!text-[13px]"
+                    value={ruleDraft.actionTarget}
+                    onChange={v => setRuleDraft({ ...ruleDraft, actionTarget: v })}
+                    options={ruleDraft.action === 'transfer' ? TRANSFER_TARGETS : DEPARTMENTS}
+                  />
                 </div>
               )}
             </div>

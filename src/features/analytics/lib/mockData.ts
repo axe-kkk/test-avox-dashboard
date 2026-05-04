@@ -50,7 +50,7 @@ export const overviewByEngine: {
 ];
 export const overviewSplit = [
   { label: "AI autonomous", value: 5642, color: "#2355A7" },
-  { label: "Escalated to agent", value: 1066, color: "#0E1013" },
+  { label: "Escalated to agent", value: 1066, color: "#163B6E" },
 ];
 export const overviewTopActions: {
   type: string;
@@ -327,7 +327,7 @@ export const conversionPages = [
   { page: "/spa/packages", conv: 4.5 },
 ];
 export const reservationOutcome = [
-  { label: "Fully cancelled", value: 162, color: "#0E1013" },
+  { label: "Fully cancelled", value: 162, color: "#163B6E" },
   { label: "Saved (alt dates)", value: 84, color: "#2355A7" },
   { label: "Saved (credit)", value: 43, color: "#BED4F6" },
 ];
@@ -430,7 +430,7 @@ export const arrivalGuests = [
 ];
 export const conciergeSplit = [
   { label: "AI resolved", value: 1936, color: "#2355A7" },
-  { label: "Escalated to reception", value: 168, color: "#0E1013" },
+  { label: "Escalated to reception", value: 168, color: "#163B6E" },
 ];
 export const conciergeEscalations = [
   {
@@ -469,7 +469,7 @@ export const recoveryCategories = [
 ];
 export const recoverySplit = [
   { label: "AI resolved", value: 134, color: "#2355A7" },
-  { label: "Escalated", value: 55, color: "#0E1013" },
+  { label: "Escalated", value: 55, color: "#163B6E" },
 ];
 export const recoveryLog = [
   {
@@ -773,11 +773,11 @@ export const departments = [
 ];
 export const deptSplitOrigin = [
   { label: "Escalated from AI", value: 1284, color: "#2355A7" },
-  { label: "Direct", value: 748, color: "#0E1013" },
+  { label: "Direct", value: 748, color: "#163B6E" },
 ];
 export const deptSplitState = [
   { label: "Resolved", value: 1842, color: "#2355A7" },
-  { label: "Open", value: 190, color: "#0E1013" },
+  { label: "Open", value: 190, color: "#163B6E" },
 ]; /* ── 7.14 Load (heatmap) ─────────────────────────────────────── */
 export const loadHeatmap: { day: string; hours: number[] }[] = (() => {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -812,12 +812,12 @@ export const guestSatisfactionDist = [
 ];
 export const guestSourcesDist = [
   { label: "Direct", value: 412, color: "#2355A7" },
-  { label: "OTA", value: 638, color: "#0E1013" },
+  { label: "OTA", value: 638, color: "#163B6E" },
   { label: "Other", value: 85, color: "#BED4F6" },
 ];
 export const guestNewVsReturning = [
   { label: "New", value: 412, color: "#2355A7" },
-  { label: "Returning", value: 723, color: "#0E1013" },
+  { label: "Returning", value: 723, color: "#163B6E" },
 ]; /* ── 7.16 Scheduled reports ──────────────────────────────────── */
 export const scheduledReports = [
   {

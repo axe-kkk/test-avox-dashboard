@@ -5,6 +5,7 @@ import { mockEngines } from '../../data/mock/engines';
 import { cn } from '../../utils';
 import { useApp } from '../../app/AppContext';
 import { Switch } from '../../components/ui/Switch';
+import { Select } from '../../components/ui/Select';
 
 interface NativeIntegration {
   id: string;
@@ -472,18 +473,13 @@ export function IntegrationsPage() {
               <div className="grid grid-cols-[120px_1fr] gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">Method</p>
-                  <div className="relative">
-                    <select
-                      value={apiDraft.method}
-                      onChange={e => setApiDraft({ ...apiDraft, method: e.target.value as ApiAction['method'] })}
-                      className="w-full h-9 pl-3 pr-9 rounded-xl border border-brand-border bg-surface-2 text-[13px] font-semibold text-strong appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
-                    >
-                      <option>GET</option>
-                      <option>POST</option>
-                      <option>PUT</option>
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-subtle pointer-events-none" />
-                  </div>
+                  <Select
+                    className="w-full"
+                    triggerClassName="font-semibold !text-[13px]"
+                    value={apiDraft.method}
+                    onChange={v => setApiDraft({ ...apiDraft, method: v as ApiAction['method'] })}
+                    options={['GET', 'POST', 'PUT']}
+                  />
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle mb-1.5">URL</p>
